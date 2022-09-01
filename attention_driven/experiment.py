@@ -1,5 +1,8 @@
 from typing import Callable, Dict, Union
 
+import os
+import pickle
+
 from argparse import ArgumentParser, Namespace
 
 import csv
@@ -24,6 +27,7 @@ from transformers import (
     TrainingArguments,
 )
 
+from attention_driven import RESULTS_DIR
 from attention_driven.attention_driven import (
     AttentionDrivenM2M100ForConditionalGeneration,
     AttentionDrivenSeq2SeqTrainer,
@@ -146,11 +150,23 @@ class BaselineExperiment:
 
         return model
 
+    @property
+    def experiment_class_output_dir(self) -> str:
+        exp_name = self.__class__.__name__
+        return os.path.join(RESULTS_DIR, exp_name)
+
+    @property
+    def predictions_output_path(self) -> str:
+        return os.path.join(
+            self.experiment_class_output_dir, "predictions"
+        )
+
     def get_training_arguments(
         self, learning_rate: float, batch_size: int
     ) -> TrainingArguments:
-        exp_name = self.__class__.__name__
-        output_dir = f"results/{exp_name}/{learning_rate:.0e}"
+        output_dir = os.path.join(
+            self.experiment_class_output_dir, "{learning_rate:.0e}"
+        )
 
         return Seq2SeqTrainingArguments(
             output_dir,
@@ -210,6 +226,10 @@ class BaselineExperiment:
 
             predictions = trainer.predict(tokenized_dataset["test"])
             predictions_dict[learning_rate] = predictions
+
+        # Save our predictions to disk
+        with open(self.predictions_output_path, "wb") as f:
+            pickle.dump(predictions, f)
 
         return predictions
 
