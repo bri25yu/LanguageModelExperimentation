@@ -1,0 +1,5 @@
+transformers
+transformers[sentencepiece]
+datasets
+sacrebleu
+evaluate
