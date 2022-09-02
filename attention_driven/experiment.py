@@ -35,9 +35,8 @@ class BaselineExperiment:
     MODEL_NAME = "facebook/nllb-200-distilled-600M"
     MAX_INPUT_LENGTH = 100
 
-    # The percent of the total train set to use as the val set
-    # Here, 0.1 means 10%
-    VAL_SPLIT_RATIO = 0.1
+    # The number of samples in the val set
+    VAL_SPLIT_SIZE = 1000
 
     LEARNING_RATES = [1e-5, 2e-5, 3e-5]
 
@@ -60,7 +59,7 @@ class BaselineExperiment:
         This function assumes that https://github.com/Linguae-Dharmae/language-models
         has been cloned into the same root folder.
         """
-        val_split_ratio = self.VAL_SPLIT_RATIO
+        val_split_size = self.VAL_SPLIT_SIZE
         max_input_length = self.MAX_INPUT_LENGTH
 
         def load_single_dataset(path: str) -> Dataset:
@@ -78,7 +77,7 @@ class BaselineExperiment:
 
         # Load our datasets from disk into HF Dataset's
         train_dataset = load_single_dataset("train_without_shorts.tsv.gz")
-        train_val_dataset = train_dataset.train_test_split(val_split_ratio, seed=42)
+        train_val_dataset = train_dataset.train_test_split(val_split_size, seed=42)
         test_dataset = load_single_dataset("test.tsv.gz")
 
         dataset = DatasetDict(
