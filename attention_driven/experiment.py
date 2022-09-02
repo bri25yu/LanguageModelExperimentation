@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List, Optional, Union
 
 import os
 import pickle
@@ -25,7 +25,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from attention_driven import RESULTS_DIR
+from attention_driven import RESULTS_DIR, TRAIN_OUTPUT_DIR
 from attention_driven.attention_driven import (
     AttentionDrivenM2M100ForConditionalGeneration
 )
@@ -142,14 +142,17 @@ class BaselineExperiment:
         return model
 
     @property
+    def name(self) -> str:
+        return self.__class__.__name__
+
+    @property
     def experiment_class_output_dir(self) -> str:
-        exp_name = self.__class__.__name__
-        return os.path.join(RESULTS_DIR, exp_name)
+        return os.path.join(TRAIN_OUTPUT_DIR, self.name)
 
     @property
     def predictions_output_path(self) -> str:
         return os.path.join(
-            self.experiment_class_output_dir, "predictions"
+            RESULTS_DIR, self.name, "predictions"
         )
 
     def get_training_arguments(
@@ -183,18 +186,26 @@ class BaselineExperiment:
             predict_with_generate=True,
         )
 
-    def run(self, batch_size: int) -> Dict[float, PredictionOutput]:
+    def run(self, batch_size: int, learning_rates: Optional[List[float]]=None) -> Dict[float, PredictionOutput]:
         max_input_length = self.MAX_INPUT_LENGTH
-        learning_rates = self.LEARNING_RATES
+        learning_rates = learning_rates or self.LEARNING_RATES
         trainer_cls = self.trainer_cls
         callbacks = self.callbacks
+        predictions_output_path = self.predictions_output_path
 
         tokenizer = self.get_tokenizer()
         tokenized_dataset = self.load_data(tokenizer)
         compute_metrics = self.get_compute_metrics(tokenizer)
         data_collator = DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
 
-        predictions_dict: Dict[float, PredictionOutput] = dict()
+        # Load predictions if they exist
+        if os.path.exists(predictions_output_path):
+            with open(predictions_output_path, "rb") as f:
+                predictions_dict: Dict[float, PredictionOutput] = pickle.load(f)
+        else:
+            predictions_dict: Dict[float, PredictionOutput] = dict()
+
+        # We perform hyperparam tuning over three learning rates
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(learning_rate, batch_size)
             model = self.get_model(tokenizer)
@@ -217,7 +228,7 @@ class BaselineExperiment:
             predictions_dict[learning_rate] = predictions
 
             # Save our predictions to disk
-            with open(self.predictions_output_path, "wb") as f:
+            with open(predictions_output_path, "wb") as f:
                 pickle.dump(predictions, f)
 
             for callback in callbacks:
