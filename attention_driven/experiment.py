@@ -3,8 +3,6 @@ from typing import Callable, Dict, Union
 import os
 import pickle
 
-from argparse import ArgumentParser, Namespace
-
 import csv
 import pandas as pd
 from datasets import Dataset, DatasetDict
@@ -29,8 +27,7 @@ from transformers import (
 
 from attention_driven import RESULTS_DIR
 from attention_driven.attention_driven import (
-    AttentionDrivenM2M100ForConditionalGeneration,
-    AttentionDrivenSeq2SeqTrainer,
+    AttentionDrivenM2M100ForConditionalGeneration
 )
 
 
@@ -45,20 +42,6 @@ class BaselineExperiment:
     LEARNING_RATES = [1e-5, 2e-5, 3e-5]
 
     trainer_cls: Trainer = Seq2SeqTrainer
-
-    def parse_args(self) -> Namespace:
-        parser = ArgumentParser()
-        parser.add_argument(
-            "--batch_size",
-            "-bs",
-            type=int,
-            required=True,
-            help="Train batch size",
-        )
-        
-        args = parser.parse_args()
-
-        return args
 
     def get_tokenizer(self) -> PreTrainedTokenizer:
         model_name = self.MODEL_NAME
@@ -103,7 +86,7 @@ class BaselineExperiment:
             val=train_val_dataset["test"],
             test=test_dataset,
         )
-        print("Human readable dataset", dataset)
+        print("Human readable dataset:", dataset)
 
         def tokenize_fn(examples):
             model_inputs = tokenizer(examples["tibetan"], max_length=max_input_length, truncation=True)
@@ -116,9 +99,9 @@ class BaselineExperiment:
             return model_inputs
 
         tokenized_dataset = dataset.map(tokenize_fn, batched=True, remove_columns=["tibetan", "english"])
-        print("Model readable dataset", tokenized_dataset)
+        print("Model readable dataset:", tokenized_dataset)
 
-        return dataset
+        return tokenized_dataset
 
     def get_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
         metric = evaluate.load("chrf")
@@ -192,20 +175,17 @@ class BaselineExperiment:
             predict_with_generate=True,
         )
 
-    def run(self) -> Dict[float, PredictionOutput]:
+    def run(self, batch_size: int) -> Dict[float, PredictionOutput]:
         max_input_length = self.MAX_INPUT_LENGTH
         learning_rates = self.LEARNING_RATES
         trainer_cls = self.trainer_cls
-
-        args = self.parse_args()
-        batch_size = args.batch_size
 
         tokenizer = self.get_tokenizer()
         tokenized_dataset = self.load_data(tokenizer)
         compute_metrics = self.get_compute_metrics(tokenizer)
         data_collator = DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
 
-        predictions_dict: Dict[float, PredictionOutput]
+        predictions_dict: Dict[float, PredictionOutput] = dict()
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(learning_rate, batch_size)
             model = self.get_model(tokenizer)
@@ -235,7 +215,6 @@ class BaselineExperiment:
 
 
 class AttentionDrivenExperimentBase(BaselineExperiment):
-    trainer_cls = AttentionDrivenSeq2SeqTrainer
     attention_driven_masking_probability: Union[None, float] = None
 
     def get_model(self, tokenizer: PreTrainedTokenizer) -> PreTrainedModel:
