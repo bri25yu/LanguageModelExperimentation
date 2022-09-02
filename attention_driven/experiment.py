@@ -40,15 +40,6 @@ class BaselineExperiment:
 
     trainer_cls: Trainer = Seq2SeqTrainer
 
-    def __init__(
-        self, callbacks: Union[None, List[Callable[[None], None]]]=None
-    ) -> None:
-        """
-        Callbacks are run at the end of every training config e.g. at the end of
-        a run with lr=1e-5. 
-        """
-        self.callbacks = callbacks if callbacks else []
-
     def get_tokenizer(self) -> PreTrainedTokenizer:
         model_name = self.MODEL_NAME
 
@@ -187,7 +178,6 @@ class BaselineExperiment:
     def run(self, batch_size: int, learning_rates: List[float]) -> Dict[float, PredictionOutput]:
         max_input_length = self.MAX_INPUT_LENGTH
         trainer_cls = self.trainer_cls
-        callbacks = self.callbacks
         predictions_output_path = self.predictions_output_path
 
         tokenizer = self.get_tokenizer()
@@ -227,9 +217,6 @@ class BaselineExperiment:
             # Save our predictions to disk
             with open(predictions_output_path, "wb") as f:
                 pickle.dump(predictions, f)
-
-            for callback in callbacks:
-                callback()
 
         return predictions
 
