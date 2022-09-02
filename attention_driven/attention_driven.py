@@ -1,5 +1,7 @@
 from typing import Optional, Tuple
 
+from types import MethodType
+
 import torch
 import torch.nn as nn
 
@@ -102,22 +104,24 @@ def attention_driven_forward(
     attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
 
     # START attention driven dropout
-    # attn_probs are (batch_size * self.num_heads, seq_len, seq_len)
 
-    # Reshape so that we can use argmax and so we deal with each sample individually
-    attn_probs_reshaped = attn_probs.view(bsz, -1)
+    if self.training:
+        # attn_probs are (batch_size * self.num_heads, seq_len, seq_len)
+        # Reshape so that we can use argmax and so we deal with each sample individually
+        attn_probs_reshaped = attn_probs.view(bsz, -1)
 
-    # Find the argmax
-    argmax_idxs = torch.argmax(attn_probs_reshaped, dim=1)
+        # Find the argmax
+        argmax_idxs = torch.argmax(attn_probs_reshaped, dim=1)
 
-    # We only mask with probability `attention_driven_masking_probability``
-    dropout_mask = torch.bernoulli((1 - self.attention_driven_masking_probability) * torch.ones(argmax_idxs.shape))
+        # We only mask with probability `attention_driven_masking_probability``
+        dropout_mask = torch.bernoulli((1 - self.attention_driven_masking_probability) * torch.ones(argmax_idxs.shape))
+        dropout_mask = dropout_mask.to(attn_probs_reshaped.device)
 
-    # Replace the values with 0 or the original value
-    attn_probs_reshaped[:, argmax_idxs] = dropout_mask * attn_probs_reshaped[:, argmax_idxs]
+        # Replace the values with 0 or the original value
+        attn_probs_reshaped[:, argmax_idxs] = dropout_mask * attn_probs_reshaped[:, argmax_idxs]
 
-    # Reshape it into the original form
-    attn_probs = attn_probs_reshaped.view(bsz * self.num_heads, tgt_len, src_len)
+        # Reshape it into the original form
+        attn_probs = attn_probs_reshaped.view(bsz * self.num_heads, tgt_len, src_len)
 
     # END attention driven dropout
 
@@ -151,5 +155,6 @@ class AttentionDrivenM2M100ForConditionalGeneration(M2M100ForConditionalGenerati
             if not (name.endswith("self_attn") and "encoder" in name):
                 continue
 
-            setattr(module, "forward", attention_driven_forward)
+            # See https://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object-instance
+            module.forward = MethodType(attention_driven_forward, module)
             module.attention_driven_masking_probability = attention_driven_masking_probability

@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, List, Union
 
 import os
 import pickle
@@ -41,6 +41,15 @@ class BaselineExperiment:
     LEARNING_RATES = [1e-5, 2e-5, 3e-5]
 
     trainer_cls: Trainer = Seq2SeqTrainer
+
+    def __init__(
+        self, callbacks: Union[None, List[Callable[[None], None]]]=None
+    ) -> None:
+        """
+        Callbacks are run at the end of every training config e.g. at the end of
+        a run with lr=1e-5. 
+        """
+        self.callbacks = callbacks if callbacks else []
 
     def get_tokenizer(self) -> PreTrainedTokenizer:
         model_name = self.MODEL_NAME
@@ -178,6 +187,7 @@ class BaselineExperiment:
         max_input_length = self.MAX_INPUT_LENGTH
         learning_rates = self.LEARNING_RATES
         trainer_cls = self.trainer_cls
+        callbacks = self.callbacks
 
         tokenizer = self.get_tokenizer()
         tokenized_dataset = self.load_data(tokenizer)
@@ -206,9 +216,12 @@ class BaselineExperiment:
             predictions = trainer.predict(tokenized_dataset["test"])
             predictions_dict[learning_rate] = predictions
 
-        # Save our predictions to disk
-        with open(self.predictions_output_path, "wb") as f:
-            pickle.dump(predictions, f)
+            # Save our predictions to disk
+            with open(self.predictions_output_path, "wb") as f:
+                pickle.dump(predictions, f)
+
+            for callback in callbacks:
+                callback()
 
         return predictions
 
