@@ -160,7 +160,7 @@ class BaselineExperiment:
             save_steps=100,
             save_total_limit=2,
             per_device_train_batch_size=batch_size,
-            per_device_eval_batch_size=batch_size,
+            per_device_eval_batch_size=2 * batch_size,
             gradient_accumulation_steps=32 // batch_size,
             eval_accumulation_steps=1,
             max_steps=10000,
