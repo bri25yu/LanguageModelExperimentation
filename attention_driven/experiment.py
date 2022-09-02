@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional, Union
+from typing import Callable, Dict, List, Union
 
 import os
 import pickle
@@ -37,8 +37,6 @@ class BaselineExperiment:
 
     # The number of samples in the val set
     VAL_SPLIT_SIZE = 1000
-
-    LEARNING_RATES = [1e-5, 2e-5, 3e-5]
 
     trainer_cls: Trainer = Seq2SeqTrainer
 
@@ -186,9 +184,8 @@ class BaselineExperiment:
             predict_with_generate=True,
         )
 
-    def run(self, batch_size: int, learning_rates: Optional[List[float]]=None) -> Dict[float, PredictionOutput]:
+    def run(self, batch_size: int, learning_rates: List[float]) -> Dict[float, PredictionOutput]:
         max_input_length = self.MAX_INPUT_LENGTH
-        learning_rates = learning_rates or self.LEARNING_RATES
         trainer_cls = self.trainer_cls
         callbacks = self.callbacks
         predictions_output_path = self.predictions_output_path
