@@ -219,7 +219,7 @@ class BaselineExperiment:
 
             # Save our predictions to disk
             with open(predictions_output_path, "wb") as f:
-                pickle.dump(predictions, f)
+                pickle.dump(predictions_dict, f)
 
             print("Total results", predictions_dict)
 
