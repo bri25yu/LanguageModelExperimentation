@@ -189,12 +189,15 @@ class BaselineExperiment:
         if os.path.exists(predictions_output_path):
             with open(predictions_output_path, "rb") as f:
                 predictions_dict: Dict[float, PredictionOutput] = pickle.load(f)
+
+            print("Current results", predictions_dict)
         else:
             predictions_dict: Dict[float, PredictionOutput] = dict()
 
         # We perform hyperparam tuning over three learning rates
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(learning_rate, batch_size)
+            print("Training with", training_arguments)
             model = self.get_model(tokenizer)
 
             trainer = trainer_cls(
@@ -217,6 +220,8 @@ class BaselineExperiment:
             # Save our predictions to disk
             with open(predictions_output_path, "wb") as f:
                 pickle.dump(predictions, f)
+
+            print("Total results", predictions_dict)
 
         return predictions
 
