@@ -148,7 +148,7 @@ class BaselineExperiment:
         self, learning_rate: float, batch_size: int
     ) -> TrainingArguments:
         output_dir = os.path.join(
-            self.experiment_class_output_dir, "{learning_rate:.0e}"
+            self.experiment_class_output_dir, f"{learning_rate:.0e}"
         )
 
         return Seq2SeqTrainingArguments(
