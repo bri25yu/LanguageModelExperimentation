@@ -140,9 +140,11 @@ class BaselineExperiment:
 
     @property
     def predictions_output_path(self) -> str:
-        return os.path.join(
+        predictions_output_path = os.path.join(
             RESULTS_DIR, self.name, "predictions"
         )
+        os.makedirs(os.path.split(predictions_output_path), exist_ok=True)
+        return predictions_output_path
 
     def get_training_arguments(
         self, learning_rate: float, batch_size: int
