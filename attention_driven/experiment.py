@@ -26,7 +26,7 @@ from transformers import (
 )
 
 from attention_driven import RESULTS_DIR, TRAIN_OUTPUT_DIR
-from attention_driven.attention_driven import (
+from attention_driven.modeling_attention_driven import (
     AttentionDrivenM2M100ForConditionalGeneration
 )
 
