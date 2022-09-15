@@ -10,15 +10,15 @@ from attention_driven.experiments.baseline import BaselineExperiment
 
 
 class AttentionDrivenExperimentBase(BaselineExperiment):
-    attention_driven_masking_probability: Union[None, float] = None
+    attention_dropout: Union[None, float] = None
 
     def get_model(self, tokenizer: PreTrainedTokenizer) -> PreTrainedModel:
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
-        attention_driven_masking_probability = self.attention_driven_masking_probability
+        attention_dropout = self.attention_dropout
 
         model = AttentionDrivenM2M100ForConditionalGeneration.from_pretrained(
-            model_name, attention_driven_masking_probability
+            model_name, attention_dropout
         )
 
         model.config.max_length = max_input_length
@@ -29,12 +29,12 @@ class AttentionDrivenExperimentBase(BaselineExperiment):
 
 
 class AttentionDrivenConfig1Experiment(AttentionDrivenExperimentBase):
-    attention_driven_masking_probability = 0.05
+    attention_dropout = 0.05
 
 
 class AttentionDrivenConfig2Experiment(AttentionDrivenExperimentBase):
-    attention_driven_masking_probability = 0.10
+    attention_dropout = 0.10
 
 
 class AttentionDrivenConfig3Experiment(AttentionDrivenExperimentBase):
-    attention_driven_masking_probability = 0.15
+    attention_dropout = 0.15

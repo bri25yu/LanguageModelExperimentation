@@ -107,21 +107,21 @@ def attention_driven_forward(
     # attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
 
     if self.training:
-        # attn_probs are (batch_size * self.num_heads, seq_len, seq_len)
+        # attn_weights are (batch_size * self.num_heads, seq_len, seq_len)
 
-        # We only mask with probability `attention_driven_masking_probability`
+        # We only mask with probability `dropout`
         # scaled by the attention score itself (so higher scores are more likely to be dropped)
         # This is a more challenging task than fully random dropout
         # Ideally, this requires the model to learn more from relational information
-        masking_probs = self.attention_driven_masking_probability * attn_probs
+        masking_probs = self.dropout * attn_weights
         retain_probs = 1 - masking_probs
-        retain_mask = torch.bernoulli(retain_probs).to(attn_probs.device)
+        retain_mask = torch.bernoulli(retain_probs).to(attn_weights.device)
 
         # Since we drop out some values, we need to rescale our softmax
-        dropout_scaling = 1 / (1 - self.attention_driven_masking_probability)
+        dropout_scaling = 1 / (1 - self.dropout)
 
         # Replace the values with 0 or the original value
-        attn_probs = dropout_scaling * retain_mask * attn_probs
+        attn_probs = dropout_scaling * retain_mask * attn_weights
 
     # END attention driven dropout
 
@@ -146,9 +146,7 @@ def attention_driven_forward(
 
 
 class AttentionDrivenM2M100ForConditionalGeneration(M2M100ForConditionalGeneration):
-    def __init__(
-        self, config, attention_driven_masking_probability: float
-    ) -> None:
+    def __init__(self, config) -> None:
         super().__init__(config)
 
         for name, module in self.named_modules():
@@ -157,4 +155,3 @@ class AttentionDrivenM2M100ForConditionalGeneration(M2M100ForConditionalGenerati
 
             # See https://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object-instance
             module.forward = MethodType(attention_driven_forward, module)
-            module.attention_driven_masking_probability = attention_driven_masking_probability
