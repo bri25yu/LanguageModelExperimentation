@@ -29,12 +29,12 @@ class AttentionDrivenExperimentBase(BaselineExperiment):
 
 
 class AttentionDrivenConfig1Experiment(AttentionDrivenExperimentBase):
-    attention_driven_masking_probability = 0.15
+    attention_driven_masking_probability = 0.05
 
 
 class AttentionDrivenConfig2Experiment(AttentionDrivenExperimentBase):
-    attention_driven_masking_probability = 0.25
+    attention_driven_masking_probability = 0.10
 
 
 class AttentionDrivenConfig3Experiment(AttentionDrivenExperimentBase):
-    attention_driven_masking_probability = 0.50
+    attention_driven_masking_probability = 0.15

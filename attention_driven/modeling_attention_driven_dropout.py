@@ -101,27 +101,27 @@ def attention_driven_forward(
     else:
         attn_weights_reshaped = None
 
-    attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
-
     # START attention driven dropout
+
+    # Original dropout calculation
+    # attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
 
     if self.training:
         # attn_probs are (batch_size * self.num_heads, seq_len, seq_len)
-        # Reshape so that we can use argmax and so we deal with each sample individually
-        attn_probs_reshaped = attn_probs.view(bsz, -1)
 
-        # Find the argmax
-        argmax_idxs = torch.argmax(attn_probs_reshaped, dim=1)
+        # We only mask with probability `attention_driven_masking_probability`
+        # scaled by the attention score itself (so higher scores are more likely to be dropped)
+        # This is a more challenging task than fully random dropout
+        # Ideally, this requires the model to learn more from relational information
+        masking_probs = self.attention_driven_masking_probability * attn_probs
+        retain_probs = 1 - masking_probs
+        retain_mask = torch.bernoulli(retain_probs).to(attn_probs.device)
 
-        # We only mask with probability `attention_driven_masking_probability``
-        dropout_mask = torch.bernoulli((1 - self.attention_driven_masking_probability) * torch.ones(argmax_idxs.shape))
-        dropout_mask = dropout_mask.to(attn_probs_reshaped.device)
+        # Since we drop out some values, we need to rescale our softmax
+        dropout_scaling = 1 / (1 - self.attention_driven_masking_probability)
 
         # Replace the values with 0 or the original value
-        attn_probs_reshaped[:, argmax_idxs] = dropout_mask * attn_probs_reshaped[:, argmax_idxs]
-
-        # Reshape it into the original form
-        attn_probs = attn_probs_reshaped.view(bsz * self.num_heads, tgt_len, src_len)
+        attn_probs = dropout_scaling * retain_mask * attn_probs
 
     # END attention driven dropout
 
@@ -152,7 +152,7 @@ class AttentionDrivenM2M100ForConditionalGeneration(M2M100ForConditionalGenerati
         super().__init__(config)
 
         for name, module in self.named_modules():
-            if not (name.endswith("self_attn") and "encoder" in name):
+            if not (name.endswith("self_attn")):
                 continue
 
             # See https://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object-instance
