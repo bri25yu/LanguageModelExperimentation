@@ -25,7 +25,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from attention_driven import RESULTS_DIR, TRAIN_OUTPUT_DIR
+from attention_driven import ROOT_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
 
 
 class BaselineExperiment:
@@ -59,7 +59,7 @@ class BaselineExperiment:
 
         def load_single_dataset(path: str) -> Dataset:
             df = pd.read_csv(
-                f"language-models/tib/data/{path}",
+                os.path.join(ROOT_DIR, "..", "..", "language-models/tib/data", path),
                 sep="\t",
                 quoting=csv.QUOTE_NONE,
                 names=["tibetan","english"],

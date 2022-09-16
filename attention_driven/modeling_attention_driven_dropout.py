@@ -122,6 +122,8 @@ def attention_driven_forward(
 
         # Replace the values with 0 or the original value
         attn_probs = dropout_scaling * retain_mask * attn_weights
+    else:
+        attn_probs = attn_weights
 
     # END attention driven dropout
 
