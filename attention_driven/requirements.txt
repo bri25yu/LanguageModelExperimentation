@@ -1,3 +1,5 @@
 -r requirements_colab.txt
-deepspeed
-accelerate
+--extra-index-url https://download.pytorch.org/whl/cu113
+torch==1.12.1+cu113
+deepspeed==0.7.2
+accelerate==0.12.0

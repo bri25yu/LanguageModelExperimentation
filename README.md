@@ -12,7 +12,8 @@ conda create -n LanguageModelExperimentation
 
 conda activate LanguageModelExperimentation
 
-pip -q -q install -r attention_driven/requirements_colab.txt --upgrade
-
+pip -q -q install -r attention_driven/requirements.txt
 pip install -e .
+
+deepspeed run.py
 ```

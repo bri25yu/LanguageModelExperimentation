@@ -1,5 +1,4 @@
-transformers
-transformers[sentencepiece]
-datasets
+transformers[sentencepiece]==4.22.0
+datasets==2.4.0
 sacrebleu
-evaluate
+evaluate==0.2.2
