@@ -14,9 +14,12 @@ def main():
             results = pickle.load(f)
 
         print(experiment_name)
-        for learning_rate, result in sorted(results.items()):
-            test_score = result.metrics["test_score"]
-            print("  ", learning_rate, f"{test_score:.2f}")
+        for learning_rate, result_by_lr in sorted(results.items()):
+            print(f"  {learning_rate:e}")
+            for split_name, result in result_by_lr.items():
+                loss = result.metrics["test_loss"]
+                score = result.metrics["test_score"]
+                print(f"    {split_name.ljust(10)} | loss {loss:.2f} score {score:.1f}")
 
 
 if __name__ == "__main__":

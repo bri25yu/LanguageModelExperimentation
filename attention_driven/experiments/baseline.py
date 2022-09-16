@@ -37,6 +37,8 @@ class BaselineExperiment:
     # The number of samples in the val set
     VAL_SPLIT_SIZE = 1000
 
+    NUM_TRAIN_EPOCHS = 25
+
     trainer_cls: Trainer = Seq2SeqTrainer
 
     def get_tokenizer(self) -> PreTrainedTokenizer:
@@ -151,6 +153,7 @@ class BaselineExperiment:
         output_dir = os.path.join(
             self.experiment_class_output_dir, f"{learning_rate:.0e}"
         )
+        num_train_epochs = self.NUM_TRAIN_EPOCHS
 
         try:
             import deepspeed
@@ -165,20 +168,20 @@ class BaselineExperiment:
         else:
             deepspeed_args = None
 
+        eval_save_strategy = "epoch"
+
         return Seq2SeqTrainingArguments(
             output_dir,
             learning_rate=learning_rate,
             load_best_model_at_end=True,
-            evaluation_strategy="steps",
-            eval_steps=1000,
-            save_strategy="steps",
-            save_steps=1000,
-            save_total_limit=2,
+            evaluation_strategy=eval_save_strategy,
+            save_strategy=eval_save_strategy,
+            save_total_limit=1,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=2 * batch_size,
             gradient_accumulation_steps=32 // batch_size,
             eval_accumulation_steps=1,
-            max_steps=10000,
+            num_train_epochs=num_train_epochs,
             warmup_ratio=0.1,
             do_train=True,
             do_eval=True,
@@ -229,7 +232,10 @@ class BaselineExperiment:
 
             trainer.train()
 
-            predictions = trainer.predict(tokenized_dataset["test"])
+            predictions = {
+                split_name: trainer.predict(tokenized_dataset[split_name])
+                for split_name in tokenized_dataset
+            }
             predictions_dict[learning_rate] = predictions
 
             # Save our predictions to disk
