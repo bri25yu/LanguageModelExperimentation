@@ -3,6 +3,8 @@ from typing import Callable, Dict, List
 import os
 import pickle
 
+import json
+
 import csv
 import pandas as pd
 from datasets import Dataset, DatasetDict
@@ -25,7 +27,7 @@ from transformers import (
     TrainingArguments,
 )
 
-from attention_driven import ROOT_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
+from attention_driven import CONFIG_DIR, ROOT_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
 
 
 class BaselineExperiment:
@@ -150,6 +152,10 @@ class BaselineExperiment:
             self.experiment_class_output_dir, f"{learning_rate:.0e}"
         )
 
+        deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
+        with open(deepspeed_args_path) as f:
+            deepspeed_args = json.load(f)
+
         return Seq2SeqTrainingArguments(
             output_dir,
             learning_rate=learning_rate,
@@ -172,6 +178,7 @@ class BaselineExperiment:
             log_level="error",
             logging_steps=1,
             predict_with_generate=True,
+            deepspeed=deepspeed_args,
         )
 
     def run(self, batch_size: int, learning_rates: List[float]) -> Dict[float, PredictionOutput]:
