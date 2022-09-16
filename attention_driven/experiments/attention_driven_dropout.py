@@ -18,7 +18,7 @@ class AttentionDrivenExperimentBase(BaselineExperiment):
         attention_dropout = self.attention_dropout
 
         model = AttentionDrivenM2M100ForConditionalGeneration.from_pretrained(
-            model_name, attention_dropout
+            model_name, attention_dropout=attention_dropout
         )
 
         model.config.max_length = max_input_length
