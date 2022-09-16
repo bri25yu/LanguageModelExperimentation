@@ -152,9 +152,18 @@ class BaselineExperiment:
             self.experiment_class_output_dir, f"{learning_rate:.0e}"
         )
 
-        deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
-        with open(deepspeed_args_path) as f:
-            deepspeed_args = json.load(f)
+        try:
+            import deepspeed
+            has_deepspeed = True
+        except ImportError:
+            has_deepspeed = False
+
+        if has_deepspeed:
+            deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
+            with open(deepspeed_args_path) as f:
+                deepspeed_args = json.load(f)
+        else:
+            deepspeed_args = None
 
         return Seq2SeqTrainingArguments(
             output_dir,
