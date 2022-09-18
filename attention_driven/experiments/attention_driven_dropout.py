@@ -3,7 +3,7 @@ from typing import Union
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 
-from attention_driven.modeling_attention_driven_dropout import (
+from attention_driven.modeling.attention_driven_dropout import (
     AttentionDrivenM2M100ForConditionalGeneration
 )
 from attention_driven.experiments.baseline import BaselineExperiment
