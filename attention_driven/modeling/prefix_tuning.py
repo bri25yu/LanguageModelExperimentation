@@ -11,11 +11,9 @@ from transformers import (
 )
 from transformers.modeling_outputs import (
     BaseModelOutput,
-    BaseModelOutputWithPastAndCrossAttentions,
 )
 from transformers.models.m2m_100.modeling_m2m_100 import (
     _expand_mask,
-    _make_causal_mask,
 )
 
 
