@@ -1,5 +1,56 @@
-### Methods
+# Background
+Original attention algorithm
+1. Some definitions:
+    1. N = batch size, L = sequence length, D = hidden dim, N_h = number of attention heads (for multi-headed attention)
+    2. D_h = hidden dim for attention heads = D / N_h
+    3. Input X of shape (N, L, D)
+    4. Attention weights Q, K, V of shapes (D, D)
+2. Q_L = XQ of shape (N, L, D). Reshape Q_L to (N, L, N_h, D_h) then to (N, N_h, L, D_h). Repeat the same process with K_L and V_L
+3. attention_scores = Q_L V_L^T of shape (N, N_h, L, L)
+4. attention_probs = softmax(attention_scores, axis=-1) of shape (N, N_h, L, L)
+5. attention_probs = dropout(attention_probs) with probability p
+6. context = attention probs V_L of shape (N, N_h, L, D_h). Reshape context to (N, L, N_h, D_h) then to (N, L, D)
+
+
+# Methods
 We train for 25 epochs with an early stopping patience of 2.
+
+## Attention driven dropout
+In the original attention algorithm, we modify step 5
+```
+# Original attention algorithm
+5. attention_probs = dropout(attention_probs) with probability p
+```
+to
+```
+# Dropout argmax score in addition to regular dropout
+5. attention_probs = dropout(attention_probs) with probability p
+    1. attention_probs = dropout(attention_probs.argmax()) with probability p_argmax
+```
+
+We ablate over different argmax attention prob dropout values i.e. `p_argmax` of 5%, 10%, 15%, 25%, and 50%. There was no difference between the performance of the baseline with the performance of this method.
+
+Why does dropping out the argmax attention value during training even with a high probability of 50% change so little? Part of it has to do with the scale of the attention probabilities, specifically that the dropout matrix is shaped (L, L) where L=100 is the sequence length and dropping out one value doesn’t actually change much. 
+
+So, instead of dropping out a single value, we apply dropout with probability weighted by the attention score. Higher attention score values have a higher probability to be dropped out. We ablate over p = 5%, 10%, and 15%.
+
+However, there was no difference between the performance of this technique and the baseline. The expected number of values dropped out is p * L * L where L is the sequence length. But if we weight by our attention probs, this value drops to dropout * L * 1. So, in theory, we need to multiply our dropout probability by a factor of L. We ablate over just 5%. We observe that the performance degrades significantly, where the train loss is much much higher than the baseline train loss, a sign that we're dropping out too much during training.
+
+As a result, instead of multiplying by L to recover the true expected value, we multiply by sqrt(L) instead.
+
+
+## LoRA
+We apply the Low-Rank Adaptation (LoRA) of Large Language Models (see https://arxiv.org/abs/2106.09685). 
+
+First, we freeze all the pretrained model parameters. For our attention algorithm, we modify step 2. Specifically we change step 2 from
+```
+# Original attention algorithm
+2. Q_L = XQ of shape (N, L, D). Reshape Q_L to (N, L, N_h, D_h) then to (N, N_h, L, D_h). Repeat the same process with K_L and V_L
+```
+to
+```
+2. Q_L = X(Q + Q_A Q_B) ... (the rest is the same)
+```
 
 
 # Results
