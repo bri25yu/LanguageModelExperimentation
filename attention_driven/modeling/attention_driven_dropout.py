@@ -101,7 +101,9 @@ def attention_driven_forward(
     else:
         attn_weights_reshaped = None
 
+    ###################################
     # START attention driven dropout
+    ###################################
 
     # Original dropout calculation
     # attn_probs = nn.functional.dropout(attn_weights, p=self.dropout, training=self.training)
@@ -109,11 +111,23 @@ def attention_driven_forward(
     if self.training:
         # attn_weights are (batch_size * self.num_heads, seq_len, seq_len)
 
-        # We only mask with probability `dropout`
-        # scaled by the attention score itself (so higher scores are more likely to be dropped)
-        # This is a more challenging task than fully random dropout
-        # Ideally, this requires the model to learn more from relational information
-        masking_probs = self.dropout * attn_weights
+        """
+        We only mask with probability `dropout` scaled by the attention score
+        itself (so higher scores are more likely to be dropped)
+
+        This is a more challenging task than fully random dropout
+        Ideally, this requires the model to learn more from relational information
+
+        The expected number of values dropped out is self.dropout * L * L
+        But if we weight by attn_weights, this value drops to self.dropout * L * 1
+        So we need to multiply our masking_probs by L, which is `tgt_len` in this case
+        """
+        masking_probs = tgt_len * self.dropout * attn_weights
+
+        # Since our masking prob can now be larger than 1 depending on our sequence length
+        # We clamp the values
+        masking_probs = torch.clamp(masking_probs, max=1.0)
+
         retain_probs = 1 - masking_probs
         retain_mask = torch.bernoulli(retain_probs).to(attn_weights.device)
 
@@ -125,7 +139,9 @@ def attention_driven_forward(
     else:
         attn_probs = attn_weights
 
+    ###################################
     # END attention driven dropout
+    ###################################
 
     attn_output = torch.bmm(attn_probs, value_states)
 
