@@ -5,8 +5,16 @@ from types import MethodType
 import torch
 import torch.nn as nn
 
-from transformers import M2M100ForConditionalGeneration
+from transformers import (
+    M2M100ForConditionalGeneration, M2M100Config
+)
 
+
+class LoRAM2M100Config(M2M100Config):
+    def __init__(self, rank: int=1, **kwargs) -> None:
+        super().__init__(**kwargs)
+
+        self.rank = rank
 
 
 # This is an exact copy of the M2M100Attention class except denoted otherwise
@@ -230,6 +238,8 @@ def lora_forward(
 
 
 class LoRAM2M100ForConditionalGeneration(M2M100ForConditionalGeneration):
+    config_class = LoRAM2M100Config
+
     def __init__(self, config) -> None:
         super().__init__(config)
 
@@ -245,7 +255,7 @@ class LoRAM2M100ForConditionalGeneration(M2M100ForConditionalGeneration):
                 continue
 
             # Add our low-rank parameters
-            self.add_lora_params(module)
+            self.add_lora_params(module, self.rank)
 
             # Modify the forward function to actually use the low-rank parameters
             # See https://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object-instance
@@ -259,20 +269,22 @@ class LoRAM2M100ForConditionalGeneration(M2M100ForConditionalGeneration):
         rank = self.rank
 
         # Get our module shapes
-        d = self_attn_module.embed_dim
-        k = self_attn_module.embed_dim
         r = rank
 
         for weight_prefix in weight_prefixes:
             weight_name = f"{weight_prefix}_proj"
+            
+            weight = getattr(self_attn_module, weight_name)
+            d = weight.in_features
+            k = weight.out_features
 
             # Create names for our A and B matrices
             b_name = f"{weight_name}_b"
             a_name = f"{weight_name}_a"
 
             # Create our A and B matrices
-            B = nn.Linear(d, r)
-            A = nn.Linear(r, k)
+            B = nn.Linear(r, d)
+            A = nn.Linear(k, r)
 
             # Initialize weights
             # Initialize all weights in B to be 0.
