@@ -15,7 +15,7 @@ def main():
 
         print(experiment_name)
         for learning_rate, result_by_lr in sorted(results.items()):
-            print(f"  {learning_rate:0e}")
+            print(f"  {learning_rate:.0e}")
             for split_name, result in result_by_lr.items():
                 loss = result.metrics["test_loss"]
                 score = result.metrics["test_score"]
