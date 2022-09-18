@@ -2,6 +2,8 @@ from typing import Optional, Tuple
 
 from types import MethodType
 
+import numpy as np
+
 import torch
 import torch.nn as nn
 
@@ -127,7 +129,7 @@ def attention_driven_forward(
 
         We multiply our masking_probs by sqrt(L), which is `sqrt(tgt_len)` in this case
         """
-        masking_probs = torch.sqrt(tgt_len) * self.dropout * attn_weights
+        masking_probs = np.sqrt(tgt_len) * self.dropout * attn_weights
 
         # Since our masking prob can now be larger than 1 depending on our sequence length
         # We clamp the values
