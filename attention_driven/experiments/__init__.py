@@ -11,3 +11,9 @@ from attention_driven.experiments.lora import (
     LoRAConfig4Experiment,
     LoRAConfig5Experiment,
 )
+from attention_driven.experiments.prefix_tuning import (
+    PrefixTuningConfig1Experiment,
+    PrefixTuningConfig2Experiment,
+    PrefixTuningConfig3Experiment,
+    PrefixTuningConfig4Experiment,
+)
