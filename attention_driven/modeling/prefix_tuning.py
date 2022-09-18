@@ -1,11 +1,10 @@
-from typing import Optional, Tuple
-
 from types import MethodType
 
 import random
 
 import torch
 import torch.nn as nn
+from torch.nn.parameter import Parameter
 
 from transformers import (
     M2M100ForConditionalGeneration, M2M100Config
@@ -394,6 +393,14 @@ def prefix_tuning_decoder_forward(
     )
 
 
+def create_prefix_parameter(L: int, D: int, std: float) -> nn.Module:
+    prefix = Parameter(torch.empty((L, D)))
+
+    prefix.data.normal_(mean=0.0, std=std)
+
+    return prefix
+
+
 class PrefixTuningM2M100ForConditionalGeneration(M2M100ForConditionalGeneration):
     config_class = PrefixTuningM2M100Config
 
@@ -411,7 +418,12 @@ class PrefixTuningM2M100ForConditionalGeneration(M2M100ForConditionalGeneration)
         decoder = self.model.decoder
 
         # Add prefix params
-        # !TODO
+        L = self.prefix_length
+        D = encoder.embed_dim
+        std = self.config.init_std
+
+        encoder.prefix = create_prefix_parameter(L, D, std)
+        decoder.prefix = create_prefix_parameter(L, D, std)
 
         # Modify the forward function of the encoder and decoders
         # See https://stackoverflow.com/questions/972/adding-a-method-to-an-existing-object-instance
