@@ -120,9 +120,14 @@ def attention_driven_forward(
 
         The expected number of values dropped out is self.dropout * L * L
         But if we weight by attn_weights, this value drops to self.dropout * L * 1
-        So we need to multiply our masking_probs by L, which is `tgt_len` in this case
+
+        However, since we're targeting the attention weights to drop out, we make task
+        slightly easier, so instead of multiplying by L to recover the true expected value,
+        we multiply by sqrt(L)
+
+        We multiply our masking_probs by sqrt(L), which is `sqrt(tgt_len)` in this case
         """
-        masking_probs = tgt_len * self.dropout * attn_weights
+        masking_probs = torch.sqrt(tgt_len) * self.dropout * attn_weights
 
         # Since our masking prob can now be larger than 1 depending on our sequence length
         # We clamp the values
