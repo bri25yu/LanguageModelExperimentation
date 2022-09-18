@@ -232,10 +232,18 @@ class BaselineExperiment:
 
             trainer.train()
 
-            predictions = {
-                split_name: trainer.predict(tokenized_dataset[split_name])
-                for split_name in tokenized_dataset
-            }
+            predictions = dict()
+            for split_name in tokenized_dataset:
+                split_preds = trainer.predict(tokenized_dataset[split_name])
+
+                if split_name != "test":
+                    # We only care about the predictions for the test set
+                    split_preds = PredictionOutput(
+                        None, None, split_preds.metrics
+                    )
+
+                predictions[split_name] = split_preds
+
             predictions_dict[learning_rate] = predictions
 
             # Save our predictions to disk
