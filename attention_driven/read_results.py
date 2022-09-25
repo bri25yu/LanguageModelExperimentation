@@ -57,7 +57,7 @@ def main():
     columns_rordered = pd.MultiIndex.from_product([["loss", "score"], ["train", "val", "test"]], names=df.columns.names)
     df = pd.DataFrame(df, columns=columns_rordered)
 
-    print(df)
+    print(df.to_string())
 
 
 if __name__ == "__main__":
