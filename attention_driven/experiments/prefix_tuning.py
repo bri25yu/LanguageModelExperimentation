@@ -7,12 +7,12 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 
 from attention_driven.modeling.prefix_tuning import (
-    PrefixTuningM2M100ForConditionalGeneration
+    PrefixTuningNaiveM2M100ForConditionalGeneration
 )
 from attention_driven.experiments.baseline import BaselineExperiment
 
 
-class PrefixTuningExperimentBase(BaselineExperiment):
+class PrefixTuningNaiveExperimentBase(BaselineExperiment):
     prefix_length: Union[None, int] = None
 
     def get_model(self, tokenizer: PreTrainedTokenizer) -> PreTrainedModel:
@@ -20,7 +20,7 @@ class PrefixTuningExperimentBase(BaselineExperiment):
         max_input_length = self.MAX_INPUT_LENGTH
         prefix_length = self.prefix_length
 
-        model = PrefixTuningM2M100ForConditionalGeneration.from_pretrained(
+        model = PrefixTuningNaiveM2M100ForConditionalGeneration.from_pretrained(
             model_name, prefix_length=prefix_length
         )
 
@@ -31,17 +31,17 @@ class PrefixTuningExperimentBase(BaselineExperiment):
         return model
 
 
-class PrefixTuningConfig1Experiment(PrefixTuningExperimentBase):
+class PrefixTuningNaiveConfig1Experiment(PrefixTuningNaiveExperimentBase):
     prefix_length = 1
 
 
-class PrefixTuningConfig2Experiment(PrefixTuningExperimentBase):
+class PrefixTuningNaiveConfig2Experiment(PrefixTuningNaiveExperimentBase):
     prefix_length = 2
 
 
-class PrefixTuningConfig3Experiment(PrefixTuningExperimentBase):
+class PrefixTuningNaiveConfig3Experiment(PrefixTuningNaiveExperimentBase):
     prefix_length = 5
 
 
-class PrefixTuningConfig4Experiment(PrefixTuningExperimentBase):
+class PrefixTuningNaiveConfig4Experiment(PrefixTuningNaiveExperimentBase):
     prefix_length = 10
