@@ -12,8 +12,8 @@ from attention_driven.experiments.lora import (
     LoRAConfig5Experiment,
 )
 from attention_driven.experiments.prefix_tuning import (
-    PrefixTuningConfig1Experiment,
-    PrefixTuningConfig2Experiment,
-    PrefixTuningConfig3Experiment,
-    PrefixTuningConfig4Experiment,
+    PrefixTuningNaiveConfig1Experiment,
+    PrefixTuningNaiveConfig2Experiment,
+    PrefixTuningNaiveConfig3Experiment,
+    PrefixTuningNaiveConfig4Experiment,
 )
