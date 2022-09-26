@@ -105,7 +105,7 @@ def prefix_tuning_encoder_forward(
     # i.e. (L, D_p) -> (N, L, D_p)
 
     batch_size = input_ids.size()[0]
-    batched_prefix = self.prefix.unsqueeze(0).expand(batch_size, -1)
+    batched_prefix = self.prefix.unsqueeze(0).expand(batch_size, -1, -1)
     hidden_states = torch.concat((batched_prefix, hidden_states))
 
     ###################################
