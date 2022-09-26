@@ -51,25 +51,44 @@ class PrefixTuningNaiveM2M100ForConditionalGeneration(M2M100ForConditionalGenera
         output_hidden_states=None,
         return_dict=None,
     ):
-        prefix_length = self.prefix_length
-
-        # `input_ids` is (batch_size, seq_len)
-        batch_size, _ = input_ids.size()
+        # `input_ids` and `decoder_input_ids` are (batch_size, seq_len)
+        if input_ids is not None:
+            ids_to_embed = input_ids
+            embed_model = self.get_encoder()
+            batch_size, _ = input_ids.size()
+        elif decoder_input_ids is not None:
+            ids_to_embed = decoder_input_ids
+            embed_model = self.get_decoder()
+            batch_size, _ = decoder_input_ids.size()
+        else:
+            raise ValueError("Either input_ids or decoder_input_ids must not be None")
 
         # Convert our input_ids into input_embeds
-        encoder = self.get_encoder()
-        inputs_embeds = encoder.embed_tokens(input_ids) * encoder.embed_scale
+        embeds = embed_model.embed_tokens(ids_to_embed) * embed_model.embed_scale
 
         # Prepend to our input_embeds
         batched_prefix = self.prefix.unsqueeze(0).expand(batch_size, -1, -1)
-        inputs_embeds = torch.concat((batched_prefix, inputs_embeds), dim=1)
+        embeds_to_input = torch.concat((batched_prefix, embeds), dim=1)
 
-        # Prepend to our attention mask
-        prefix_attention_mask = torch.ones((batch_size, prefix_length), device=attention_mask.device)
-        attention_mask = torch.concat((prefix_attention_mask, attention_mask), dim=1)
+        if input_ids is not None:
+            # Set our input_ids to None
+            input_ids = None
 
-        # Set our input_ids to None
-        input_ids = None
+            # Set our inputs_embeds
+            inputs_embeds = embeds_to_input
+
+            prefix_length = self.prefix_length
+
+            # Prepend to our attention mask
+            prefix_attention_mask = torch.ones((batch_size, prefix_length), device=attention_mask.device)
+            attention_mask = torch.concat((prefix_attention_mask, attention_mask), dim=1)
+
+        elif decoder_input_ids is not None:
+            # Set our input_ids to None
+            decoder_input_ids = None
+
+            # Set our inputs_embeds
+            decoder_inputs_embeds = embeds_to_input
 
         return super().forward(
             input_ids,
