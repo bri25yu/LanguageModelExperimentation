@@ -15,6 +15,9 @@ def main():
             continue
 
         results_path = os.path.join(RESULTS_DIR, experiment_name, "predictions")
+        if not os.path.exists(results_path):
+            continue
+
         with open(results_path, "rb") as f:
             results = pickle.load(f)
 
