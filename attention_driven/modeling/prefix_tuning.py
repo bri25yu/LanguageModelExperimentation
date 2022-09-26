@@ -121,7 +121,7 @@ def prefix_tuning_encoder_forward(
         # START prefix tuning attention mask
         ###################################
 
-        prefix_length = self.prefix.size()[1]
+        prefix_length = self.prefix.size()[0]
         prefix_attention_mask = torch.ones((batch_size, prefix_length), device=attention_mask.device)
         attention_mask = torch.concat((prefix_attention_mask, attention_mask), dim=1)
 
