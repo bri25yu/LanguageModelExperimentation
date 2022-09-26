@@ -100,7 +100,13 @@ def prefix_tuning_encoder_forward(
     # START prefix tuning hidden states
     ###################################
 
-    hidden_states = torch.concat((self.prefix, hidden_states))
+    # self.prefix is of size (L, D_p)
+    # We need to expand it so that it matches the batch size of the hidden states
+    # i.e. (L, D_p) -> (N, L, D_p)
+
+    batch_size = input_ids.size()[0]
+    batched_prefix = self.prefix.unsqueeze(0).expand(batch_size, -1)
+    hidden_states = torch.concat((batched_prefix, hidden_states))
 
     ###################################
     # END prefix tuning hidden states
@@ -115,8 +121,7 @@ def prefix_tuning_encoder_forward(
         # START prefix tuning attention mask
         ###################################
 
-        L = self.prefix.size()[0]
-        prefix_attention_mask = torch.ones(L, device=attention_mask.device)
+        prefix_attention_mask = torch.ones_like(batched_prefix, device=attention_mask.device)
         attention_mask = torch.concat((prefix_attention_mask, attention_mask))
 
         ###################################
