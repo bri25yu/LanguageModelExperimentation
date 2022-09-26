@@ -106,7 +106,7 @@ def prefix_tuning_encoder_forward(
 
     batch_size = input_ids.size()[0]
     batched_prefix = self.prefix.unsqueeze(0).expand(batch_size, -1, -1)
-    hidden_states = torch.concat((batched_prefix, hidden_states))
+    hidden_states = torch.concat((batched_prefix, hidden_states), dim=1)
 
     ###################################
     # END prefix tuning hidden states
@@ -122,7 +122,7 @@ def prefix_tuning_encoder_forward(
         ###################################
 
         prefix_attention_mask = torch.ones_like(batched_prefix, device=attention_mask.device)
-        attention_mask = torch.concat((prefix_attention_mask, attention_mask))
+        attention_mask = torch.concat((prefix_attention_mask, attention_mask), dim=1)
 
         ###################################
         # END prefix tuning attention mask
