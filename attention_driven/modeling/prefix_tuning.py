@@ -208,7 +208,7 @@ class PrefixTuningM2M100ForConditionalGeneration(M2M100ForConditionalGeneration)
 
         # Add prefix params
         L = self.prefix_length
-        D = self.config.embed_dim
+        D = self.config.d_model
         std = self.config.init_std
 
         encoder.prefix = create_prefix_parameter(L, D, std)
