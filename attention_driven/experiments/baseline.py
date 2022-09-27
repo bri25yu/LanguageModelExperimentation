@@ -28,6 +28,8 @@ from transformers import (
 )
 
 from attention_driven import CONFIG_DIR, ROOT_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
+from attention_driven.data_processors import LDTibetanEnglishDataProcessor
+from attention_driven.data_processors.utils import convert_df_to_hf_dataset
 
 
 class BaselineExperiment:
@@ -61,23 +63,10 @@ class BaselineExperiment:
         val_split_size = self.VAL_SPLIT_SIZE
         max_input_length = self.MAX_INPUT_LENGTH
 
-        def load_single_dataset(path: str) -> Dataset:
-            df = pd.read_csv(
-                os.path.join(ROOT_DIR, "..", "..", "language-models/tib/data", path),
-                sep="\t",
-                quoting=csv.QUOTE_NONE,
-                names=["tibetan","english"],
-            )
-            df = df.astype(str)
-
-            dataset = Dataset.from_pandas(df)
-
-            return dataset
-
         # Load our datasets from disk into HF Dataset's
-        train_dataset = load_single_dataset("train_without_shorts.tsv.gz")
+        data_processor = LDTibetanEnglishDataProcessor()
+        train_dataset, test_dataset = convert_df_to_hf_dataset(data_processor())
         train_val_dataset = train_dataset.train_test_split(val_split_size, seed=42)
-        test_dataset = load_single_dataset("test.tsv.gz")
 
         dataset = DatasetDict(
             train=train_val_dataset["train"],
