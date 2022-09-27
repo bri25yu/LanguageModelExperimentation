@@ -36,6 +36,10 @@ def main():
 
                 data.append(config_data)
 
+    if not data:
+        print("No results found!")
+        return
+
     # Create a dataframe and clean it up some
     df = pd.DataFrame(data)
 
