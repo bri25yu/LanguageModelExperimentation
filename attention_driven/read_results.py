@@ -24,15 +24,20 @@ def main():
         for learning_rate, result_by_lr in sorted(results.items()):
             for split_name, result in result_by_lr.items():
                 loss = result.metrics["test_loss"]
-                score = result.metrics["test_score"]
 
                 config_data = {
                     "name": experiment_name,
                     "lr": learning_rate,
                     "split": split_name,
                     "loss": loss,
-                    "score": score,
                 }
+
+                for attr_name, attr_value in result.metrics.items():
+                    if not attr_name.endswith("score"):
+                        continue
+
+                    attr_name = attr_name.removeprefix("test_")
+                    config_data[attr_name] = attr_value
 
                 data.append(config_data)
 
@@ -49,14 +54,21 @@ def main():
     # Some display improvements
     df.lr = df.lr.map(lambda lr: f"{lr:.0e}")
     df.loss = df.loss.round(3)
-    df.score = df.score.round(1)
     df.name = df.name.str.removesuffix("Experiment")
+
+    value_names = ["loss"]
+    for value_name in df.columns:
+        if not value_name.endswith("score"):
+            continue
+
+        df[value_name] = df[value_name].round(1)
+        value_names.append(value_name)
 
     # Create a spreadsheet
     df = df.pivot_table(
         index=["name", "lr"],
         columns="split",
-        values=["loss", "score"],
+        values=value_names,
         sort=False,
     )
 
