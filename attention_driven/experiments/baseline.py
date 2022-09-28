@@ -30,6 +30,9 @@ from attention_driven.data_processors import LDTibetanEnglishDataProcessor
 from attention_driven.data_processors.utils import convert_df_to_hf_dataset
 
 
+__all__ = ["BaselineExperiment"]
+
+
 class BaselineExperiment:
     MODEL_NAME = "facebook/nllb-200-distilled-600M"
     MAX_INPUT_LENGTH = 100

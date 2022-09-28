@@ -11,6 +11,9 @@ from attention_driven.data_processors import LDTibetanEnglishDataV2Processor
 from attention_driven.data_processors.utils import convert_df_to_hf_dataset
 
 
+__all__ = ["BaselineV2Experiment"]
+
+
 class BaselineV2Experiment(BaselineExperiment):
     """
     This is the same as the baseline experiment with the following changes:
