@@ -17,18 +17,26 @@ class LDTibetanEnglishDataProcessor(AbstractDataProcessor):
     """
 
     def __call__(self):
-        def load_single_dataset(path: str) -> pd.DataFrame:
-            df = pd.read_csv(
-                os.path.join(ROOT_DIR, "..", "..", "language-models/tib/data", path),
-                sep="\t",
-                quoting=csv.QUOTE_NONE,
-                names=["tibetan","english"],
-            )
-            df = df.astype(str)
+        train_dataset = self.load_single_dataset("train_without_shorts.tsv.gz")
+        test_dataset = self.load_single_dataset("test.tsv.gz")
 
-            return df
+        return train_dataset, test_dataset
 
-        train_dataset = load_single_dataset("train_without_shorts.tsv.gz")
-        test_dataset = load_single_dataset("test.tsv.gz")
+    def load_single_dataset(self, path: str) -> pd.DataFrame:
+        df = pd.read_csv(
+            os.path.join(ROOT_DIR, "..", "..", "language-models/tib/data", path),
+            sep="\t",
+            quoting=csv.QUOTE_NONE,
+            names=["tibetan","english"],
+        )
+        df = df.astype(str)
+
+        return df
+
+
+class LDTibetanEnglishDataV2Processor(LDTibetanEnglishDataProcessor):
+    def __call__(self):
+        train_dataset = self.load_single_dataset("tib_train.tsv.gz")
+        test_dataset = self.load_single_dataset("tib_test.tsv.gz")
 
         return train_dataset, test_dataset
