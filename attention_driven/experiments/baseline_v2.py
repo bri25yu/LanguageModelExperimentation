@@ -16,9 +16,12 @@ class BaselineV2Experiment(BaselineExperiment):
     This is the same as the baseline experiment with the following changes:
     - Add BLEU metrics
     - New silver data
+    - Reduce the number of passes through the data. We moved from a train set size of 70k to 200k, so we decrease the number of epochs from 25 to 10.
 
     This experiment finetunes an NLLB 600M model
     """
+
+    NUM_TRAIN_EPOCHS = 10
 
     def get_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
         chrf = evaluate.load("chrf")
