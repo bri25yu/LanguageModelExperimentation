@@ -220,7 +220,8 @@ class BaselineExperiment:
             )
             trainer.remove_callback(PrinterCallback)
 
-            trainer.train()
+            if training_arguments.do_train:
+                trainer.train()
 
             predictions = dict()
             for split_name in tokenized_dataset:
