@@ -10,7 +10,7 @@ class ZeroShotMT5ExperimentBase(FinetuneMT5ExperimentBase):
     def get_training_arguments(self, learning_rate: float, batch_size: int) -> TrainingArguments:
         training_arguments = super().get_training_arguments(learning_rate, batch_size)
 
-        training_arguments.do_train = False
+        training_arguments.max_steps = 0
 
         return training_arguments
 
