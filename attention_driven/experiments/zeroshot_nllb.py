@@ -1,5 +1,3 @@
-from transformers import TrainingArguments
-
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
 
 
@@ -7,12 +5,7 @@ __all__ = ["ZeroShotNLLB600MExperiment", "ZeroShotNLLB1_3BExperiment", "ZeroShot
 
 
 class ZeroShotNLLBExperimentBase(BaselineV2Experiment):
-    def get_training_arguments(self, learning_rate: float, batch_size: int) -> TrainingArguments:
-        training_arguments = super().get_training_arguments(learning_rate, batch_size)
-
-        training_arguments.do_train = False
-
-        return training_arguments
+    NUM_TRAIN_EPOCHS = 0
 
 
 class ZeroShotNLLB600MExperiment(ZeroShotNLLBExperimentBase):
