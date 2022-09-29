@@ -45,7 +45,8 @@ class BaselineV2Experiment(BaselineExperiment):
             bleu_metrics = bleu.compute(predictions=predictions, references=references)
 
             # Remove the "bleu" value and call is score
-            bleu_metrics["score"] = bleu_metrics["bleu"]
+            # The original bleu score is from 0 to 1, but we scale it up to 0 to 100
+            bleu_metrics["score"] = bleu_metrics["bleu"] * 100
             del bleu_metrics["bleu"]
 
             def prepend_to_keys(d: Dict[str, Any], prefix: str) -> Dict[str, Any]:
