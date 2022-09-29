@@ -73,7 +73,7 @@ def main():
     )
 
     # Order the columns properly
-    columns_rordered = pd.MultiIndex.from_product([["loss", "score"], ["train", "val", "test"]], names=df.columns.names)
+    columns_rordered = pd.MultiIndex.from_product([value_names, ["train", "val", "test"]], names=df.columns.names)
     df = pd.DataFrame(df, columns=columns_rordered)
 
     print(df.to_string())
