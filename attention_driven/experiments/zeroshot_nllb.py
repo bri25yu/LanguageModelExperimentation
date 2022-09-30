@@ -10,7 +10,8 @@ class ZeroShotNLLBExperimentBase(BaselineV2Experiment):
     def get_training_arguments(self, learning_rate: float, batch_size: int) -> TrainingArguments:
         training_arguments = super().get_training_arguments(learning_rate, batch_size)
 
-        training_arguments.max_steps = 0
+        training_arguments.do_train = False
+        training_arguments.deepspeed = None
 
         return training_arguments
 
