@@ -1,3 +1,8 @@
+# Start ssh-agent to manage our private ssh key since we're ssh'ing into multiple remotes
+eval `ssh-agent`
+ssh-add
+
+
 for i in `seq 18 26`
 do
     # Get GPU information
