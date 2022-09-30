@@ -13,9 +13,9 @@ wget https://repo.anaconda.com/miniconda/Miniconda3-py39_4.12.0-Linux-x86_64.sh
 
 cd LanguageModelExperimentation
 
-conda create -y -n LanguageModelExperimentation python=3.9
+conda create -y -n LME python=3.9
 
-conda activate LanguageModelExperimentation
+conda activate LME
 
 # The CUDA Toolkit is split between two conda packages:
 #   cudatoolkit - includes CUDA runtime support
