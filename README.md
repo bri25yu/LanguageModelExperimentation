@@ -19,7 +19,7 @@ cd LanguageModelExperimentation
 
 # If you want to run t5 models on nvidia GPUs older running archs older than 2017 ampere arch, run this line
 # This is transformers v4.22.0 with a special optional autocast for t5 models under fp16 precision
-conda env create -y -f attention_driven/environment.yml
+conda env create -f attention_driven/environment.yml
 
 conda activate LME
 
