@@ -189,7 +189,7 @@ class BaselineExperiment:
         predictions_output_path = self.predictions_output_path
 
         tokenizer = self.get_tokenizer()
-        tokenized_dataset = self.load_data(tokenizer)
+        tokenized_dataset = None
         compute_metrics = self.get_compute_metrics(tokenizer)
         data_collator = DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
 
@@ -205,6 +205,11 @@ class BaselineExperiment:
         # We perform hyperparam tuning over three learning rates
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(learning_rate, batch_size)
+
+            if tokenized_dataset is None:
+                with training_arguments.main_process_first():
+                    tokenized_dataset = self.load_data(tokenizer)
+
             print("Training with", training_arguments)
             model = self.get_model(tokenizer)
 
