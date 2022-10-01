@@ -1,9 +1,6 @@
 """
 This is a convenience script for running experiments
 """
-import shutil
-
-from attention_driven import TRAIN_OUTPUT_DIR
 from attention_driven.experiments import available_experiments
 
 
@@ -21,9 +18,4 @@ for experiment_name, batch_size, learning_rates in EXPERIMENTS_TO_RUN:
     for learning_rate in learning_rates:
         experiment = experiment_cls()
 
-        try:
-            experiment.run(batch_size, [learning_rate])
-        except Exception as e:
-            print(e)
-
-        shutil.rmtree(TRAIN_OUTPUT_DIR, ignore_errors=True)
+        experiment.run(batch_size, [learning_rate])
