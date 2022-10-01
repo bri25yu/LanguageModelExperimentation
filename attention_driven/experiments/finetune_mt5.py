@@ -26,7 +26,7 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
 
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, vocab_size=tokenizer.get_vocab_size())
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, vocab_size=tokenizer.vocab_size + 2)
 
         model.config.max_length = max_input_length
 
