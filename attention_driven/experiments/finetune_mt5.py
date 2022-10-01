@@ -44,10 +44,11 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         # Load pretrained weights into new model with a slight change to embeddings
         # since we have a larger vocab size
         model.load_state_dict(base_model_parameter_dict, strict=False)
+        model_parameter_dict = model.state_dict()
         with torch.no_grad():
             for weight_name, pretrained_embedding_weight in pretrained_embedding_weights.items():
                 pretrained_vocab_size, hidden_dim = pretrained_embedding_weight.size()
-                model[weight_name][:pretrained_vocab_size, :hidden_dim].copy_(pretrained_embedding_weight)
+                model_parameter_dict[weight_name][:pretrained_vocab_size, :hidden_dim].copy_(pretrained_embedding_weight)
 
         model.config.max_length = max_input_length
 
