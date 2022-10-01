@@ -1,4 +1,0 @@
--r requirements_colab.txt
-deepspeed==0.7.3
-accelerate==0.12.0
-pandas
