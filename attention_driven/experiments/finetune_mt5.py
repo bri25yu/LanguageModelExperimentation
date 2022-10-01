@@ -1,6 +1,6 @@
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
-from transformers import MT5Tokenizer, MT5ForConditionalGeneration
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
 
@@ -17,9 +17,8 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
 
         https://github.com/huggingface/transformers/tree/main/examples/flax/language-modeling#t5-like-span-masked-language-modeling
         """
-        model_name = self.MODEL_NAME
 
-        tokenizer = MT5Tokenizer.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained("buddhist-nlp/mt5-tibetan-tokenizer")
 
         return tokenizer
 
@@ -27,7 +26,7 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
 
-        model = MT5ForConditionalGeneration.from_pretrained(model_name)
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
         model.config.max_length = max_input_length
 
