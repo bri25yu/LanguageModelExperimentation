@@ -22,7 +22,13 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         https://github.com/huggingface/transformers/tree/main/examples/flax/language-modeling#t5-like-span-masked-language-modeling
         """
 
+        """
         tokenizer = AutoTokenizer.from_pretrained("buddhist-nlp/mt5-tibetan-tokenizer")
+        """
+
+        model_name = self.MODEL_NAME
+
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
 
         return tokenizer
 
@@ -30,6 +36,7 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
 
+        """
         # Load pretrained parameter weights
         base_model_parameter_dict = AutoModelForSeq2SeqLM.from_pretrained(model_name).state_dict()
         base_model_parameter_dict = OrderedDict(base_model_parameter_dict)  # Make `base_model_parameter_dict` modifiable
@@ -49,7 +56,9 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
             for weight_name, pretrained_embedding_weight in pretrained_embedding_weights.items():
                 pretrained_vocab_size, hidden_dim = pretrained_embedding_weight.size()
                 model_parameter_dict[weight_name][:pretrained_vocab_size, :hidden_dim].copy_(pretrained_embedding_weight)
+        """
 
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         model.config.max_length = max_input_length
 
         return model
