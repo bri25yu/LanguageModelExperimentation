@@ -34,7 +34,7 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         base_model_parameter_dict = AutoModelForSeq2SeqLM.from_pretrained(model_name).state_dict()
         base_model_parameter_dict = OrderedDict(base_model_parameter_dict)  # Make `base_model_parameter_dict` modifiable
 
-        keys_to_modify = ["shared.weight", "encoder.embed_tokens.weight", "decoder.embed_tokens.weight"]
+        keys_to_modify = ["shared.weight", "encoder.embed_tokens.weight", "decoder.embed_tokens.weight", "lm_head.weight"]
         pretrained_embedding_weights = {k: base_model_parameter_dict.pop(k) for k in keys_to_modify}
 
         # Create new model
