@@ -23,6 +23,8 @@ conda env create -f attention_driven/environment.yml
 
 conda activate LME
 
+pip install -e .
+
 deepspeed run.py
 
 python attention_driven/read_results.py
