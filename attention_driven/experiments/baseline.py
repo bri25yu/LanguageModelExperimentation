@@ -42,8 +42,6 @@ class BaselineExperiment:
 
     NUM_TRAIN_EPOCHS = 25
 
-    USE_DEEPSPEED = True
-
     trainer_cls: Trainer = Seq2SeqTrainer
 
     def get_tokenizer(self) -> PreTrainedTokenizer:
@@ -146,7 +144,6 @@ class BaselineExperiment:
             self.experiment_class_output_dir, f"{learning_rate:.0e}"
         )
         num_train_epochs = self.NUM_TRAIN_EPOCHS
-        use_deepspeed = self.USE_DEEPSPEED
 
         try:
             import deepspeed
@@ -154,7 +151,7 @@ class BaselineExperiment:
         except ImportError:
             has_deepspeed = False
 
-        if use_deepspeed and has_deepspeed:
+        if has_deepspeed:
             deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
             with open(deepspeed_args_path) as f:
                 deepspeed_args = json.load(f)

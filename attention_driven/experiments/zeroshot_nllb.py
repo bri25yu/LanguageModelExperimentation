@@ -1,13 +1,19 @@
-from transformers import TrainingArguments
+from transformers import TrainingArguments, Trainer, Seq2SeqTrainer
 
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
+from attention_driven.experiments.utils import init_deepspeed_inference
 
 
 __all__ = ["ZeroShotNLLB600MExperiment", "ZeroShotNLLB1_3BExperiment", "ZeroShotNLLB3_3BExperiment"]
 
 
 class ZeroShotNLLBExperimentBase(BaselineV2Experiment):
-    USE_DEEPSPEED = False
+    def trainer_cls(self, *args, **kwargs) -> Trainer:
+        trainer = Seq2SeqTrainer(*args, **kwargs)
+
+        init_deepspeed_inference(trainer)
+
+        return trainer
 
     def get_training_arguments(self, learning_rate: float, batch_size: int) -> TrainingArguments:
         training_arguments = super().get_training_arguments(learning_rate, batch_size)
