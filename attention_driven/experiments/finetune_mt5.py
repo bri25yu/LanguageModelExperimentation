@@ -1,6 +1,10 @@
+from collections import OrderedDict
+
+import torch
+
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoConfig, MT5ForConditionalGeneration
 
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
 
@@ -26,7 +30,21 @@ class FinetuneMT5ExperimentBase(BaselineV2Experiment):
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
 
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, vocab_size=tokenizer.vocab_size + 2)
+        # Load pretrained parameter weights
+        base_model_parameter_dict = AutoModelForSeq2SeqLM.from_pretrained(model_name).state_dict()
+        base_model_parameter_dict = OrderedDict(base_model_parameter_dict)  # Make `base_model_parameter_dict` modifiable
+        pretrained_embedding_weight = base_model_parameter_dict.pop("shared.weight")
+
+        # Create new model
+        config = AutoConfig.from_pretrained(model_name, vocab_size=tokenizer.vocab_size + 2)
+        model = MT5ForConditionalGeneration(config)
+
+        # Load pretrained weights into new model with a slight change to embeddings
+        # since we have a larger vocab size
+        model.load_state_dict(base_model_parameter_dict)
+        pretrained_vocab_size, hidden_dim = pretrained_embedding_weight.size()
+        with torch.no_grad():
+            model.shared.weight[:pretrained_vocab_size, :hidden_dim].copy_(pretrained_embedding_weight)
 
         model.config.max_length = max_input_length
 
