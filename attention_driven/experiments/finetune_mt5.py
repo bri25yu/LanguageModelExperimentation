@@ -6,7 +6,7 @@ from datasets import DatasetDict
 
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoConfig, MT5ForConditionalGeneration
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoConfig
 
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
 from attention_driven.data_processors import LDTibetanEnglishDataV2Processor
@@ -15,7 +15,14 @@ from attention_driven.modeling.mt5_fp16_utils import scale_weights_for_fp16_t5
 from attention_driven.modeling.mt5_fp16 import MT5Fp16ForConditionalGeneration
 
 
-__all__ = ["FinetuneMT5BaseExperiment", "FinetuneMT5LargeExperiment", "FinetuneMT5XLExperiment"]
+__all__ = [
+    "FinetuneMT5BaseExperiment",
+    "FinetuneMT5LargeExperiment",
+    "FinetuneMT5XLExperiment",
+    "FinetuneMT5BaseV2Experiment",
+    "FinetuneMT5LargeV2Experiment",
+    "FinetuneMT5XLV2Experiment",
+]
 
 
 # We use a special version fp16 capable version of MT5

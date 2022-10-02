@@ -1,5 +1,11 @@
 """
 Adapted from https://github.com/huggingface/transformers/issues/14189#issuecomment-961571628
+
+The following weights are not scaled (but maybe they should be):
+    'encoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight',
+    'decoder.block.0.layer.0.SelfAttention.relative_attention_bias.weight',
+    'lm_head.weight'
+
 """
 from typing import Union
 
@@ -32,7 +38,10 @@ WEIGHT_SCALING = {
     "SelfAttention.o": ARCH_SCALING["attention_output"],
     "EncDecAttention.v": ARCH_SCALING["attention_value"],
     "EncDecAttention.o": ARCH_SCALING["attention_output"],
-    "lm_scale_modifier": 1 / ARCH_SCALING["embeddings"]
+    "lm_scale_modifier": 1 / ARCH_SCALING["embeddings"],
+    "DenseReluDense.wi": ARCH_SCALING["feedforward_weights_in"],
+    "DenseReluDense.wo": ARCH_SCALING["feedforward_weights_out"],
+    "layer_norm": ARCH_SCALING["feedforward_layernorm"],
 }
 
 
