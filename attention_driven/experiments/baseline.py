@@ -186,21 +186,11 @@ class BaselineExperiment:
     def run(self, batch_size: int, learning_rates: List[float]) -> Dict[float, PredictionOutput]:
         max_input_length = self.MAX_INPUT_LENGTH
         trainer_cls = self.trainer_cls
-        predictions_output_path = self.predictions_output_path
 
         tokenizer = self.get_tokenizer()
         tokenized_dataset = None
         compute_metrics = self.get_compute_metrics(tokenizer)
         data_collator = DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
-
-        # Load predictions if they exist
-        if os.path.exists(predictions_output_path):
-            with open(predictions_output_path, "rb") as f:
-                predictions_dict: Dict[float, PredictionOutput] = pickle.load(f)
-
-            print("Current results", predictions_dict)
-        else:
-            predictions_dict: Dict[float, PredictionOutput] = dict()
 
         # We perform hyperparam tuning over three learning rates
         for learning_rate in learning_rates:
@@ -240,12 +230,22 @@ class BaselineExperiment:
 
                 predictions[split_name] = split_preds
 
-            predictions_dict[learning_rate] = predictions
-
-            # Save our predictions to disk
-            with open(predictions_output_path, "wb") as f:
-                pickle.dump(predictions_dict, f)
-
-            print("Total results", predictions_dict)
+            self._load_and_save_predictions_dict(learning_rate, predictions)
 
         return predictions
+
+    def _load_and_save_predictions_dict(self, learning_rate: float, predictions: Dict[str, PredictionOutput]) -> None:
+        predictions_output_path = self.predictions_output_path
+
+        # Load predictions if they exist
+        if os.path.exists(predictions_output_path):
+            with open(predictions_output_path, "rb") as f:
+                predictions_dict: Dict[float, PredictionOutput] = pickle.load(f)
+        else:
+            predictions_dict: Dict[float, PredictionOutput] = dict()
+
+        predictions_dict[learning_rate] = predictions
+
+        # Save our predictions to disk
+        with open(predictions_output_path, "wb") as f:
+            pickle.dump(predictions_dict, f)
