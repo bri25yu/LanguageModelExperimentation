@@ -47,7 +47,7 @@ def scale_weights_for_fp16_t5(model: T5PreTrainedModel) -> None:
         return None
 
     with torch.no_grad():
-        for weight_name, weight in model.state_dict():
+        for weight_name, weight in model.state_dict().items():
             scaling = search_for_scaling(weight_name)
             if scaling is None:
                 continue
