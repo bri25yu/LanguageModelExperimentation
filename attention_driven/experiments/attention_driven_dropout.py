@@ -7,6 +7,7 @@ from attention_driven.modeling.attention_driven_dropout import (
     AttentionDrivenM2M100ForConditionalGeneration
 )
 from attention_driven.experiments.baseline import BaselineExperiment
+from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
 
 
 class AttentionDrivenExperimentBase(BaselineExperiment):
@@ -28,6 +29,12 @@ class AttentionDrivenExperimentBase(BaselineExperiment):
         return model
 
 
+class AttentionDrivenV2ExperimentBase(BaselineV2Experiment):
+    attention_dropout: Union[None, float] = None
+
+    get_model = AttentionDrivenExperimentBase.get_model
+
+
 class AttentionDrivenConfig1Experiment(AttentionDrivenExperimentBase):
     attention_dropout = 0.05
 
@@ -38,3 +45,12 @@ class AttentionDrivenConfig2Experiment(AttentionDrivenExperimentBase):
 
 class AttentionDrivenConfig3Experiment(AttentionDrivenExperimentBase):
     attention_dropout = 0.15
+
+
+class AttentionDrivenV2Config1Experiment(AttentionDrivenV2ExperimentBase):
+    attention_dropout = 0.10
+
+
+class AttentionDrivenV2Config2Experiment(AttentionDrivenV2ExperimentBase):
+    attention_dropout = 0.10
+    MODEL_NAME = "facebook/nllb-200-1.3B"
