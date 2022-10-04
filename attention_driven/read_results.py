@@ -48,9 +48,6 @@ def main():
     # Create a dataframe and clean it up some
     df = pd.DataFrame(data)
 
-    # Generate display order
-    df = df.sort_values(["name", "lr"])
-
     # Some display improvements
     df.lr = df.lr.map(lambda lr: f"{lr:.0e}")
     df.loss = df.loss.round(3)
@@ -72,9 +69,10 @@ def main():
         sort=False,
     )
 
-    # Order the columns properly
+    # Order the index and columns properly
+    index_reordered = pd.MultiIndex.from_tuples(sorted(df.index.values, key=lambda t: [t[0], float(t[1])]), names=df.index.names)
     columns_rordered = pd.MultiIndex.from_product([value_names, ["train", "val", "test"]], names=df.columns.names)
-    df = pd.DataFrame(df, columns=columns_rordered)
+    df = pd.DataFrame(df, columns=columns_rordered, index=index_reordered)
 
     print(df.to_string())
 
