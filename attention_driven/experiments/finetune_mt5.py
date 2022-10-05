@@ -332,6 +332,7 @@ class FinetuneMT5FP32ExperimentBase(FinetuneMT5ExperimentBase):
             log_level="error",
             logging_steps=1,
             predict_with_generate=True,
+            deepspeed=deepspeed_args,
         )
 
 
