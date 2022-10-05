@@ -57,7 +57,7 @@ def main():
 
     df["predictions"] = predictions
 
-    df.to_csv(f"{experiment.__class__.__name__}_predictions.tsv", sep="\t", index=False)
+    df.to_csv(f"predictions/{experiment.__class__.__name__}_predictions.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":
