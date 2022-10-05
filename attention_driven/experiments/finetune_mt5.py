@@ -35,6 +35,9 @@ __all__ = [
     "FinetuneMT5BaseV3Experiment",
     "FinetuneMT5LargeV3Experiment",
     "FinetuneMT5XLV3Experiment",
+    "FinetuneMT5BaseFP32Experiment",
+    "FinetuneMT5LargeFP32Experiment",
+    "FinetuneMT5XLFP32Experiment",
 ]
 
 
@@ -240,6 +243,33 @@ class FinetuneMT5V3ExperimentBase(FinetuneMT5ExperimentBase):
         return predictions
 
 
+# We need to compare the results of fp32 vs our custom fp16 mt5 versions
+class FinetuneMT5FP32ExperimentBase(FinetuneMT5ExperimentBase):
+    # This is an exact copy of `FinetuneMT5ExperimentBase.get_model` unless specified otherwise
+    def get_model(self, tokenizer: PreTrainedTokenizer) -> PreTrainedModel:
+        model_name = self.MODEL_NAME
+        max_input_length = self.MAX_INPUT_LENGTH
+
+        ###############################
+        # START don't use fp16 mt5
+        ###############################
+
+        # Original code
+        # We don't have access to bf16 capable Ampere + GPUs so we need to workaround it
+        # model = MT5Fp16ForConditionalGeneration.from_pretrained(model_name)
+        # scale_weights_for_fp16_t5(model)
+
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+
+        ###############################
+        # END don't use fp16 mt5
+        ###############################
+
+        model.config.max_length = max_input_length
+
+        return model
+
+
 class FinetuneMT5BaseExperiment(FinetuneMT5ExperimentBase):
     MODEL_NAME = "google/mt5-base"
 
@@ -273,4 +303,17 @@ class FinetuneMT5LargeV3Experiment(FinetuneMT5V3ExperimentBase):
 
 
 class FinetuneMT5XLV3Experiment(FinetuneMT5V3ExperimentBase):
+    MODEL_NAME = "google/mt5-xl"
+
+
+
+class FinetuneMT5BaseFP32Experiment(FinetuneMT5FP32ExperimentBase):
+    MODEL_NAME = "google/mt5-base"
+
+
+class FinetuneMT5LargeFP32Experiment(FinetuneMT5FP32ExperimentBase):
+    MODEL_NAME = "google/mt5-large"
+
+
+class FinetuneMT5XLFP32Experiment(FinetuneMT5FP32ExperimentBase):
     MODEL_NAME = "google/mt5-xl"
