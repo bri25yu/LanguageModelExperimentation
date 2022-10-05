@@ -244,7 +244,7 @@ class FinetuneMT5V3ExperimentBase(FinetuneMT5ExperimentBase):
 
                 predictions[split_name] = split_preds
 
-            if training_arguments.local_rank <= 0:
+            if trainer.is_world_process_zero():
                 self._load_and_save_predictions_dict(learning_rate, predictions)
 
         return predictions
