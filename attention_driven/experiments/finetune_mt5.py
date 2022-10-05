@@ -349,6 +349,16 @@ class FinetuneMT5FP32ExperimentBase(FinetuneMT5ExperimentBase):
             ###########################
             # END No deepspeed args
             ###########################
+
+            ###########################
+            # START add gradient checkpointing to try to run on 12GB GPUs
+            ###########################
+
+            gradient_checkpointing=True,
+
+            ###########################
+            # END add gradient checkpointing to try to run on 12GB GPUs
+            ###########################
         )
 
 
