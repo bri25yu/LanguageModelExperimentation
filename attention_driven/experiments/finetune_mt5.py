@@ -16,6 +16,8 @@ from transformers import (
     DataCollatorForSeq2Seq,
     EarlyStoppingCallback,
     PrinterCallback,
+    TrainingArguments,
+    Seq2SeqTrainingArguments,
 )
 
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
@@ -268,6 +270,84 @@ class FinetuneMT5FP32ExperimentBase(FinetuneMT5ExperimentBase):
         model.config.max_length = max_input_length
 
         return model
+
+    # This is an exact copy of `BaselinExperiment.get_training_arguments` unless specified otherwise
+    def get_training_arguments(
+        self, learning_rate: float, batch_size: int
+    ) -> TrainingArguments:
+        output_dir = os.path.join(
+            self.experiment_class_output_dir, f"{learning_rate:.0e}"
+        )
+        num_train_epochs = self.NUM_TRAIN_EPOCHS
+
+        ###############################
+        # START no deepspeed
+        ###############################
+
+        # Original code
+        # try:
+        #     import deepspeed
+        #     has_deepspeed = True
+        # except ImportError:
+        #     has_deepspeed = False
+
+        # if has_deepspeed:
+        #     deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
+        #     with open(deepspeed_args_path) as f:
+        #         deepspeed_args = json.load(f)
+        # else:
+        #     deepspeed_args = None
+
+        ###############################
+        # END no deepspeed
+        ###############################
+
+        eval_save_strategy = "epoch"
+
+        return Seq2SeqTrainingArguments(
+            output_dir,
+            learning_rate=learning_rate,
+            load_best_model_at_end=True,
+            evaluation_strategy=eval_save_strategy,
+            save_strategy=eval_save_strategy,
+            save_total_limit=1,
+            per_device_train_batch_size=batch_size,
+            per_device_eval_batch_size=2 * batch_size,
+            gradient_accumulation_steps=32 // batch_size,
+            eval_accumulation_steps=1,
+            num_train_epochs=num_train_epochs,
+            warmup_ratio=0.1,
+            do_train=True,
+            do_eval=True,
+            seed=42,
+
+            ###########################
+            # START No fp16
+            ###########################
+
+            # Original code
+            # fp16=True,
+            fp16=False,
+
+            ###########################
+            # END No fp16
+            ###########################
+
+            log_level="error",
+            logging_steps=1,
+            predict_with_generate=True,
+
+            ###########################
+            # START No deepspeed args
+            ###########################
+
+            # Original code
+            # deepspeed=deepspeed_args,
+
+            ###########################
+            # END No deepspeed args
+            ###########################
+        )
 
 
 class FinetuneMT5BaseExperiment(FinetuneMT5ExperimentBase):
