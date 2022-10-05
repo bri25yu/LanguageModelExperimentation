@@ -6,7 +6,15 @@ from datasets import DatasetDict
 
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoConfig
+from transformers.trainer_utils import PredictionOutput
+from transformers import (
+    AutoTokenizer,
+    AutoModelForSeq2SeqLM,
+    AutoConfig,
+    DataCollatorForSeq2Seq,
+    EarlyStoppingCallback,
+    PrinterCallback,
+)
 
 from attention_driven.experiments.baseline_v2 import BaselineV2Experiment
 from attention_driven.data_processors import LDTibetanEnglishDataV2Processor
@@ -22,6 +30,9 @@ __all__ = [
     "FinetuneMT5BaseV2Experiment",
     "FinetuneMT5LargeV2Experiment",
     "FinetuneMT5XLV2Experiment",
+    "FinetuneMT5BaseV3Experiment",
+    "FinetuneMT5LargeV3Experiment",
+    "FinetuneMT5XLV3Experiment",
 ]
 
 
@@ -150,6 +161,83 @@ class FinetuneMT5V2ExperimentBase(FinetuneMT5ExperimentBase):
         return model
 
 
+# We didn't use `model.prepare_decoder_input_ids` in our original implementation
+# So we try using them now
+class FinetuneMT5V3ExperimentBase(FinetuneMT5ExperimentBase):
+    # This is an exact copy of `BaselineExperiment.run` unless specified otherwise
+    def run(self, batch_size: int, learning_rates: List[float]) -> Dict[float, PredictionOutput]:
+        max_input_length = self.MAX_INPUT_LENGTH
+        trainer_cls = self.trainer_cls
+
+        tokenizer = self.get_tokenizer()
+        tokenized_dataset = self.load_data(tokenizer)
+        compute_metrics = self.get_compute_metrics(tokenizer)
+
+        ###############################
+        # START remove previous model agnostic data collator creation
+        ###############################
+
+        # Original code
+        data_collator = DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
+        
+        ###############################
+        # END remove previous model agnostic data collator creation
+        ###############################
+
+        # We perform hyperparam tuning over three learning rates
+        for learning_rate in learning_rates:
+            training_arguments = self.get_training_arguments(learning_rate, batch_size)
+
+            print("Training with", training_arguments)
+            model = self.get_model(tokenizer)
+
+            ###############################
+            # START add model-based data collator for use of `prepare_decoder_input_ids_from_labels`
+            ###############################
+
+            # No original code here
+
+            data_collator = DataCollatorForSeq2Seq(
+                tokenizer, model=model, max_length=max_input_length, padding="max_length"
+            )
+
+            ###############################
+            # END add model-based data collator for use of `prepare_decoder_input_ids_from_labels`
+            ###############################
+
+            trainer = trainer_cls(
+                model=model,
+                args=training_arguments,
+                train_dataset=tokenized_dataset["train"],
+                eval_dataset=tokenized_dataset["val"],
+                data_collator=data_collator,
+                tokenizer=tokenizer,
+                compute_metrics=compute_metrics,
+                callbacks=[EarlyStoppingCallback(2)],
+            )
+            trainer.remove_callback(PrinterCallback)
+
+            if training_arguments.do_train:
+                trainer.train()
+
+            predictions = dict()
+            for split_name in tokenized_dataset:
+                split_preds = trainer.predict(tokenized_dataset[split_name])
+
+                if split_name != "test":
+                    # We only care about the predictions for the test set
+                    split_preds = PredictionOutput(
+                        None, None, split_preds.metrics
+                    )
+
+                predictions[split_name] = split_preds
+
+            if training_arguments.local_rank <= 0:
+                self._load_and_save_predictions_dict(learning_rate, predictions)
+
+        return predictions
+
+
 class FinetuneMT5BaseExperiment(FinetuneMT5ExperimentBase):
     MODEL_NAME = "google/mt5-base"
 
@@ -171,4 +259,16 @@ class FinetuneMT5LargeV2Experiment(FinetuneMT5V2ExperimentBase):
 
 
 class FinetuneMT5XLV2Experiment(FinetuneMT5V2ExperimentBase):
+    MODEL_NAME = "google/mt5-xl"
+
+
+class FinetuneMT5BaseV3Experiment(FinetuneMT5V3ExperimentBase):
+    MODEL_NAME = "google/mt5-base"
+
+
+class FinetuneMT5LargeV3Experiment(FinetuneMT5V3ExperimentBase):
+    MODEL_NAME = "google/mt5-large"
+
+
+class FinetuneMT5XLV3Experiment(FinetuneMT5V3ExperimentBase):
     MODEL_NAME = "google/mt5-xl"
