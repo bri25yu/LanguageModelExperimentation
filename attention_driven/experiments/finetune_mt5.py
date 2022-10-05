@@ -282,27 +282,18 @@ class FinetuneMT5FP32ExperimentBase(FinetuneMT5ExperimentBase):
         )
         num_train_epochs = self.NUM_TRAIN_EPOCHS
 
-        ###############################
-        # START no deepspeed
-        ###############################
+        try:
+            import deepspeed
+            has_deepspeed = True
+        except ImportError:
+            has_deepspeed = False
 
-        # Original code
-        # try:
-        #     import deepspeed
-        #     has_deepspeed = True
-        # except ImportError:
-        #     has_deepspeed = False
-
-        # if has_deepspeed:
-        #     deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
-        #     with open(deepspeed_args_path) as f:
-        #         deepspeed_args = json.load(f)
-        # else:
-        #     deepspeed_args = None
-
-        ###############################
-        # END no deepspeed
-        ###############################
+        if has_deepspeed:
+            deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
+            with open(deepspeed_args_path) as f:
+                deepspeed_args = json.load(f)
+        else:
+            deepspeed_args = None
 
         eval_save_strategy = "epoch"
 
@@ -338,27 +329,6 @@ class FinetuneMT5FP32ExperimentBase(FinetuneMT5ExperimentBase):
             log_level="error",
             logging_steps=1,
             predict_with_generate=True,
-
-            ###########################
-            # START No deepspeed args
-            ###########################
-
-            # Original code
-            # deepspeed=deepspeed_args,
-
-            ###########################
-            # END No deepspeed args
-            ###########################
-
-            ###########################
-            # START add gradient checkpointing to try to run on 12GB GPUs
-            ###########################
-
-            gradient_checkpointing=True,
-
-            ###########################
-            # END add gradient checkpointing to try to run on 12GB GPUs
-            ###########################
         )
 
 
