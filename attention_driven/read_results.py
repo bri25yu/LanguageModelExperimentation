@@ -8,7 +8,7 @@ import pandas as pd
 from attention_driven import RESULTS_DIR
 
 
-def main():
+def read_results():
     data: List[Dict[str, Any]] = []
     for experiment_name in os.listdir(RESULTS_DIR):
         if not experiment_name.endswith("Experiment"):
@@ -76,6 +76,8 @@ def main():
 
     print(df.to_string())
 
+    return df
+
 
 if __name__ == "__main__":
-    main()
+    read_results()
