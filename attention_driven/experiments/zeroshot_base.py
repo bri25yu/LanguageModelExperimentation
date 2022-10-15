@@ -16,7 +16,7 @@ class ZeroShotExperimentBase(ExperimentBase):
     TRAINER_CLS: Union[type, None] = None
 
     @abstractmethod
-    def get_training_arguments(self, batch_size: int) -> TrainingArguments:
+    def get_training_arguments(self, batch_size: int, *args, **kwargs) -> TrainingArguments:
         pass
 
     @abstractmethod

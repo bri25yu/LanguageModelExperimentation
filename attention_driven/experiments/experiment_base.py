@@ -12,7 +12,7 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
 from transformers import Trainer
 
-from attention_driven import RESULTS_DIR, TRAIN_OUTPUT_DIR
+from attention_driven import CONFIG_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
 
 
 __all__ = ["ExperimentBase"]
@@ -92,3 +92,17 @@ class ExperimentBase(ABC):
         # Save our predictions to disk
         with open(predictions_output_path, "wb") as f:
             pickle.dump(predictions_dict, f)
+
+    def load_deepspeed_template_args(self) -> str:
+        try:
+            import deepspeed
+            has_deepspeed = True
+        except ImportError:
+            has_deepspeed = False
+
+        if has_deepspeed:
+            deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
+        else:
+            deepspeed_args_path = None
+
+        return deepspeed_args_path
