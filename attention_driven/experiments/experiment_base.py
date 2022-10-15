@@ -110,5 +110,5 @@ class ExperimentBase(ABC):
         return deepspeed_args_path
 
     def get_world_size(self) -> int:
-        training_arguments = TrainingArguments()
+        training_arguments = TrainingArguments("")
         return training_arguments.world_size
