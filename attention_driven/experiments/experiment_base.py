@@ -109,7 +109,6 @@ class ExperimentBase(ABC):
     def load_deepspeed_template_args(self) -> str:
         try:
             import deepspeed
-            from mpi4py import MPI
 
             has_deepspeed = True
         except ImportError:
