@@ -26,7 +26,7 @@ class TibToEngTranslationMixin(ExperimentBase):
     """
     MAX_INPUT_LENGTH = 100
     NUM_TRANSLATION_TRAIN_STEPS = 10000
-    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 17
+    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 8  # 256
     NUM_TRANSLATION_EVAL_STEPS = 200
     TRAINER_CLS = Seq2SeqTrainer
 
@@ -67,6 +67,7 @@ class TibToEngTranslationMixin(ExperimentBase):
         eval_save_strategy = "steps"
 
         gradient_accumulation_steps = target_total_batch_size_per_update // (per_gpu_batch_size * world_size)
+        gradient_accumulation_steps = max(gradient_accumulation_steps, 1)
 
         return Seq2SeqTrainingArguments(
             output_dir,
