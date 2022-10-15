@@ -10,7 +10,6 @@ from datasets import DatasetDict
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
-from transformers.integrations import TensorBoardCallback
 from transformers import Trainer, TrainingArguments, PrinterCallback
 
 from attention_driven import CONFIG_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
@@ -116,7 +115,6 @@ class ExperimentBase(ABC):
 
     def setup_trainer_log_callbacks(self, trainer: Trainer) -> None:
         trainer.remove_callback(PrinterCallback)
-        trainer.add_callback(TensorBoardCallback)
 
     def load_deepspeed_template_args(self) -> str:
         try:
