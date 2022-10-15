@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from abc import ABC, abstractmethod
 
@@ -59,9 +59,20 @@ class ExperimentBase(ABC):
         os.makedirs(os.path.split(predictions_output_path)[0], exist_ok=True)
         return predictions_output_path
 
-    def get_predictions(self, trainer: Trainer, dataset: DatasetDict, split_to_keep_predictions_for: str="test") -> Dict[str, PredictionOutput]:
+    def get_predictions(
+        self,
+        trainer: Trainer,
+        dataset: DatasetDict,
+        split_to_keep_predictions_for: str="test",
+        splits_to_skip: Union[None, List[str]]=None,
+    ) -> Dict[str, PredictionOutput]:
+        splits_to_skip = [] if splits_to_skip is None else splits_to_skip
+
         predictions = dict()
         for split_name in dataset:
+            if split_name in splits_to_skip:
+                continue
+
             split_preds = trainer.predict(dataset[split_name])
 
             if split_name != split_to_keep_predictions_for:
