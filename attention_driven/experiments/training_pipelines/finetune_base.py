@@ -47,6 +47,7 @@ class FinetuneExperimentBase(ExperimentBase):
 
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(batch_size, learning_rate)
+            self.print_training_arguments(training_arguments)
 
             if tokenized_dataset is None:
                 tokenized_dataset = self.get_tokenized_dataset(tokenizer, training_arguments)

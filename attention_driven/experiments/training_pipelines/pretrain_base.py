@@ -70,6 +70,8 @@ class PretrainExperimentBase(ExperimentBase):
 
         # Pretraining
         pretrain_training_arguments = self.get_pretrain_training_arguments(batch_size)
+        self.print_training_arguments(pretrain_training_arguments)
+
         pretrain_dataset = self.get_pretrain_dataset(pretrain_training_arguments)
         pretrain_trainer = pretrain_trainer_cls(
             model=self.get_model(tokenizer),
@@ -96,6 +98,7 @@ class PretrainExperimentBase(ExperimentBase):
         finetune_dataset = None
         for finetune_learning_rate in finetune_learning_rates:
             finetune_training_arguments = self.get_finetune_training_arguments(batch_size, finetune_learning_rate)
+            self.print_training_arguments(finetune_training_arguments)
 
             if finetune_dataset is None:
                 finetune_dataset = self.get_finetune_dataset(finetune_training_arguments)

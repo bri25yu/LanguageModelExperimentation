@@ -87,6 +87,13 @@ class ExperimentBase(ABC):
 
         return predictions
 
+    def print_training_arguments(self, training_arguments: TrainingArguments) -> None:
+        is_main_process = training_arguments.process_index == 0
+        if not is_main_process:
+            return
+
+        print(training_arguments)
+
     def load_and_save_predictions_dict(self, trainer: Trainer, learning_rate: float, predictions: Dict[str, PredictionOutput]) -> None:
         if not trainer.is_world_process_zero():  # Check if this is the main process
             return
