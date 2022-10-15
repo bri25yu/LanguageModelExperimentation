@@ -1,6 +1,8 @@
 from typing import Any, Dict, List
 
 import os
+
+from argparse import ArgumentParser
 import pickle
 
 import pandas as pd
@@ -8,13 +10,13 @@ import pandas as pd
 from attention_driven import RESULTS_DIR
 
 
-def read_results():
+def read_results(results_dir: str):
     data: List[Dict[str, Any]] = []
-    for experiment_name in os.listdir(RESULTS_DIR):
+    for experiment_name in os.listdir(results_dir):
         if not experiment_name.endswith("Experiment"):
             continue
 
-        results_path = os.path.join(RESULTS_DIR, experiment_name, "predictions")
+        results_path = os.path.join(results_dir, experiment_name, "predictions")
         if not os.path.exists(results_path):
             continue
 
@@ -80,4 +82,8 @@ def read_results():
 
 
 if __name__ == "__main__":
-    read_results()
+    parser = ArgumentParser()
+    parser.add_argument("--results_dir", type=str, default=RESULTS_DIR)
+    args = parser.parse_args()
+
+    read_results(args.results_dir)
