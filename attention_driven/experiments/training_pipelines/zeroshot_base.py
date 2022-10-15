@@ -53,17 +53,19 @@ class ZeroShotExperimentBase(ExperimentBase):
             compute_metrics=self.get_compute_metrics(tokenizer),
         )
 
-        if training_arguments.deepspeed:
-            self.init_deepspeed_inference(trainer)
+        self.init_deepspeed_inference(training_arguments, trainer)
 
         predictions = self.get_predictions(trainer, tokenized_dataset)
 
         self.load_and_save_predictions_dict(learning_rate_placeholder, predictions)
 
-    def init_deepspeed_inference(self, trainer: Trainer) -> None:
+    def init_deepspeed_inference(self, training_arguments: TrainingArguments, trainer: Trainer) -> None:
         """
         Currently, running inference with deepspeed without first training requires zero 3. This is a workaround
         """
+        if not training_arguments.deepspeed:
+            return
+
         deepspeed_engine, optimizer, lr_scheduler = deepspeed_init(
             trainer, num_training_steps=0
         )

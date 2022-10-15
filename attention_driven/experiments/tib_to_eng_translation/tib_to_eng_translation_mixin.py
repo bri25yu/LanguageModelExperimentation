@@ -13,6 +13,7 @@ from transformers import (
     TrainingArguments,
     Seq2SeqTrainingArguments,
     Seq2SeqTrainer,
+    SchedulerType,
 )
 
 from attention_driven.data_processors import FinetuneDataProcessor
@@ -25,6 +26,7 @@ class TibToEngTranslationMixin(ExperimentBase):
     """
     MAX_INPUT_LENGTH = 100
     NUM_TRANSLATION_TRAIN_STEPS = 10000
+    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 17
     NUM_TRANSLATION_EVAL_STEPS = 200
     TRAINER_CLS = Seq2SeqTrainer
 
@@ -58,8 +60,13 @@ class TibToEngTranslationMixin(ExperimentBase):
         )
         max_steps = self.NUM_TRANSLATION_TRAIN_STEPS
         eval_steps = self.NUM_TRANSLATION_EVAL_STEPS
+        target_total_batch_size_per_update = self.TARGET_TOTAL_BATCH_SIZE_PER_UPDATE
+        world_size = self.get_world_size()
+        per_gpu_batch_size = batch_size
 
         eval_save_strategy = "steps"
+
+        gradient_accumulation_steps = target_total_batch_size_per_update // (per_gpu_batch_size * world_size)
 
         return Seq2SeqTrainingArguments(
             output_dir,
@@ -73,9 +80,9 @@ class TibToEngTranslationMixin(ExperimentBase):
             save_total_limit=1,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=2 * batch_size,
-            gradient_accumulation_steps=32 // batch_size,
+            gradient_accumulation_steps=gradient_accumulation_steps,
             eval_accumulation_steps=1,
-            warmup_ratio=0.1,
+            lr_scheduler_type=SchedulerType.CONSTANT,
             do_train=True,
             do_eval=True,
             seed=42,

@@ -10,7 +10,7 @@ from datasets import DatasetDict
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
-from transformers import Trainer
+from transformers import Trainer, TrainingArguments
 
 from attention_driven import CONFIG_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
 
@@ -108,3 +108,7 @@ class ExperimentBase(ABC):
             deepspeed_args_path = None
 
         return deepspeed_args_path
+
+    def get_world_size(self) -> int:
+        training_arguments = TrainingArguments()
+        return training_arguments.world_size
