@@ -79,7 +79,7 @@ class TibToEngTranslationMixin(ExperimentBase):
             save_steps=eval_steps,
             save_total_limit=1,
             per_device_train_batch_size=batch_size,
-            per_device_eval_batch_size=2 * batch_size,
+            per_device_eval_batch_size=batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
             eval_accumulation_steps=1,
             lr_scheduler_type=SchedulerType.CONSTANT,
