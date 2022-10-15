@@ -14,6 +14,9 @@ from transformers import (
 from attention_driven.experiments.experiment_base import ExperimentBase
 
 
+__all__ = ["FinetuneExperimentBase"]
+
+
 class FinetuneExperimentBase(ExperimentBase):
     TRAINER_CLS: Union[type, None] = None
 

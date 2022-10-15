@@ -11,6 +11,9 @@ from transformers import TrainingArguments, Trainer
 from attention_driven.experiments.experiment_base import ExperimentBase
 
 
+__all__ = ["ZeroShotExperimentBase"]
+
+
 class ZeroShotExperimentBase(ExperimentBase):
     LEARNING_RATE_PLACEHOLDER = 1e-100
     TRAINER_CLS: Union[type, None] = None
