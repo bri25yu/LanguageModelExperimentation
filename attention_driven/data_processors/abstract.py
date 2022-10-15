@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import os
 
-from datasets import DatasetDict, load_dataset
+from datasets import DatasetDict, load_from_disk
 
 from transformers import TrainingArguments
 
@@ -13,7 +13,7 @@ class AbstractDataProcessor(ABC):
     def __call__(self, training_arguments: TrainingArguments) -> DatasetDict:
         with training_arguments.main_process_first(desc="Loading data"):
             if os.path.exists(self.path):
-                dataset = load_dataset(self.path)
+                dataset = load_from_disk(self.path)
             else:
                 print("Loading dataset from scratch")
                 dataset = self.load()
@@ -25,12 +25,13 @@ class AbstractDataProcessor(ABC):
             print(dataset)
             for split_name, split in dataset.items():
                 print(f"Example from {split_name}")
-                print(split.iloc[0])
+                print(split[0])
 
         return dataset
 
+    @property
     def path(self) -> str:
-        name = self.__class__.__name
+        name = self.__class__.__name__
         path = os.path.join(DATASET_CACHE_DIR, name)
 
         return path

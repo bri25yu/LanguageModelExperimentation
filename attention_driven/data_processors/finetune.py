@@ -43,8 +43,11 @@ class FinetuneDataProcessor(AbstractDataProcessor):
             os.path.join(ROOT_DIR, "..", "..", "language-models/tib/data", path),
             sep="\t",
             quoting=csv.QUOTE_NONE,
-            names=["tibetan","english"],
         )
+        df = df.rename(columns={
+            "input_text": "tibetan",
+            "target_text": "english",
+        })
         df = df.astype(str)
 
         return df

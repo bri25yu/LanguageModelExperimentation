@@ -41,7 +41,7 @@ class ZeroShotExperimentBase(ExperimentBase):
 
         training_arguments = self.get_training_arguments(batch_size, learning_rate_placeholder)
         tokenizer = self.get_tokenizer()
-        tokenized_dataset = self.get_tokenized_dataset(training_arguments)
+        tokenized_dataset = self.get_tokenized_dataset(tokenizer, training_arguments)
 
         trainer = trainer_cls(
             model=self.get_model(tokenizer),
@@ -53,7 +53,8 @@ class ZeroShotExperimentBase(ExperimentBase):
             compute_metrics=self.get_compute_metrics(tokenizer),
         )
 
-        self.init_deepspeed_inference(trainer)
+        if training_arguments.deepspeed:
+            self.init_deepspeed_inference(trainer)
 
         predictions = self.get_predictions(trainer, tokenized_dataset)
 
