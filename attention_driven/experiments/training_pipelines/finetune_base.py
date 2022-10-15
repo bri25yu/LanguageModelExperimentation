@@ -68,4 +68,4 @@ class FinetuneExperimentBase(ExperimentBase):
 
             predictions = self.get_predictions(trainer, tokenized_dataset)
 
-            self.load_and_save_predictions_dict(learning_rate, predictions)
+            self.load_and_save_predictions_dict(trainer, learning_rate, predictions)

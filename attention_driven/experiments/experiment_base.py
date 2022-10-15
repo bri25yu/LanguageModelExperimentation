@@ -1,4 +1,4 @@
-from typing import Dict, List, Union
+from typing import Dict, List
 
 from abc import ABC, abstractmethod
 
@@ -64,16 +64,19 @@ class ExperimentBase(ABC):
         trainer: Trainer,
         dataset: DatasetDict,
         split_to_keep_predictions_for: str="test",
-        splits_to_skip: Union[None, List[str]]=None,
+        splits_to_cap: List[str]=["train"],
     ) -> Dict[str, PredictionOutput]:
-        splits_to_skip = [] if splits_to_skip is None else splits_to_skip
-
+        """
+        We reduce the size of all the split names in `splits_to_cap` to the first 10k examples.
+        """
         predictions = dict()
         for split_name in dataset:
-            if split_name in splits_to_skip:
-                continue
+            if split_name in splits_to_cap:
+                dataset_split_to_predict = dataset[split_name]
+            else:
+                dataset_split_to_predict = dataset[split_name][:10000]
 
-            split_preds = trainer.predict(dataset[split_name])
+            split_preds = trainer.predict(dataset_split_to_predict)
 
             if split_name != split_to_keep_predictions_for:
                 # We only care about the predictions for the test set

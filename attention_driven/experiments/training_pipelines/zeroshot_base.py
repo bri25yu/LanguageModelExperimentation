@@ -57,7 +57,7 @@ class ZeroShotExperimentBase(ExperimentBase):
 
         predictions = self.get_predictions(trainer, tokenized_dataset)
 
-        self.load_and_save_predictions_dict(learning_rate_placeholder, predictions)
+        self.load_and_save_predictions_dict(trainer, learning_rate_placeholder, predictions)
 
     def init_deepspeed_inference(self, training_arguments: TrainingArguments, trainer: Trainer) -> None:
         """

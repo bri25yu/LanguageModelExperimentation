@@ -86,7 +86,7 @@ class PretrainExperimentBase(ExperimentBase):
 
         predictions = self.get_predictions(pretrain_trainer, pretrain_dataset)
 
-        self.load_and_save_predictions_dict(pretrain_learning_rate_placeholder, predictions)
+        self.load_and_save_predictions_dict(pretrain_trainer, pretrain_learning_rate_placeholder, predictions)
 
         pretrained_model_checkpoint_dir = get_last_checkpoint(pretrain_training_arguments.output_dir)
 
@@ -116,4 +116,4 @@ class PretrainExperimentBase(ExperimentBase):
 
             predictions = self.get_predictions(finetune_trainer, finetune_dataset)
 
-            self.load_and_save_predictions_dict(finetune_learning_rate, predictions)
+            self.load_and_save_predictions_dict(finetune_trainer, finetune_learning_rate, predictions)
