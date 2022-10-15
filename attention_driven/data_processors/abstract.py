@@ -4,20 +4,24 @@ import os
 
 from datasets import DatasetDict, load_dataset
 
+from transformers import TrainingArguments
+
 from attention_driven import DATASET_CACHE_DIR
 
 
 class AbstractDataProcessor(ABC):
-    def __call__(self, verbose: bool=True) -> DatasetDict:
-        if os.path.exists(self.path):
-            print("Loading dataset from cache")
-            dataset = load_dataset(self.path)
-        else:
-            print("Loading dataset from scratch")
-            dataset = self.load()
-            dataset.save_to_disk(self.path)
+    def __call__(self, training_arguments: TrainingArguments) -> DatasetDict:
+        with training_arguments.main_process_first(desc="Loading data"):
+            if os.path.exists(self.path):
+                dataset = load_dataset(self.path)
+            else:
+                print("Loading dataset from scratch")
+                dataset = self.load()
+                print("Saving dataset")
+                dataset.save_to_disk(self.path)
 
-        if verbose:
+        is_main_process = training_arguments.process_index == 0
+        if is_main_process:
             print(dataset)
             for split_name, split in dataset.items():
                 print(f"Example from {split_name}")
