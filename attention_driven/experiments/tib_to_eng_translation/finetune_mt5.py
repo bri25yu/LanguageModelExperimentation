@@ -1,0 +1,11 @@
+from attention_driven.experiments.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
+from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin
+from attention_driven.experiments.training_pipelines import FinetuneExperimentBase
+
+
+class FinetuneMT5Base580MExperiment(MT5Base580MModelMixin, TibToEngTranslationMixin, FinetuneExperimentBase):
+    pass
+
+
+class FinetuneMT5Large1_2BExperiment(MT5Large1_2BModelMixin, TibToEngTranslationMixin, FinetuneExperimentBase):
+    pass
