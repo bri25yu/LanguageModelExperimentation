@@ -72,9 +72,9 @@ class ExperimentBase(ABC):
         predictions = dict()
         for split_name in dataset:
             if split_name in splits_to_cap:
-                dataset_split_to_predict = dataset[split_name]
-            else:
                 dataset_split_to_predict = dataset[split_name][:10000]
+            else:
+                dataset_split_to_predict = dataset[split_name]
 
             split_preds = trainer.predict(dataset_split_to_predict)
 
