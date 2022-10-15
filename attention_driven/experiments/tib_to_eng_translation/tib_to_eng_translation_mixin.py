@@ -12,6 +12,7 @@ from transformers import (
     DataCollatorForSeq2Seq,
     TrainingArguments,
     Seq2SeqTrainingArguments,
+    Seq2SeqTrainer,
 )
 
 from attention_driven.data_processors import FinetuneDataProcessor
@@ -25,6 +26,7 @@ class TibToEngTranslationMixin(ExperimentBase):
     MAX_INPUT_LENGTH = 100
     NUM_TRANSLATION_TRAIN_STEPS = 10000
     NUM_TRANSLATION_EVAL_STEPS = 200
+    TRAINER_CLS = Seq2SeqTrainer
 
     def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
         return self.get_translation_training_arguments(batch_size, learning_rate)
@@ -67,6 +69,7 @@ class TibToEngTranslationMixin(ExperimentBase):
             save_strategy=eval_save_strategy,
             max_steps=max_steps,
             eval_steps=eval_steps,
+            save_steps=eval_steps,
             save_total_limit=1,
             per_device_train_batch_size=batch_size,
             per_device_eval_batch_size=2 * batch_size,

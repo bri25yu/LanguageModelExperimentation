@@ -39,7 +39,7 @@ class ZeroShotExperimentBase(ExperimentBase):
         trainer_cls = self.TRAINER_CLS
         assert trainer_cls, f"Must override the `TRAINER_CLS` property of {self.name}"
 
-        training_arguments = self.get_training_arguments(batch_size)
+        training_arguments = self.get_training_arguments(batch_size, learning_rate_placeholder)
         tokenizer = self.get_tokenizer()
         tokenized_dataset = self.get_tokenized_dataset(training_arguments)
 
