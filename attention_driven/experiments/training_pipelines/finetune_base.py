@@ -8,7 +8,6 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers import (
     TrainingArguments,
     EarlyStoppingCallback,
-    PrinterCallback,
 )
 
 from attention_driven.experiments.experiment_base import ExperimentBase
@@ -63,7 +62,7 @@ class FinetuneExperimentBase(ExperimentBase):
                 compute_metrics=compute_metrics,
                 callbacks=[EarlyStoppingCallback(2)],
             )
-            trainer.remove_callback(PrinterCallback)
+            self.setup_trainer_log_callbacks(trainer)
 
             trainer.train()
 

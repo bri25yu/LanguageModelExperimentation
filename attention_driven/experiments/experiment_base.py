@@ -10,7 +10,8 @@ from datasets import DatasetDict
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
-from transformers import Trainer, TrainingArguments
+from transformers.integrations import TensorBoardCallback
+from transformers import Trainer, TrainingArguments, PrinterCallback
 
 from attention_driven import CONFIG_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
 
@@ -87,13 +88,6 @@ class ExperimentBase(ABC):
 
         return predictions
 
-    def print_training_arguments(self, training_arguments: TrainingArguments) -> None:
-        is_main_process = training_arguments.process_index == 0
-        if not is_main_process:
-            return
-
-        print(training_arguments)
-
     def load_and_save_predictions_dict(self, trainer: Trainer, learning_rate: float, predictions: Dict[str, PredictionOutput]) -> None:
         if not trainer.is_world_process_zero():  # Check if this is the main process
             return
@@ -112,6 +106,17 @@ class ExperimentBase(ABC):
         # Save our predictions to disk
         with open(predictions_output_path, "wb") as f:
             pickle.dump(predictions_dict, f)
+
+    def print_training_arguments(self, training_arguments: TrainingArguments) -> None:
+        is_main_process = training_arguments.process_index == 0
+        if not is_main_process:
+            return
+
+        print(training_arguments)
+
+    def setup_trainer_log_callbacks(self, trainer: Trainer) -> None:
+        trainer.remove_callback(PrinterCallback)
+        trainer.add_callback(TensorBoardCallback)
 
     def load_deepspeed_template_args(self) -> str:
         try:

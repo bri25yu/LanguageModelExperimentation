@@ -9,7 +9,6 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers import (
     TrainingArguments,
     EarlyStoppingCallback,
-    PrinterCallback,
     Trainer,
 )
 
@@ -82,7 +81,7 @@ class PretrainExperimentBase(ExperimentBase):
             tokenizer=tokenizer,
             compute_metrics=self.get_pretrain_compute_metrics(tokenizer),
         )
-        pretrain_trainer.remove_callback(PrinterCallback)
+        self.setup_trainer_log_callbacks(pretrain_trainer)
 
         pretrain_trainer.train()
 
@@ -113,7 +112,7 @@ class PretrainExperimentBase(ExperimentBase):
                 compute_metrics=finetune_compute_metrics,
                 callbacks=[EarlyStoppingCallback(2)],
             )
-            finetune_trainer.remove_callback(PrinterCallback)
+            self.setup_trainer_log_callbacks(finetune_trainer)
 
             finetune_trainer.train(resume_from_checkpoint=pretrained_model_checkpoint_dir)
 
