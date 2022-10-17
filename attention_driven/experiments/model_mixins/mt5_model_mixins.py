@@ -17,7 +17,7 @@ class MT5ModelMixinBase(ExperimentBase):
     def get_tokenizer(self) -> PreTrainedTokenizer:
         model_name = self.MODEL_NAME
 
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
 
         return tokenizer
 
