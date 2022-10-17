@@ -3,13 +3,10 @@ from typing import Callable, List, Union
 
 from datasets import DatasetDict
 
-import torch
-
 from transformers.tokenization_utils import PreTrainedTokenizer
 
 from transformers import (
     TrainingArguments,
-    EarlyStoppingCallback,
 )
 
 from attention_driven.experiments.experiment_base import ExperimentBase
@@ -62,7 +59,6 @@ class FinetuneExperimentBase(ExperimentBase):
                 data_collator=data_collator,
                 tokenizer=tokenizer,
                 compute_metrics=compute_metrics,
-                callbacks=[EarlyStoppingCallback(2)],
             )
             self.setup_trainer_log_callbacks(trainer)
 
