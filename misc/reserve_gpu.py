@@ -9,7 +9,7 @@ import torch
 
 
 def reserve_gpu(gpu_id: int) -> None:
-    free_memory_in_bytes = torch.cuda.mem_get_info(device=gpu_id)  # On the order of ~ 10000MiB
+    free_memory_in_bytes, _ = torch.cuda.mem_get_info(device=gpu_id)  # On the order of ~ 10000MiB
     base_layer_size = [10000, 10000]
     base_layer_size_in_bytes = 4 * prod(base_layer_size)  # Should be ~ 400MiB
 
