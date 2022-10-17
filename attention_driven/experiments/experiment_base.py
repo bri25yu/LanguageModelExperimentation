@@ -1,8 +1,9 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from abc import ABC, abstractmethod
 
 import os
+import json
 import pickle
 
 from datasets import DatasetDict
@@ -116,7 +117,7 @@ class ExperimentBase(ABC):
     def setup_trainer_log_callbacks(self, trainer: Trainer) -> None:
         trainer.remove_callback(PrinterCallback)
 
-    def load_deepspeed_template_args(self) -> str:
+    def load_deepspeed_template_args(self, scheduler_type: str) -> Dict[str, Any]:
         try:
             import deepspeed
 
@@ -129,7 +130,10 @@ class ExperimentBase(ABC):
         else:
             deepspeed_args_path = None
 
-        return deepspeed_args_path
+        deepspeed_args = json.load(open(deepspeed_args_path))
+        deepspeed_args["scheduler"]["type"] = scheduler_type
+
+        return deepspeed_args
 
     def get_world_size(self) -> int:
         training_arguments = TrainingArguments("")

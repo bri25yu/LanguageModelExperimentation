@@ -13,7 +13,6 @@ from transformers import (
     TrainingArguments,
     Seq2SeqTrainingArguments,
     Seq2SeqTrainer,
-    SchedulerType,
 )
 
 from attention_driven.data_processors import FinetuneDataProcessor
@@ -83,7 +82,6 @@ class TibToEngTranslationMixin(ExperimentBase):
             per_device_eval_batch_size=per_gpu_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
             eval_accumulation_steps=1,
-            lr_scheduler_type=SchedulerType.CONSTANT,
             do_train=True,
             do_eval=True,
             seed=42,
@@ -92,7 +90,8 @@ class TibToEngTranslationMixin(ExperimentBase):
             log_on_each_node=False,
             logging_steps=1,
             predict_with_generate=True,
-            deepspeed=self.load_deepspeed_template_args(),
+            warmup_steps=0,
+            deepspeed=self.load_deepspeed_template_args("WarmupLR"),
         )
 
     def get_translation_dataset(self, tokenizer: PreTrainedTokenizer, training_arguments: TrainingArguments) -> DatasetDict:

@@ -71,7 +71,3 @@ class FinetuneExperimentBase(ExperimentBase):
             predictions = self.get_predictions(trainer, tokenized_dataset)
 
             self.load_and_save_predictions_dict(trainer, learning_rate, predictions)
-
-            # Not sure if this is necessary, but clean up after ourselves
-            del model, trainer, predictions
-            torch.cuda.empty_cache()

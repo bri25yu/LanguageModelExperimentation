@@ -1,6 +1,6 @@
 import os
 
-from transformers import TrainingArguments, SchedulerType, Seq2SeqTrainingArguments
+from transformers import TrainingArguments, Seq2SeqTrainingArguments
 
 from attention_driven.experiments.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
 from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin
@@ -45,21 +45,6 @@ class MT5TibToEngTranslationMixin(TibToEngTranslationMixin):
             per_device_eval_batch_size=per_gpu_batch_size,
             gradient_accumulation_steps=gradient_accumulation_steps,
             eval_accumulation_steps=1,
-
-            ###########################
-            # START mt5 fp16 modification
-            ###########################
-
-            # Original code:
-            # lr_scheduler_type=SchedulerType.CONSTANT,
-
-            lr_scheduler_type=SchedulerType.CONSTANT_WITH_WARMUP,
-            warmup_steps=self.MT5_FP16_WARMUP_NUM_STEPS,
-
-            ###########################
-            # END mt5 fp16 modification
-            ###########################
-
             do_train=True,
             do_eval=True,
             seed=42,
@@ -68,7 +53,20 @@ class MT5TibToEngTranslationMixin(TibToEngTranslationMixin):
             log_on_each_node=False,
             logging_steps=1,
             predict_with_generate=True,
-            deepspeed=self.load_deepspeed_template_args(),
+            ###########################
+            # START mt5 fp16 modification
+            ###########################
+
+            # Original code:
+            # warmup_steps=0,
+
+            warmup_steps=self.MT5_FP16_WARMUP_NUM_STEPS,
+
+            ###########################
+            # END mt5 fp16 modification
+            ###########################
+
+            deepspeed=self.load_deepspeed_template_args("WarmupLR"),
         )
 
 
