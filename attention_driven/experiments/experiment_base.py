@@ -131,7 +131,14 @@ class ExperimentBase(ABC):
             deepspeed_args_path = None
 
         deepspeed_args = json.load(open(deepspeed_args_path))
+
+        # Logic to work around the deepspeed scheduler config
+        ALLOWED_SCHEDULERS = ["WarmupLR", "WarmupDecayLR"]
+        assert scheduler_type in ALLOWED_SCHEDULERS, f"Unrecognize Deepspeed LR scheduler {scheduler_type}. Allowed scheduler types include {ALLOWED_SCHEDULERS}"
         deepspeed_args["scheduler"]["type"] = scheduler_type
+        if scheduler_type == "WarmupLR":
+            if "total_num_steps" in deepspeed_args["scheduler"]["params"]:
+                del deepspeed_args["scheduler"]["params"]["total_num_steps"]
 
         return deepspeed_args
 
