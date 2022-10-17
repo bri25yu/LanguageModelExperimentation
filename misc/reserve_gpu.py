@@ -1,5 +1,5 @@
 """
-Run this script as `python -i reserve_gpu.py --gpu_ids 0 1`
+Run this script as `python reserve_gpu.py --gpu_ids 0 1`
 """
 from argparse import ArgumentParser
 
