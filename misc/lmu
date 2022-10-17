@@ -1,3 +1,5 @@
+# `lmu` stands for "list machine usage"
+
 # Start ssh-agent to manage our private ssh key since we're ssh'ing into multiple remotes
 eval `ssh-agent`
 ssh-add
