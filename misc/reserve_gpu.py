@@ -29,4 +29,7 @@ if __name__ == "__main__":
     for gpu_id in args.gpu_ids:
         reserve_gpu(gpu_id)
 
+    while input("Press q + Enter to quit") != "q":
+        pass
+
     torch.cuda.empty_cache()
