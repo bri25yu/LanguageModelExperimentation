@@ -8,4 +8,4 @@ dependencies:
   - pip
   - pip:
     - torch --extra-index-url https://download.pytorch.org/whl/cu113
-    - -r file:requirements.txt
+    - -r file:attention_driven/requirements.txt
