@@ -86,13 +86,8 @@ class PretrainExperimentBase(ExperimentBase):
         )
         self.setup_trainer_log_callbacks(pretrain_trainer)
 
-        try:
-            resume_from_checkpoint = os.path.isfile(os.path.join(pretrain_training_arguments.output_dir, WEIGHTS_NAME))
-            pretrain_trainer.train(resume_from_checkpoint=resume_from_checkpoint)
-        except Exception as e:
-            import traceback
-            print(traceback.format_exc())
-            raise e
+        resume_from_checkpoint = os.path.isfile(os.path.join(pretrain_training_arguments.output_dir, WEIGHTS_NAME))
+        pretrain_trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
         pretrained_model_checkpoint_dir = get_last_checkpoint(pretrain_training_arguments.output_dir)
 
@@ -105,7 +100,13 @@ class PretrainExperimentBase(ExperimentBase):
             self.print_on_main_process_only(finetune_training_arguments, finetune_training_arguments)
 
             if finetune_dataset is None:
-                finetune_dataset = self.get_finetune_dataset(finetune_training_arguments)
+                try:
+                    finetune_dataset = self.get_finetune_dataset(finetune_training_arguments)
+                except Exception as e:
+                    import traceback
+                    print(traceback.format_exc())
+                    raise e
+
                 self.print_on_main_process_only(finetune_training_arguments, dataset_summary(finetune_dataset))
 
             finetune_trainer: Trainer = finetune_trainer_cls(
