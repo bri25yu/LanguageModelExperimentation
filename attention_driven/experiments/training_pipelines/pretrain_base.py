@@ -99,23 +99,23 @@ class PretrainExperimentBase(ExperimentBase):
                 finetune_dataset = self.get_finetune_dataset(tokenizer, finetune_training_arguments)
                 self.print_on_main_process_only(finetune_training_arguments, dataset_summary(finetune_dataset))
 
+            finetune_trainer: Trainer = finetune_trainer_cls(
+                model=self.get_model(tokenizer).from_pretrained(pretrained_model_checkpoint_dir),
+                args=finetune_training_arguments,
+                train_dataset=finetune_dataset["train"],
+                eval_dataset=finetune_dataset["val"],
+                data_collator=finetune_data_collator,
+                tokenizer=tokenizer,
+                compute_metrics=finetune_compute_metrics,
+            )
+            self.setup_trainer_log_callbacks(finetune_trainer)
+
             try:
-                finetune_trainer: Trainer = finetune_trainer_cls(
-                    model=self.get_model(tokenizer).from_pretrained(pretrained_model_checkpoint_dir),
-                    args=finetune_training_arguments,
-                    train_dataset=finetune_dataset["train"],
-                    eval_dataset=finetune_dataset["val"],
-                    data_collator=finetune_data_collator,
-                    tokenizer=tokenizer,
-                    compute_metrics=finetune_compute_metrics,
-                )
+                finetune_trainer.train()
             except Exception as e:
                 import traceback
                 print(traceback.format_exc())
                 raise e
-            self.setup_trainer_log_callbacks(finetune_trainer)
-
-            finetune_trainer.train()
 
             predictions = self.get_predictions(finetune_trainer, finetune_dataset)
 
