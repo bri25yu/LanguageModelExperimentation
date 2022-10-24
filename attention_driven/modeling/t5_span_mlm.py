@@ -111,7 +111,6 @@ class PyTorchDataCollatorForT5MLM:
         ###############################
 
         batch = BatchEncoding({k: torch.tensor(v, dtype=torch.long) for k, v in batch.items()})
-        print("hit after batch encoding")
 
         ###############################
         # END convert batch from numpy to pytorch

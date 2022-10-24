@@ -85,13 +85,13 @@ class PretrainExperimentBase(ExperimentBase):
             compute_metrics=self.get_pretrain_compute_metrics(tokenizer),
         )
         self.setup_trainer_log_callbacks(pretrain_trainer)
-        print("hit after trainer init")
 
         try:
             resume_from_checkpoint = os.path.isfile(os.path.join(pretrain_training_arguments.output_dir, WEIGHTS_NAME))
             pretrain_trainer.train(resume_from_checkpoint=resume_from_checkpoint)
         except Exception as e:
-            print(e)
+            import traceback
+            print(traceback.format_exc())
             raise e
 
         pretrained_model_checkpoint_dir = get_last_checkpoint(pretrain_training_arguments.output_dir)
