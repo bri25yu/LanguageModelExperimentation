@@ -7,6 +7,7 @@ from datasets import DatasetDict, load_from_disk
 from transformers import TrainingArguments
 
 from attention_driven import DATASET_CACHE_DIR
+from attention_driven.data_processors.utils import dataset_summary
 
 
 class AbstractDataProcessor(ABC):
@@ -22,10 +23,7 @@ class AbstractDataProcessor(ABC):
 
         is_main_process = training_arguments.process_index == 0
         if is_main_process:
-            print(dataset)
-            for split_name, split in dataset.items():
-                print(f"Example from {split_name}")
-                print(split[0])
+            print(dataset_summary(dataset))
 
         return dataset
 

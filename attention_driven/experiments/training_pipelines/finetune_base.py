@@ -9,6 +9,7 @@ from transformers import (
     TrainingArguments,
 )
 
+from attention_driven.data_processors.utils import dataset_summary
 from attention_driven.experiments.experiment_base import ExperimentBase
 
 
@@ -45,10 +46,11 @@ class FinetuneExperimentBase(ExperimentBase):
 
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(batch_size, learning_rate)
-            self.print_training_arguments(training_arguments)
+            self.print_on_main_process_only(training_arguments, training_arguments)
 
             if tokenized_dataset is None:
                 tokenized_dataset = self.get_tokenized_dataset(tokenizer, training_arguments)
+                self.print_on_main_process_only(training_arguments, dataset_summary(tokenized_dataset))
 
             model = self.get_model(tokenizer)
             trainer = trainer_cls(

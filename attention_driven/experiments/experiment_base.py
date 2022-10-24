@@ -107,12 +107,12 @@ class ExperimentBase(ABC):
         with open(predictions_output_path, "wb") as f:
             pickle.dump(predictions_dict, f)
 
-    def print_training_arguments(self, training_arguments: TrainingArguments) -> None:
+    def print_on_main_process_only(self, training_arguments: TrainingArguments, to_print: Any) -> None:
         is_main_process = training_arguments.process_index == 0
         if not is_main_process:
             return
 
-        print(training_arguments)
+        print(to_print)
 
     def setup_trainer_log_callbacks(self, trainer: Trainer) -> None:
         trainer.remove_callback(PrinterCallback)
