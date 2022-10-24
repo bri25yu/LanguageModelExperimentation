@@ -22,7 +22,6 @@ class PretrainExperimentBase(ExperimentBase):
     """
     This class pretrains for a set learning rate schedule and finetunes over multiple input learning rates
     """
-    PRETRAIN_LEARNING_RATE_PLACEHOLDER = 1e-100
     PRETRAIN_TRAINER_CLS: Union[type, None] = None
     FINETUNE_TRAINER_CLS: Union[type, None] = None
 
@@ -59,7 +58,6 @@ class PretrainExperimentBase(ExperimentBase):
         pass
 
     def run(self, batch_size: int, finetune_learning_rates: List[float]) -> None:
-        pretrain_learning_rate_placeholder = self.PRETRAIN_LEARNING_RATE_PLACEHOLDER
         pretrain_trainer_cls = self.PRETRAIN_TRAINER_CLS
         finetune_trainer_cls = self.FINETUNE_TRAINER_CLS
         assert pretrain_trainer_cls, f"Must override the `PRETRAIN_TRAINER_CLS` property of {self.name}"
@@ -72,22 +70,17 @@ class PretrainExperimentBase(ExperimentBase):
         self.print_training_arguments(pretrain_training_arguments)
 
         pretrain_dataset = self.get_pretrain_dataset(pretrain_training_arguments)
-        pretrain_trainer = pretrain_trainer_cls(
+        pretrain_trainer: Trainer = pretrain_trainer_cls(
             model=self.get_model(tokenizer),
             args=pretrain_training_arguments,
             train_dataset=pretrain_dataset["train"],
-            eval_dataset=pretrain_dataset["val"],
             data_collator=self.get_pretrain_data_collator(tokenizer),
             tokenizer=tokenizer,
             compute_metrics=self.get_pretrain_compute_metrics(tokenizer),
         )
         self.setup_trainer_log_callbacks(pretrain_trainer)
 
-        pretrain_trainer.train()
-
-        predictions = self.get_predictions(pretrain_trainer, pretrain_dataset)
-
-        self.load_and_save_predictions_dict(pretrain_trainer, pretrain_learning_rate_placeholder, predictions)
+        pretrain_trainer.train(resume_from_checkpoint=True)
 
         pretrained_model_checkpoint_dir = get_last_checkpoint(pretrain_training_arguments.output_dir)
 

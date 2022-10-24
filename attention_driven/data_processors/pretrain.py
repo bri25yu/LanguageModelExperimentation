@@ -23,8 +23,6 @@ class PretrainDataProcessor(AbstractDataProcessor):
     """
 
     def load(self) -> DatasetDict:
-        # !TODO
-        raise NotImplementedError
         dataset = load_dataset("buddhist-nlp/pretraining_data", use_auth_token=True)
 
         return dataset

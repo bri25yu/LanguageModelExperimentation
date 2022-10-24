@@ -27,7 +27,7 @@ class TibToEngTranslationMixin(ExperimentBase):
     NUM_TRANSLATION_TRAIN_STEPS = 10000
     TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 8  # 256
     NUM_TRANSLATION_EVAL_STEPS = 200
-    TRAINER_CLS = Seq2SeqTrainer
+    FINETUNE_TRAINER_CLS = TRAINER_CLS = Seq2SeqTrainer
 
     def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
         return self.get_translation_training_arguments(batch_size, learning_rate)
