@@ -100,13 +100,7 @@ class PretrainExperimentBase(ExperimentBase):
             self.print_on_main_process_only(finetune_training_arguments, finetune_training_arguments)
 
             if finetune_dataset is None:
-                try:
-                    finetune_dataset = self.get_finetune_dataset(finetune_training_arguments)
-                except Exception as e:
-                    import traceback
-                    print(traceback.format_exc())
-                    raise e
-
+                finetune_dataset = self.get_finetune_dataset(tokenizer, finetune_training_arguments)
                 self.print_on_main_process_only(finetune_training_arguments, dataset_summary(finetune_dataset))
 
             finetune_trainer: Trainer = finetune_trainer_cls(
