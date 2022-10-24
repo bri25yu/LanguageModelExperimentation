@@ -114,12 +114,13 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
         dataset_dict = PretrainDataProcessor()(pretrain_training_arguments)
 
         def tokenize_fn(examples):
-            return tokenizer(examples["text"])
+            tokenized = tokenizer(examples["text"])
+            return {"input_ids": tokenized["input_ids"]}
 
         with pretrain_training_arguments.main_process_first(desc="Mapping dataset"):
             tokenized_grouped_dataset_dict = dataset_dict \
                 .map(tokenize_fn, batched=True, remove_columns=["text"]) \
-                .map(group_texts, batched=True, remove_columns=["attention_mask"])
+                .map(group_texts, batched=True)
 
             tokenized_group_dataset = concatenate_datasets(list(tokenized_grouped_dataset_dict.values()))
 

@@ -65,7 +65,7 @@ class PyTorchDataCollatorForT5MLM:
     def __call__(self, examples: List[Dict[str, np.ndarray]]) -> BatchEncoding:
         # convert list to dict and tensorize input
         batch = BatchEncoding(
-            {k: np.array([examples[i][k] for i in range(len(examples))]) for k, v in examples[0].items()}
+            {k: np.array([examples[i][k] for i in range(len(examples))]) for k in examples[0]}
         )
 
         input_ids = batch["input_ids"]
