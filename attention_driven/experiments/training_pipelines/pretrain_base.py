@@ -2,13 +2,10 @@ from typing import Callable, List, Union
 
 from abc import abstractmethod
 
-import os
-
 from datasets import DatasetDict
 
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.utils import WEIGHTS_NAME
 
 from transformers import (
     TrainingArguments,
@@ -85,7 +82,7 @@ class PretrainExperimentBase(ExperimentBase):
         )
         self.setup_trainer_log_callbacks(pretrain_trainer)
 
-        resume_from_checkpoint = os.path.isfile(os.path.join(pretrain_training_arguments.output_dir, WEIGHTS_NAME))
+        resume_from_checkpoint = get_last_checkpoint(pretrain_training_arguments.output_dir)
         pretrain_trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
         pretrained_model_checkpoint_dir = get_last_checkpoint(pretrain_training_arguments.output_dir)
@@ -102,15 +99,20 @@ class PretrainExperimentBase(ExperimentBase):
                 finetune_dataset = self.get_finetune_dataset(tokenizer, finetune_training_arguments)
                 self.print_on_main_process_only(finetune_training_arguments, dataset_summary(finetune_dataset))
 
-            finetune_trainer: Trainer = finetune_trainer_cls(
-                model=self.get_model(tokenizer).from_pretrained(pretrained_model_checkpoint_dir),
-                args=finetune_training_arguments,
-                train_dataset=finetune_dataset["train"],
-                eval_dataset=finetune_dataset["val"],
-                data_collator=finetune_data_collator,
-                tokenizer=tokenizer,
-                compute_metrics=finetune_compute_metrics,
-            )
+            try:
+                finetune_trainer: Trainer = finetune_trainer_cls(
+                    model=self.get_model(tokenizer).from_pretrained(pretrained_model_checkpoint_dir),
+                    args=finetune_training_arguments,
+                    train_dataset=finetune_dataset["train"],
+                    eval_dataset=finetune_dataset["val"],
+                    data_collator=finetune_data_collator,
+                    tokenizer=tokenizer,
+                    compute_metrics=finetune_compute_metrics,
+                )
+            except Exception as e:
+                import traceback
+                print(traceback.format_exc())
+                raise e
             self.setup_trainer_log_callbacks(finetune_trainer)
 
             finetune_trainer.train()
