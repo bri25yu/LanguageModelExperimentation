@@ -1,4 +1,4 @@
-from typing import Callable, Union
+from typing import Callable
 
 import os
 
@@ -36,7 +36,6 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
     # T5-style span masking parameters
     MLM_PROBABILITY = 0.15
     MEAN_NOISE_SPAN_LENGTH = 3.0
-    TARGETS_LENGTH: Union[None, float] = None  # Will be calculated and set later for convenience
 
     def get_pretrain_training_arguments(self, batch_size: int) -> TrainingArguments:
         learning_rate = self.PRETRAIN_LEARNING_RATE
@@ -76,12 +75,19 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
 
     def get_pretrain_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
         max_input_length = self.MAX_INPUT_LENGTH
-        targets_length = self.TARGETS_LENGTH
+        mlm_probability = self.MLM_PROBABILITY
+        mean_noise_span_length = self.MEAN_NOISE_SPAN_LENGTH
+
+        _, targets_length = compute_input_and_target_lengths(
+            inputs_length=max_input_length,
+            noise_density=mlm_probability,
+            mean_noise_span_length=mean_noise_span_length,
+        )
 
         return PyTorchDataCollatorForT5MLM(
             tokenizer=tokenizer,
-            noise_density=0.15,
-            mean_noise_span_length=3.0,
+            noise_density=mlm_probability,
+            mean_noise_span_length=mean_noise_span_length,
             input_length=max_input_length,
             target_length=targets_length,
             pad_token_id=tokenizer.pad_token_id,
@@ -98,12 +104,11 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
         # T5-like span masked language modeling will fuse consecutively masked tokens to a single sentinel token.
         # To ensure that the input length is `max_seq_length`, we need to increase the maximum length
         # according to `mlm_probability` and `mean_noise_span_length`. We can also define the label length accordingly.
-        expanded_inputs_length, targets_length = compute_input_and_target_lengths(
+        expanded_inputs_length, _ = compute_input_and_target_lengths(
             inputs_length=max_input_length,
             noise_density=mlm_probability,
             mean_noise_span_length=mean_noise_span_length,
         )
-        self.TARGETS_LENGTH = targets_length
         group_texts = get_group_texts_fn(expanded_inputs_length)
 
         dataset_dict = PretrainDataProcessor()(pretrain_training_arguments)
