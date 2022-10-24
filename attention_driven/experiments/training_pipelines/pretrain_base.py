@@ -12,7 +12,6 @@ from transformers.utils import WEIGHTS_NAME
 
 from transformers import (
     TrainingArguments,
-    EarlyStoppingCallback,
     Trainer,
 )
 
@@ -104,18 +103,17 @@ class PretrainExperimentBase(ExperimentBase):
                 self.print_on_main_process_only(finetune_training_arguments, dataset_summary(finetune_dataset))
 
             finetune_trainer: Trainer = finetune_trainer_cls(
-                model=self.get_model(tokenizer),
+                model=self.get_model(tokenizer).from_pretrained(pretrained_model_checkpoint_dir),
                 args=finetune_training_arguments,
                 train_dataset=finetune_dataset["train"],
                 eval_dataset=finetune_dataset["val"],
                 data_collator=finetune_data_collator,
                 tokenizer=tokenizer,
                 compute_metrics=finetune_compute_metrics,
-                callbacks=[EarlyStoppingCallback(2)],
             )
             self.setup_trainer_log_callbacks(finetune_trainer)
 
-            finetune_trainer.train(resume_from_checkpoint=pretrained_model_checkpoint_dir)
+            finetune_trainer.train()
 
             predictions = self.get_predictions(finetune_trainer, finetune_dataset)
 
