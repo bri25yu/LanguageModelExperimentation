@@ -12,6 +12,7 @@ from transformers import (
 
 from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin
 from attention_driven.data_processors import PretrainDataProcessor
+from attention_driven.modeling.t5_span_mlm import PyTorchDataCollatorForT5MLM
 
 
 __all__ = ["TibZhEngPretrainExperimentMixin"]
@@ -62,7 +63,16 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
         )
 
     def get_pretrain_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
-        return DataCollatorForLanguageModeling(tokenizer)
+        max_input_length = self.MAX_INPUT_LENGTH
+
+        return PyTorchDataCollatorForT5MLM(
+            tokenizer=tokenizer,
+            noise_density=0.15,
+            mean_noise_span_length=3.0,
+            input_length=max_input_length,
+            target_length=max_input_length,
+            pad_token_id=tokenizer.pad_token_id,
+        )
 
     def get_pretrain_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
         return None

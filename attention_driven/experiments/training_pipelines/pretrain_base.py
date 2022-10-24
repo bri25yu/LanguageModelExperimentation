@@ -69,7 +69,7 @@ class PretrainExperimentBase(ExperimentBase):
         pretrain_training_arguments = self.get_pretrain_training_arguments(batch_size)
         self.print_training_arguments(pretrain_training_arguments)
 
-        pretrain_dataset = self.get_pretrain_dataset(pretrain_training_arguments)
+        pretrain_dataset = self.get_pretrain_dataset(tokenizer, pretrain_training_arguments)
         pretrain_trainer: Trainer = pretrain_trainer_cls(
             model=self.get_model(tokenizer),
             args=pretrain_training_arguments,

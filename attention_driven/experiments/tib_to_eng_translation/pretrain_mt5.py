@@ -20,24 +20,24 @@ class PretrainMT5TestExperiment(MT5Base580MModelMixin, TibZhEngPretrainExperimen
 
         dataset_dict = PretrainDataProcessor()(pretrain_training_arguments)
 
+        ###############################
+        # START reduce dataset size for test experiment
+        ###############################
+
+        for key in dataset_dict:
+            dataset_dict[key] = dataset_dict[key].select(range(10000))
+
+        ###############################
+        # END reduce dataset size for test experiment
+        ###############################
+
         def tokenize_fn(examples):
             return tokenizer(examples["text"], max_length=max_input_length, truncation=True)
 
         with pretrain_training_arguments.main_process_first(desc="Mapping dataset"):
             tokenized_dataset_dict = dataset_dict.map(tokenize_fn, batched=True, remove_columns=["text"])
-            tokenized_dataset = concatenate_datasets(list(tokenized_dataset_dict.items()))
+            tokenized_dataset = concatenate_datasets(list(tokenized_dataset_dict.values()))
             shuffled_tokenized_dataset = tokenized_dataset.shuffle(seed=42)
-
-            ###############################
-            # START reduce dataset size for test experiment
-            ###############################
-
-            shuffled_tokenized_dataset = shuffled_tokenized_dataset.select(range(10000))
-
-            ###############################
-            # END reduce dataset size for test experiment
-            ###############################
-
             pretrain_dataset = DatasetDict({"train": shuffled_tokenized_dataset})
 
         return pretrain_dataset
