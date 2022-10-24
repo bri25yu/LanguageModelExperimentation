@@ -68,6 +68,7 @@ class PretrainMT5TestExperiment(MT5Base580MModelMixin, TibZhEngPretrainExperimen
         pretrain_training_arguments = super().get_pretrain_training_arguments(batch_size)
 
         pretrain_training_arguments.max_steps = 10
+        pretrain_training_arguments.save_steps = 10
 
         return pretrain_training_arguments
 
@@ -75,6 +76,7 @@ class PretrainMT5TestExperiment(MT5Base580MModelMixin, TibZhEngPretrainExperimen
         finetune_training_arguments = super().get_finetune_training_arguments(batch_size, learning_rate)
 
         finetune_training_arguments.max_steps = 10
+        finetune_training_arguments.save_steps = 10
 
         return finetune_training_arguments
 
