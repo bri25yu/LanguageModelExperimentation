@@ -32,7 +32,7 @@ class PretrainMT5TestExperiment(MT5Base580MModelMixin, TibZhEngPretrainExperimen
         ###############################
 
         def tokenize_fn(examples):
-            return tokenizer(examples["text"], max_length=max_input_length, truncation=True)
+            return tokenizer(examples["text"], max_length=max_input_length, truncation=True, padding="max_length")
 
         with pretrain_training_arguments.main_process_first(desc="Mapping dataset"):
             tokenized_dataset_dict = dataset_dict.map(tokenize_fn, batched=True, remove_columns=["text"])

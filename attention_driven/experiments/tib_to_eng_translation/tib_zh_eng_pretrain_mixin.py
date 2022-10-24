@@ -7,7 +7,7 @@ from datasets import DatasetDict, concatenate_datasets
 from transformers.tokenization_utils import PreTrainedTokenizer
 
 from transformers import (
-    TrainingArguments, Seq2SeqTrainer, Seq2SeqTrainingArguments, DataCollatorForLanguageModeling
+    TrainingArguments, Seq2SeqTrainer, Seq2SeqTrainingArguments
 )
 
 from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin
@@ -83,11 +83,11 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
         dataset_dict = PretrainDataProcessor()(pretrain_training_arguments)
 
         def tokenize_fn(examples):
-            tokenizer = tokenizer(examples["text"], max_length=max_input_length, truncation=True, padding="max_length")
+            return tokenizer(examples["text"], max_length=max_input_length, truncation=True, padding="max_length")
 
         with pretrain_training_arguments.main_process_first(desc="Mapping dataset"):
             tokenized_dataset_dict = dataset_dict.map(tokenize_fn, batched=True, remove_columns=["text"])
-            tokenized_dataset = concatenate_datasets(list(tokenized_dataset_dict.items()))
+            tokenized_dataset = concatenate_datasets(list(tokenized_dataset_dict.values()))
             shuffled_tokenized_dataset = tokenized_dataset.shuffle(seed=42)
             pretrain_dataset = DatasetDict({"train": shuffled_tokenized_dataset})
 
