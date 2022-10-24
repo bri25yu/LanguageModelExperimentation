@@ -4,6 +4,8 @@ from abc import abstractmethod
 
 from datasets import DatasetDict
 
+import torch
+
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.trainer_utils import get_last_checkpoint
 
@@ -86,6 +88,10 @@ class PretrainExperimentBase(ExperimentBase):
         pretrain_trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
         pretrained_model_checkpoint_dir = get_last_checkpoint(pretrain_training_arguments.output_dir)
+
+        # Cleanup pretraining
+        del pretrain_trainer
+        torch.cuda.empty_cache()
 
         # Finetuning
         finetune_data_collator = self.get_finetune_data_collator(tokenizer)
