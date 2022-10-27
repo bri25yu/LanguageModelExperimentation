@@ -19,6 +19,9 @@ from attention_driven.data_processors import FinetuneDataProcessor
 from attention_driven.experiments.experiment_base import ExperimentBase
 
 
+__all__ = ["TibToEngTranslationMixin", "TibToEngTranslationWithPrefixMixin"]
+
+
 class TibToEngTranslationMixin(ExperimentBase):
     """
     Mixin for Tibetan to English translation finetuning

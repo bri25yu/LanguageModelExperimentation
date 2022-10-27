@@ -10,14 +10,14 @@ from transformers import (
     TrainingArguments, Seq2SeqTrainer, Seq2SeqTrainingArguments
 )
 
-from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin
+from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin, TibToEngTranslationWithPrefixMixin
 from attention_driven.data_processors import PretrainDataProcessor
 from attention_driven.modeling.t5_span_mlm import (
     PyTorchDataCollatorForT5MLM, compute_input_and_target_lengths, get_group_texts_fn
 )
 
 
-__all__ = ["TibZhEngPretrainExperimentMixin"]
+__all__ = ["TibZhEngPretrainExperimentMixin", "TibZhEngPretrainWithPrefixExperimentMixin"]
 
 
 class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
@@ -129,3 +129,10 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
             pretrain_dataset = DatasetDict({"train": shuffled_tokenized_grouped_dataset})
 
         return pretrain_dataset
+
+
+class TibZhEngPretrainWithPrefixExperimentMixin(TibZhEngPretrainExperimentMixin):
+    """
+    There's no change between the pretrain strategies, only with the finetune dataset creation.
+    """
+    get_translation_dataset = TibToEngTranslationWithPrefixMixin.get_translation_dataset
