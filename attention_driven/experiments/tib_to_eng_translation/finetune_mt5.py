@@ -83,9 +83,9 @@ class MT5TibToEngTranslationWithPrefixMixin(TibToEngTranslationWithPrefixMixin):
     get_translation_training_arguments = MT5TibToEngTranslationMixin.get_translation_training_arguments
 
 
-class FinetuneMT5Base580MExperiment(MT5Base580MModelMixin, MT5TibToEngTranslationWithPrefixMixin, FinetuneExperimentBase):
+class FinetuneMT5Base580MWithPrefixExperiment(MT5Base580MModelMixin, MT5TibToEngTranslationWithPrefixMixin, FinetuneExperimentBase):
     pass
 
 
-class FinetuneMT5Large1_2BExperiment(MT5Large1_2BModelMixin, MT5TibToEngTranslationWithPrefixMixin, FinetuneExperimentBase):
+class FinetuneMT5Large1_2BWithPrefixExperiment(MT5Large1_2BModelMixin, MT5TibToEngTranslationWithPrefixMixin, FinetuneExperimentBase):
     pass
