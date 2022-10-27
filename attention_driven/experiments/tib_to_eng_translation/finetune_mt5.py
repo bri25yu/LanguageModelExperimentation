@@ -3,7 +3,7 @@ import os
 from transformers import TrainingArguments, Seq2SeqTrainingArguments
 
 from attention_driven.experiments.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
-from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin
+from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin, TibToEngTranslationWithPrefixMixin
 from attention_driven.experiments.training_pipelines import FinetuneExperimentBase
 
 
@@ -75,4 +75,17 @@ class FinetuneMT5Base580MExperiment(MT5Base580MModelMixin, MT5TibToEngTranslatio
 
 
 class FinetuneMT5Large1_2BExperiment(MT5Large1_2BModelMixin, MT5TibToEngTranslationMixin, FinetuneExperimentBase):
+    pass
+
+
+class MT5TibToEngTranslationWithPrefixMixin(TibToEngTranslationWithPrefixMixin):
+    MT5_FP16_WARMUP_NUM_STEPS = MT5TibToEngTranslationMixin.MT5_FP16_WARMUP_NUM_STEPS
+    get_translation_training_arguments = MT5TibToEngTranslationMixin.get_translation_training_arguments
+
+
+class FinetuneMT5Base580MExperiment(MT5Base580MModelMixin, MT5TibToEngTranslationWithPrefixMixin, FinetuneExperimentBase):
+    pass
+
+
+class FinetuneMT5Large1_2BExperiment(MT5Large1_2BModelMixin, MT5TibToEngTranslationWithPrefixMixin, FinetuneExperimentBase):
     pass

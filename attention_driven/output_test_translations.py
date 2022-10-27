@@ -2,8 +2,10 @@ from argparse import ArgumentParser
 
 import pickle
 
+from datasets import load_from_disk
+
 from attention_driven.experiments import available_experiments
-from attention_driven.data_processors import LDTibetanEnglishDataV2Processor
+from attention_driven.data_processors import FinetuneDataProcessor
 
 
 def load_experiment():
@@ -44,20 +46,16 @@ def decode_tokens(experiment, results):
 
 def main():
     experiment = load_experiment()
-    _, df = LDTibetanEnglishDataV2Processor()()
+    test_dataset = load_from_disk(FinetuneDataProcessor().path)["test"]
     results = load_results(experiment)
     predictions = decode_tokens(experiment, results)
 
     for i in range(5):
         print(f"*****Example translation {i+1}*****")
-        print("Tibetan input:", df.tibetan.iloc[i])
-        print("English translation:", df.english.iloc[i])
+        print("Tibetan input:", test_dataset[i]["tibetan"])
+        print("English translation:", test_dataset[i]["english"])
         print("Predicted translation:", predictions[i])
         print()
-
-    df["predictions"] = predictions
-
-    df.to_csv(f"predictions/{experiment.__class__.__name__}_predictions.tsv", sep="\t", index=False)
 
 
 if __name__ == "__main__":
