@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
 
 import os
 import json
@@ -19,7 +19,26 @@ from attention_driven import CONFIG_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
 __all__ = ["ExperimentBase"]
 
 
-class ExperimentBase(ABC):
+class ExperimentMetaClass(ABCMeta):
+    @staticmethod
+    def run_wrapper(run):
+        def run_with_exceptions(*args, **kwargs):
+            try:
+                return run(*args, **kwargs)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                raise e
+
+        return run_with_exceptions
+
+    def __new__(cls, name, bases, attrs):
+        new_obj = super().__new__(cls, name, bases, attrs)
+        new_obj.run = cls.run_wrapper(new_obj.run)
+        return new_obj
+
+
+class ExperimentBase(metaclass=ExperimentMetaClass):
     """
     This is a base experiment class that is meant to be overridden. This class assumes virtually nothing about
     the nature of a particular experiment. It provides a few utility functions such as:
