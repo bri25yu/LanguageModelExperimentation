@@ -94,18 +94,24 @@ class TibToEngWithTibMixin(TibToEngTranslationWithPrefixMixin, TibZhEngPretrainE
 
         translation_data_collator = self.get_translation_data_collator(tokenizer)
         monolingual_data_collator = self.get_pretrain_data_collator(tokenizer)
+        translation_data_collator.return_tensors = "np"
+        monolingual_data_collator.return_tensors = "np"
 
         def wrap_in_list_fn(collator):
-            def wrap_in_list(example):
-                features = [example]
-                collated = collator(features)
-                return {k: v[0] for k, v in collated.items()}
+            def wrap_in_list(examples):
+                keys = list(examples.keys())
+                n_examples = len(examples[keys[0]])
+                features = [{k: examples[k][i] for k in keys} for i in range(n_examples)]
+
+                return collator(features)
 
             return wrap_in_list
 
         with training_arguments.main_process_first():
-            translation_collated = translation_dataset.map(wrap_in_list_fn(translation_data_collator))
-            monolingual_collated = monolingual_dataset.map(wrap_in_list_fn(monolingual_data_collator))
+            translation_collated = translation_dataset.map(wrap_in_list_fn(translation_data_collator), batched=True)
+            monolingual_collated = monolingual_dataset.map(wrap_in_list_fn(monolingual_data_collator), batched=True)
+
+            monolingual_collated
 
             mixed_train_dataset: Dataset = concatenate_datasets([translation_collated["train"], monolingual_collated["train"]])
             mixed_train_dataset = mixed_train_dataset.shuffle(seed=42)

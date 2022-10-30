@@ -49,6 +49,7 @@ class PyTorchDataCollatorForT5MLM:
     input_length: int
     target_length: int
     pad_token_id: int
+    return_tensors: str = "pt"
 
     ###############################
     # START don't manually shift right
@@ -79,6 +80,8 @@ class PyTorchDataCollatorForT5MLM:
 
         batch["input_ids"] = self.filter_input_ids(input_ids, input_ids_sentinel)
         batch["labels"] = self.filter_input_ids(input_ids, labels_sentinel)
+        if "attention_mask" in batch:
+            batch["attention_mask"] = self.filter_input_ids(batch["attention_mask"], input_ids_sentinel).astype(np.int8)
 
         if batch["input_ids"].shape[-1] != self.input_length:
             raise ValueError(
@@ -110,7 +113,12 @@ class PyTorchDataCollatorForT5MLM:
         # START convert batch from numpy to pytorch
         ###############################
 
-        batch = BatchEncoding({k: torch.tensor(v, dtype=torch.long) for k, v in batch.items()})
+        if self.return_tensors == "pt":
+            batch = BatchEncoding({k: torch.tensor(v, dtype=torch.long) for k, v in batch.items()})
+        elif self.return_tensors == "np":
+            pass
+        else:
+            raise ValueError(f"Available return tensors are pt and np but got {self.return_tensors}")
 
         ###############################
         # END convert batch from numpy to pytorch
