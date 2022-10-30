@@ -50,6 +50,7 @@ class PyTorchDataCollatorForT5MLM:
     target_length: int
     pad_token_id: int
     return_tensors: str = "pt"
+    pad_targets: bool = False
 
     ###############################
     # START don't manually shift right
@@ -94,6 +95,18 @@ class PyTorchDataCollatorForT5MLM:
                 f"`labels` are incorrectly preprocessed. `labels` length is {batch['labels'].shape[-1]}, but should be"
                 f" {self.target_length}."
             )
+
+        ###############################
+        # START optionally pad labels from `target_length` to `input_length`
+        ###############################
+
+        if self.pad_targets:
+            label_padding = np.full((batch_size, self.input_length - self.target_length), self.pad_token_id)
+            batch["labels"] = np.concatenate((batch["labels"], label_padding), axis=1)
+
+        ###############################
+        # END optionally pad labels from `target_length` to `input_length`
+        ###############################
 
         ###############################
         # START don't manually shift right
