@@ -3,7 +3,7 @@ from typing import Callable
 from datasets import Dataset, DatasetDict, concatenate_datasets
 
 from transformers.tokenization_utils import PreTrainedTokenizer
-from transformers import TrainingArguments
+from transformers import TrainingArguments, DefaultDataCollator
 
 from attention_driven.data_processors.utils import dataset_summary
 from attention_driven.data_processors.pretrain import PretrainDataProcessor
@@ -47,8 +47,19 @@ class TibToEngWithTibMixin(TibToEngTranslationWithPrefixMixin, TibZhEngPretrainE
         ###############################
 
         def tokenize_fn(examples):
-            tokenized = tokenizer(examples["text"])
-            return {"input_ids": tokenized["input_ids"]}
+            ###############################
+            # START return attention mask
+            ###############################
+
+            # Original code:
+            # tokenized = tokenizer(examples["text"])
+            # return {"input_ids": tokenized["input_ids"]}
+
+            return tokenizer(examples["text"])
+
+            ###############################
+            # END return attention mask
+            ###############################
 
         with pretrain_training_arguments.main_process_first(desc="Mapping dataset"):
             tokenized_grouped_dataset_dict = dataset_dict \
@@ -64,19 +75,38 @@ class TibToEngWithTibMixin(TibToEngTranslationWithPrefixMixin, TibZhEngPretrainE
         return pretrain_dataset
 
     def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizer, training_arguments: TrainingArguments) -> DatasetDict:
+        num_train_steps = self.NUM_TRANSLATION_TRAIN_STEPS
+        num_examples_per_train_step = self.TARGET_TOTAL_BATCH_SIZE_PER_UPDATE
+
         translation_dataset = self.get_translation_dataset(tokenizer, training_arguments)
         monolingual_dataset = self.get_pretrain_dataset(tokenizer, training_arguments)
+
+        self.print_on_main_process_only(training_arguments, "Input translation dataset")
         self.print_on_main_process_only(training_arguments, dataset_summary(translation_dataset))
+        self.print_on_main_process_only(training_arguments, "Input monolingual MLM dataset")
         self.print_on_main_process_only(training_arguments, dataset_summary(monolingual_dataset))
+
+        # Calculate the total number of train examples we need from the monolingual dataset
+        total_examples = num_train_steps * num_examples_per_train_step
+        translation_n_examples = len(translation_dataset["train"])
+        needed_monolingual_n_examples = total_examples - translation_n_examples
+        monolingual_dataset["train"] = monolingual_dataset["train"].select(range(needed_monolingual_n_examples))
 
         translation_data_collator = self.get_translation_data_collator(tokenizer)
         monolingual_data_collator = self.get_pretrain_data_collator(tokenizer)
 
-        with training_arguments.main_process_first():
-            translation_collated = translation_dataset.map(translation_data_collator, batched=True)
-            monolingual_collated = monolingual_dataset.map(monolingual_data_collator, batched=True)
+        def wrap_in_list_fn(collator):
+            def wrap_in_list(example):
+                features = [example]
+                collated = collator(features)
+                return {k: v[0] for k, v in collated.items()}
 
-            # For now, we use a 1:1 mixing
+            return wrap_in_list
+
+        with training_arguments.main_process_first():
+            translation_collated = translation_dataset.map(wrap_in_list_fn(translation_data_collator))
+            monolingual_collated = monolingual_dataset.map(wrap_in_list_fn(monolingual_data_collator))
+
             mixed_train_dataset: Dataset = concatenate_datasets([translation_collated["train"], monolingual_collated["train"]])
             mixed_train_dataset = mixed_train_dataset.shuffle(seed=42)
 
@@ -89,4 +119,4 @@ class TibToEngWithTibMixin(TibToEngTranslationWithPrefixMixin, TibZhEngPretrainE
         return dataset
 
     def get_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
-        return None
+        return DefaultDataCollator()
