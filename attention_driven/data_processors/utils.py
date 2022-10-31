@@ -1,4 +1,4 @@
-from typing import Dict, Sequence, Union
+from typing import Dict, List, Sequence, Union
 
 import pandas as pd
 
@@ -27,3 +27,9 @@ def dataset_summary(dataset_dict: DatasetDict) -> str:
         summary += f"Example from {split_name}\n{split[0]}\n"
 
     return summary
+
+
+def check_shape(d: Dict[str, List[int]], L: int, keys: List[str]=["input_ids", "attention_mask", "labels"]) -> None:
+    assert set(keys) == set(d.keys()), f"Expected {keys} keys but got {list(d.keys())}"
+    for k, v in d.items():
+        assert all(len(e) == L for e in v), f"Key `{k}` needs to have all {L}-length values but it does not"
