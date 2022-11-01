@@ -125,11 +125,21 @@ class LongContextMixedTrainingMixin(TibToEngWithTibMixin):
     MAX_INPUT_LENGTH = 256
     TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 7  # 128
 
-    # 1:3 mix of translation and monolingual datasets
-    # Out of 1,280,000 examples, the model sees 320,000 translation examples
-    # (about the total number of available translation examples)
-    # and 960,000 monolingual examples, where the base number of monolingual
-    # examples is about 900,000 (before applying MLM)
+    """
+    A `max_input_length` of 256 fully captures 96% of all translation train data points
+
+    1:3 mix of translation and monolingual datasets
+
+    Out of 1,280,000 examples, the model sees
+    - 320,000 translation examples (about the total number of available translation examples)
+    - 960,000 monolingual examples, where the base number of monolingual examples is about 900,000 (before applying MLM)
+
+    This translates to
+    - 27,000,000 or 27 million translation tokens for 320,000 or 320k translation pairs
+        - Average of ~ 90 tokens per translation pair
+    - 960,000 * 256 ~ 250,000,000 or 250 million monolingual tokens
+
+    """
     def _create_mix(self, translation_dataset: DatasetDict, monolingual_dataset: DatasetDict) -> Tuple[DatasetDict, DatasetDict]:
         num_train_steps = self.NUM_TRANSLATION_TRAIN_STEPS
         num_examples_per_train_step = self.TARGET_TOTAL_BATCH_SIZE_PER_UPDATE
