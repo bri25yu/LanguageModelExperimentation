@@ -90,7 +90,6 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
             mean_noise_span_length=mean_noise_span_length,
             input_length=max_input_length,
             target_length=targets_length,
-            pad_token_id=tokenizer.pad_token_id,
         )
 
     def get_pretrain_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
