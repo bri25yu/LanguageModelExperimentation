@@ -5,10 +5,9 @@ from itertools import cycle
 from datasets import Dataset, DatasetDict, concatenate_datasets
 
 from transformers.tokenization_utils import PreTrainedTokenizer
-from transformers import TrainingArguments, DefaultDataCollator
+from transformers import TrainingArguments, DataCollatorForSeq2Seq
 
 from attention_driven.data_processors.pretrain import PretrainDataProcessor
-from attention_driven.data_processors.utils import check_shape
 
 from attention_driven.modeling.t5_span_mlm import (
     compute_input_and_target_lengths, get_group_texts_fn
@@ -80,36 +79,16 @@ class TibToEngWithTibMixin(TibToEngTranslationWithPrefixMixin, TibZhEngPretrainE
         return pretrain_dataset
 
     def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizer, training_arguments: TrainingArguments) -> DatasetDict:
-        L = self.MAX_INPUT_LENGTH
-
         monolingual_data_collator = self.get_pretrain_data_collator(tokenizer)
         monolingual_data_collator.return_tensors = "np"
-        monolingual_data_collator.pad_targets = True
 
         translation_dataset = self.get_translation_dataset(tokenizer, training_arguments)
         monolingual_dataset = self.get_pretrain_dataset(tokenizer, training_arguments)
 
-        def wrap_in_list_fn(collator):
-            def wrap_in_list(examples):
-                keys = list(examples.keys())
-                n_examples = len(examples[keys[0]])
-                features = [{k: examples[k][i] for k in keys} for i in range(n_examples)]
-
-                collated = collator(features)
-
-                # At this point, all inputs should be of length L
-                check_shape(collated, L)
-
-                return collated
-
-            return wrap_in_list
-
         with training_arguments.main_process_first():
-
-            # Calculate the total number of train examples we need from the monolingual dataset
             translation_dataset, monolingual_dataset = self._create_mix(translation_dataset, monolingual_dataset)
 
-            monolingual_collated = monolingual_dataset.map(wrap_in_list_fn(monolingual_data_collator), batched=True)
+            monolingual_collated = monolingual_dataset.map(monolingual_data_collator, batched=True)
 
             mixed_train_dataset: Dataset = concatenate_datasets([translation_dataset["train"], monolingual_collated["train"]])
             mixed_train_dataset = mixed_train_dataset.shuffle(seed=42)
@@ -137,7 +116,9 @@ class TibToEngWithTibMixin(TibToEngTranslationWithPrefixMixin, TibZhEngPretrainE
         return translation_dataset, monolingual_dataset
 
     def get_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
-        return DefaultDataCollator()
+        max_input_length = self.MAX_INPUT_LENGTH
+
+        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
 
 
 class LongContextMixedTrainingMixin(TibToEngWithTibMixin):

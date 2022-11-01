@@ -172,17 +172,15 @@ class TibToEngTranslationWithPrefixMixin(TibToEngTranslationMixin):
 
             prefix = "translate Tibetan to English: "
             tibetan_inputs = [prefix + t for t in examples["tibetan"]]
-            model_inputs = tokenizer(tibetan_inputs, max_length=max_input_length, truncation=True, padding="max_length")
+            model_inputs = tokenizer(tibetan_inputs, max_length=max_input_length, truncation=True)
 
             ###########################
             # END add task prefix
             ###########################
 
-            labels = tokenizer(text_target=examples["english"], max_length=max_input_length, truncation=True, padding="max_length")
+            labels = tokenizer(text_target=examples["english"], max_length=max_input_length, truncation=True)
 
             model_inputs["labels"] = labels["input_ids"]
-
-            check_shape(model_inputs, max_input_length)
             
             return model_inputs
 
