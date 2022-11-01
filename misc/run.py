@@ -20,7 +20,7 @@ def reserve_gpu(gpu_id: int) -> bool:
     max_number_of_layers = (free_memory_in_bytes - num_bytes_to_reserve) // base_layer_size_in_bytes
 
     # Randomly add or take away a few layers
-    n_layers = max_number_of_layers + torch.randint(-2, 3, (1,))
+    n_layers = max_number_of_layers + torch.randint(-3, 1, (1,))
 
     total_size = [n_layers] + base_layer_size
 
