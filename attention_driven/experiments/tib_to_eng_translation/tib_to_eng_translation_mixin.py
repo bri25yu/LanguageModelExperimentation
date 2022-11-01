@@ -16,7 +16,6 @@ from transformers import (
 )
 
 from attention_driven.data_processors import FinetuneDataProcessor
-from attention_driven.data_processors.utils import check_shape
 from attention_driven.experiments.experiment_base import ExperimentBase
 
 
