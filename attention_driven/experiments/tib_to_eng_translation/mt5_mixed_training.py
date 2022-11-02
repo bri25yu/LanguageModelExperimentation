@@ -1,4 +1,9 @@
-from attention_driven.experiments.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
+from attention_driven.experiments.model_mixins.mt5_model_mixins import (
+    MT5Base580MModelMixin,
+    MT5Large1_2BModelMixin,
+    MT5FP32Base580MModelMixin,
+    MT5FP32Large1_2BModelMixin,
+)
 
 from attention_driven.experiments.training_pipelines import FinetuneExperimentBase
 from attention_driven.experiments.tib_to_eng_translation.mixed_training import TibToEngWithTibMixin, LongContextMixedTrainingMixin
@@ -28,4 +33,12 @@ class FinetuneMT5Base580MLongContextMixedTrainingExperiment(MT5Base580MModelMixi
 
 
 class FinetuneMT5Large1_2BLongContextMixedTrainingExperiment(MT5Large1_2BModelMixin, MT5LongContextMixedTrainingMixin, FinetuneExperimentBase):
+    pass
+
+
+class FinetuneMT5FP32Base580MLongContextMixedTrainingExperiment(MT5FP32Base580MModelMixin, LongContextMixedTrainingMixin, FinetuneExperimentBase):
+    pass
+
+
+class FinetuneMT5FP32Large1_2BLongContextMixedTrainingExperiment(MT5FP32Large1_2BModelMixin, LongContextMixedTrainingMixin, FinetuneExperimentBase):
     pass
