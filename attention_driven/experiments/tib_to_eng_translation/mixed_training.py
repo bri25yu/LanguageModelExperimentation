@@ -159,3 +159,49 @@ class LongContextMixedTrainingMixin(TibToEngWithTibMixin):
         monolingual_dataset["train"] = repeat_examples(monolingual_dataset["train"], 3 * total_examples // 4)
 
         return translation_dataset, monolingual_dataset
+
+
+class LC_MT_v2_Mixin(TibToEngWithTibMixin):
+    MAX_INPUT_LENGTH = 256
+    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 10  # 1024
+
+    """
+    LC_MT stands for Long Context with Mixed Training
+
+    A `max_input_length` of 256 fully captures 96% of all translation train data points
+
+    1:3 mix of translation and monolingual datasets
+
+    Number of available:
+    - translation examples: 320k
+    - monolingual tokens: 250 mil
+
+    Out of 10 mil examples, the model sees
+    - 2.5 mil translation examples (about the 8 times total number of available translation examples)
+    - 7.5 mil monolingual examples, where the base number of monolingual examples is about 900,000 (before applying MLM)
+
+    This translates to
+    - 220 mil translation tokens
+        - Average of 90 tokens per translation pair
+    - 7.5 mil * 256 = 2 billion monolingual tokens
+
+    """
+    def _create_mix(self, translation_dataset: DatasetDict, monolingual_dataset: DatasetDict) -> Tuple[DatasetDict, DatasetDict]:
+        num_train_steps = self.NUM_TRANSLATION_TRAIN_STEPS
+        num_examples_per_train_step = self.TARGET_TOTAL_BATCH_SIZE_PER_UPDATE
+
+        total_examples = num_train_steps * num_examples_per_train_step
+
+        def repeat_examples(dataset: Dataset, target_n_examples: int) -> Dataset:
+            if len(dataset) >= target_n_examples:
+                return dataset.select(range(target_n_examples))
+
+            indices_iter = cycle(range(len(dataset)))
+            indices = [next(indices_iter) for _ in range(target_n_examples)]
+
+            return dataset.select(indices)
+
+        translation_dataset["train"] = repeat_examples(translation_dataset["train"], total_examples // 4)
+        monolingual_dataset["train"] = repeat_examples(monolingual_dataset["train"], 3 * total_examples // 4)
+
+        return translation_dataset, monolingual_dataset
