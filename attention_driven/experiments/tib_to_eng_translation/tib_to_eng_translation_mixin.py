@@ -16,7 +16,7 @@ from transformers import (
 )
 
 from attention_driven.data_processors import FinetuneDataProcessor
-from attention_driven.experiments.experiment_base import ExperimentBase
+from attention_driven.training_pipelines.experiment_base import ExperimentBase
 
 
 __all__ = ["TibToEngTranslationMixin", "TibToEngTranslationWithPrefixMixin"]

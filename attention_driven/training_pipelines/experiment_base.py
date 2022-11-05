@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 from abc import ABC, abstractmethod
 
 import os
-import json
 import pickle
 
 from datasets import DatasetDict
@@ -13,7 +12,7 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
 from transformers import Trainer, TrainingArguments, PrinterCallback
 
-from attention_driven import CONFIG_DIR, RESULTS_DIR, TRAIN_OUTPUT_DIR
+from attention_driven import RESULTS_DIR, TRAIN_OUTPUT_DIR
 
 
 __all__ = ["ExperimentBase"]
@@ -116,32 +115,3 @@ class ExperimentBase(ABC):
 
     def setup_trainer_log_callbacks(self, trainer: Trainer) -> None:
         trainer.remove_callback(PrinterCallback)
-
-    def load_deepspeed_template_args(self, scheduler_type: str) -> Dict[str, Any]:
-        try:
-            import deepspeed
-
-            has_deepspeed = True
-        except ImportError:
-            has_deepspeed = False
-
-        if has_deepspeed:
-            deepspeed_args_path = os.path.join(CONFIG_DIR, "deepspeed.json")
-        else:
-            deepspeed_args_path = None
-
-        deepspeed_args = json.load(open(deepspeed_args_path))
-
-        # Logic to work around the deepspeed scheduler config
-        ALLOWED_SCHEDULERS = ["WarmupLR", "WarmupDecayLR"]
-        assert scheduler_type in ALLOWED_SCHEDULERS, f"Unrecognize Deepspeed LR scheduler {scheduler_type}. Allowed scheduler types include {ALLOWED_SCHEDULERS}"
-        deepspeed_args["scheduler"]["type"] = scheduler_type
-        if scheduler_type == "WarmupLR":
-            if "total_num_steps" in deepspeed_args["scheduler"]["params"]:
-                del deepspeed_args["scheduler"]["params"]["total_num_steps"]
-
-        return deepspeed_args
-
-    def get_world_size(self) -> int:
-        training_arguments = TrainingArguments("")
-        return training_arguments.world_size

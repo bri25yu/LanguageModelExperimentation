@@ -8,7 +8,7 @@ from transformers.deepspeed import deepspeed_init
 
 from transformers import TrainingArguments, Trainer
 
-from attention_driven.experiments.experiment_base import ExperimentBase
+from attention_driven.training_pipelines.experiment_base import ExperimentBase
 
 
 __all__ = ["ZeroShotExperimentBase"]
