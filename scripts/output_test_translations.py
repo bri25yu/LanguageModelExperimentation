@@ -4,8 +4,8 @@ import pickle
 
 from datasets import load_from_disk
 
-from attention_driven.experiments import available_experiments
-from attention_driven.data_processors import FinetuneDataProcessor
+from lme.experiments import available_experiments
+from lme.data_processors import FinetuneDataProcessor
 
 
 def load_experiment():

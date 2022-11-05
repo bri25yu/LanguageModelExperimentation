@@ -10,9 +10,9 @@ from transformers import (
     TrainingArguments, Seq2SeqTrainer, Seq2SeqTrainingArguments
 )
 
-from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin, TibToEngTranslationWithPrefixMixin
-from attention_driven.data_processors import PretrainDataProcessor
-from attention_driven.modeling.t5_span_mlm import (
+from lme.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin, TibToEngTranslationWithPrefixMixin
+from lme.data_processors import PretrainDataProcessor
+from lme.modeling.t5_span_mlm import (
     PyTorchDataCollatorForT5MLM, compute_input_and_target_lengths, get_group_texts_fn
 )
 

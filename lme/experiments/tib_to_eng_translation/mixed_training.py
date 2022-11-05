@@ -7,14 +7,14 @@ from datasets import Dataset, DatasetDict, concatenate_datasets
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers import TrainingArguments, DataCollatorForSeq2Seq
 
-from attention_driven.data_processors.pretrain import PretrainDataProcessor
+from lme.data_processors.pretrain import PretrainDataProcessor
 
-from attention_driven.modeling.t5_span_mlm import (
+from lme.modeling.t5_span_mlm import (
     compute_input_and_target_lengths, get_group_texts_fn
 )
 
-from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationWithPrefixMixin
-from attention_driven.experiments.tib_to_eng_translation.tib_zh_eng_pretrain_mixin import TibZhEngPretrainExperimentMixin
+from lme.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationWithPrefixMixin
+from lme.experiments.tib_to_eng_translation.tib_zh_eng_pretrain_mixin import TibZhEngPretrainExperimentMixin
 
 
 __all__ = ["TibToEngWithTibMixin", "LongContextMixedTrainingMixin"]

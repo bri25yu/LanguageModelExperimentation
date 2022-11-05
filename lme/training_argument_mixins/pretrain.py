@@ -1,6 +1,6 @@
 from transformers import TrainingArguments
 
-from attention_driven.training_argument_mixins.utils import get_seq2seq_training_arguments
+from lme.training_argument_mixins.utils import get_seq2seq_training_arguments
 
 
 __all__ = ["PretrainTrainingArgumentsMixin"]

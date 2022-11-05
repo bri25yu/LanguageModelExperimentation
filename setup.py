@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 setup(
-    name="attention_driven",
-    version="0.1.0",
-    packages=["attention_driven"],
+    name="lme",
+    version="0.0.1",
+    packages=["lme"],
 )

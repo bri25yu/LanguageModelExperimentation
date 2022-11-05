@@ -1,7 +1,7 @@
 """
 This is a convenience script for running experiments
 """
-from attention_driven.experiments import available_experiments
+from lme.experiments import available_experiments
 
 
 EXPERIMENTS_TO_RUN = [  # Each element is a tuple (experiment name, batch size, learning rates: Optional[List[float]])

@@ -15,8 +15,8 @@ from transformers import (
     Seq2SeqTrainer,
 )
 
-from attention_driven.data_processors import FinetuneDataProcessor
-from attention_driven.training_pipelines.experiment_base import ExperimentBase
+from lme.data_processors import FinetuneDataProcessor
+from lme.training_pipelines.experiment_base import ExperimentBase
 
 
 __all__ = ["TibToEngTranslationMixin", "TibToEngTranslationWithPrefixMixin"]

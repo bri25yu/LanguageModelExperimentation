@@ -9,8 +9,8 @@ from transformers import (
     TrainingArguments,
 )
 
-from attention_driven.data_processors.utils import dataset_summary
-from attention_driven.training_pipelines.experiment_base import ExperimentBase
+from lme.data_processors.utils import dataset_summary
+from lme.training_pipelines.experiment_base import ExperimentBase
 
 
 __all__ = ["FinetuneExperimentBase"]

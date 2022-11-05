@@ -6,7 +6,7 @@ import json
 
 from transformers import TrainingArguments, Seq2SeqTrainingArguments
 
-from attention_driven import CONFIG_DIR
+from lme import CONFIG_DIR
 
 
 __all__ = ["get_seq2seq_training_arguments"]

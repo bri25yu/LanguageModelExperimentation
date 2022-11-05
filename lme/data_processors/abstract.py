@@ -6,8 +6,8 @@ from datasets import DatasetDict, load_from_disk
 
 from transformers import TrainingArguments
 
-from attention_driven import DATASET_CACHE_DIR
-from attention_driven.data_processors.utils import dataset_summary
+from lme import DATASET_CACHE_DIR
+from lme.data_processors.utils import dataset_summary
 
 
 class AbstractDataProcessor(ABC):

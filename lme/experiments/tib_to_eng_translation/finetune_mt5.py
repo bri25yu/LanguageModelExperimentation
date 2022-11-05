@@ -2,9 +2,9 @@ import os
 
 from transformers import TrainingArguments, Seq2SeqTrainingArguments
 
-from attention_driven.experiments.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
-from attention_driven.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin, TibToEngTranslationWithPrefixMixin
-from attention_driven.experiments.training_pipelines import FinetuneExperimentBase
+from lme.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
+from lme.experiments.tib_to_eng_translation.tib_to_eng_translation_mixin import TibToEngTranslationMixin, TibToEngTranslationWithPrefixMixin
+from lme.training_pipelines import FinetuneExperimentBase
 
 
 class MT5TibToEngTranslationMixin(TibToEngTranslationMixin):

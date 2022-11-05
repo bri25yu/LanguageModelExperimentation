@@ -7,7 +7,7 @@ import pickle
 
 import pandas as pd
 
-from attention_driven import RESULTS_DIR
+from lme import RESULTS_DIR
 
 
 def read_results(results_dir: str):

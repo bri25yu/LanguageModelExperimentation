@@ -7,11 +7,11 @@ from transformers.tokenization_utils import PreTrainedTokenizer
 
 from datasets import DatasetDict, concatenate_datasets
 
-from attention_driven.data_processors.pretrain import PretrainDataProcessor
-from attention_driven.experiments.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
-from attention_driven.experiments.tib_to_eng_translation.tib_zh_eng_pretrain_mixin import TibZhEngPretrainExperimentMixin, TibZhEngPretrainWithPrefixExperimentMixin
-from attention_driven.experiments.training_pipelines import PretrainExperimentBase
-from attention_driven.modeling.t5_span_mlm import (
+from lme.data_processors.pretrain import PretrainDataProcessor
+from lme.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
+from lme.experiments.tib_to_eng_translation.tib_zh_eng_pretrain_mixin import TibZhEngPretrainExperimentMixin, TibZhEngPretrainWithPrefixExperimentMixin
+from lme.training_pipelines import PretrainExperimentBase
+from lme.modeling.t5_span_mlm import (
     compute_input_and_target_lengths, get_group_texts_fn
 )
 

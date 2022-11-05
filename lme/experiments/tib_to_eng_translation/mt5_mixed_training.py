@@ -2,21 +2,21 @@ import os
 
 from transformers import Seq2SeqTrainingArguments, TrainingArguments
 
-from attention_driven.experiments.model_mixins.mt5_model_mixins import (
+from lme.model_mixins.mt5_model_mixins import (
     MT5Base580MModelMixin,
     MT5Large1_2BModelMixin,
     MT5FP32Base580MModelMixin,
     MT5FP32Large1_2BModelMixin,
 )
 
-from attention_driven.experiments.training_pipelines import FinetuneExperimentBase
-from attention_driven.experiments.tib_to_eng_translation.mixed_training import (
+from lme.training_pipelines import FinetuneExperimentBase
+from lme.experiments.tib_to_eng_translation.mixed_training import (
     TibToEngWithTibMixin,
     LongContextMixedTrainingMixin,
     LC_MT_v2_Mixin,
     LC_MT_v3_Mixin,
 )
-from attention_driven.experiments.tib_to_eng_translation.finetune_mt5 import MT5TibToEngTranslationMixin
+from lme.experiments.tib_to_eng_translation.finetune_mt5 import MT5TibToEngTranslationMixin
 
 
 class MT5MixedTrainingMixin(TibToEngWithTibMixin):

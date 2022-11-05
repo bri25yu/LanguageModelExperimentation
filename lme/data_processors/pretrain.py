@@ -1,6 +1,6 @@
 from datasets import load_dataset, DatasetDict
 
-from attention_driven.data_processors.abstract import AbstractDataProcessor
+from lme.data_processors.abstract import AbstractDataProcessor
 
 
 class PretrainDataProcessor(AbstractDataProcessor):

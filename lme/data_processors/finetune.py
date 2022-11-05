@@ -5,9 +5,9 @@ import pandas as pd
 
 from datasets import DatasetDict
 
-from attention_driven import ROOT_DIR
-from attention_driven.data_processors.utils import convert_df_to_hf_dataset
-from attention_driven.data_processors.abstract import AbstractDataProcessor
+from lme import ROOT_DIR
+from lme.data_processors.utils import convert_df_to_hf_dataset
+from lme.data_processors.abstract import AbstractDataProcessor
 
 
 class FinetuneDataProcessor(AbstractDataProcessor):

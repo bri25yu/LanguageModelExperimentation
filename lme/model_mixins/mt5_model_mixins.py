@@ -5,8 +5,8 @@ from transformers.modeling_utils import PreTrainedModel
 
 from transformers import AutoTokenizer
 
-from attention_driven.modeling.mt5_fp16_utils import scale_weights_for_fp16_t5
-from attention_driven.modeling.mt5_fp16 import MT5Fp16ForConditionalGeneration
+from lme.modeling.mt5_fp16_utils import scale_weights_for_fp16_t5
+from lme.modeling.mt5_fp16 import MT5Fp16ForConditionalGeneration
 
 
 __all__ = [

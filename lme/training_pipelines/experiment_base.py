@@ -12,7 +12,7 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
 from transformers import Trainer, TrainingArguments, PrinterCallback
 
-from attention_driven import RESULTS_DIR, TRAIN_OUTPUT_DIR
+from lme import RESULTS_DIR, TRAIN_OUTPUT_DIR
 
 
 __all__ = ["ExperimentBase"]
