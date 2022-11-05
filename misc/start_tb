@@ -1,3 +1,4 @@
+#!/bin/bash
 # Start Tensorboard (tb)
 
 tensorboard --logdir . --port=27426

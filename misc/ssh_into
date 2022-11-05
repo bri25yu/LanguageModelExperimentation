@@ -1,1 +1,2 @@
-ssh -L 6006:localhost:27426 bri25yu@$1.millennium.berkeley.edu
+#!/bin/bash
+ssh -L 6006:localhost:27426 bri25yu@"$1".millennium.berkeley.edu

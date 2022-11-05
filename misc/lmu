@@ -1,14 +1,15 @@
+#!/bin/bash
 # `lmu` stands for "list machine usage"
 
 # Start ssh-agent to manage our private ssh key since we're ssh'ing into multiple remotes
-eval `ssh-agent`
+eval "$(ssh-agent)"
 ssh-add
 
 
-for i in `seq 18 26`
+for i in $(seq 18 26)
 do
     # Get GPU information
-    gpu_info=$(ssh bri25yu@a$i.millennium.berkeley.edu nvidia-smi)
+    gpu_info=$(ssh bri25yu@a"$i".millennium.berkeley.edu nvidia-smi)
 
     # Clean up GPU info output to just lines with GPU RAM info
     gpu_info=$(echo "${gpu_info}" | grep Default)
