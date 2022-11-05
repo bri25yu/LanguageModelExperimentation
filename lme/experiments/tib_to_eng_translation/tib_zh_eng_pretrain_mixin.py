@@ -51,9 +51,6 @@ class TibZhEngPretrainExperimentMixin(TibToEngTranslationMixin):
             target_length=targets_length,
         )
 
-    def get_pretrain_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
-        return None
-
     def get_pretrain_dataset(self, tokenizer: PreTrainedTokenizer, pretrain_training_arguments: TrainingArguments) -> DatasetDict:
         max_input_length = self.MAX_INPUT_LENGTH
         mlm_probability = self.MLM_PROBABILITY

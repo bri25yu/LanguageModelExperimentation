@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from abc import ABC, abstractmethod
 
@@ -30,6 +30,7 @@ class ExperimentBase(ABC):
     In order to use this experiment class, you must implement the `get_tokenizer`, `get_model`, and `run` methods.
 
     """
+    MAX_INPUT_LENGTH: Union[None, int] = None
 
     @abstractmethod
     def get_tokenizer(self) -> PreTrainedTokenizer:
