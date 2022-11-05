@@ -1,14 +1,12 @@
 from typing import Union
 
-from attention_driven.experiments.experiment_base import ExperimentBase
-
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
 
-class NLLBModelMixinBase(ExperimentBase):
+class NLLBModelMixinBase:
     MODEL_NAME: Union[None, str] = None
 
     def get_tokenizer(self) -> PreTrainedTokenizer:

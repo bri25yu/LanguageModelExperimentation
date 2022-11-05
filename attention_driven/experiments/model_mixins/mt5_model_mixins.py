@@ -1,11 +1,9 @@
 from typing import Union
 
-from attention_driven.experiments.experiment_base import ExperimentBase
-
 from transformers.tokenization_utils import PreTrainedTokenizer
 from transformers.modeling_utils import PreTrainedModel
 
-from transformers import AutoTokenizer, MT5ForConditionalGeneration
+from transformers import AutoTokenizer
 
 from attention_driven.modeling.mt5_fp16_utils import scale_weights_for_fp16_t5
 from attention_driven.modeling.mt5_fp16 import MT5Fp16ForConditionalGeneration
@@ -14,12 +12,10 @@ from attention_driven.modeling.mt5_fp16 import MT5Fp16ForConditionalGeneration
 __all__ = [
     "MT5Base580MModelMixin",
     "MT5Large1_2BModelMixin",
-    "MT5FP32Base580MModelMixin",
-    "MT5FP32Large1_2BModelMixin",
 ]
 
 
-class MT5ModelMixinBase(ExperimentBase):
+class MT5ModelMixinBase:
     MODEL_NAME: Union[None, str] = None
 
     def get_tokenizer(self) -> PreTrainedTokenizer:
@@ -47,24 +43,4 @@ class MT5Base580MModelMixin(MT5ModelMixinBase):
 
 
 class MT5Large1_2BModelMixin(MT5ModelMixinBase):
-    MODEL_NAME = "google/mt5-large"
-
-
-class MT5FP32ModelMixinBase(MT5ModelMixinBase):
-    def get_model(self, tokenizer: PreTrainedTokenizer) -> PreTrainedModel:
-        model_name = self.MODEL_NAME
-        max_input_length = self.MAX_INPUT_LENGTH
-
-        model = MT5ForConditionalGeneration.from_pretrained(model_name)
-
-        model.config.max_length = max_input_length
-
-        return model
-
-
-class MT5FP32Base580MModelMixin(MT5FP32ModelMixinBase):
-    MODEL_NAME = "google/mt5-base"
-
-
-class MT5FP32Large1_2BModelMixin(MT5FP32ModelMixinBase):
     MODEL_NAME = "google/mt5-large"
