@@ -23,6 +23,9 @@ class PretrainTrainingArgumentsMixinBase:
 
 
 class PretrainTrainingArgumentsMixin1(PretrainTrainingArgumentsMixinBase):
+    """
+    This results in 100k * 256 = 25 mil examples.
+    """
     FINETUNE_TRAINING_ARGUMENTS_MIXIN = ConstantLRFinetuneTrainingArgumentsMixin
 
     def get_pretrain_training_arguments(self, batch_size: int) -> TrainingArguments:
@@ -31,7 +34,7 @@ class PretrainTrainingArgumentsMixin1(PretrainTrainingArgumentsMixinBase):
             learning_rate=1e-4,
             max_steps=100000,
             eval_steps=1000,
-            target_total_batch_size_per_update=2 ** 10,  # 1024
+            target_total_batch_size_per_update=2 ** 8,  # 256
             per_gpu_batch_size=batch_size,
             scheduler_type="WarmupDecayLR",
             warmup_steps=10000,  # 10% of the total number of steps

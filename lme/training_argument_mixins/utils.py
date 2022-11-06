@@ -63,7 +63,10 @@ def get_seq2seq_training_arguments(
 
     world_size = get_world_size()
     gradient_accumulation_steps = target_total_batch_size_per_update // (per_gpu_batch_size * world_size)
-    gradient_accumulation_steps = max(gradient_accumulation_steps, 1)
+    if gradient_accumulation_steps < 1:
+        # We ensure our true target batch size is constant, irregardless of hardware restrictions
+        gradient_accumulation_steps = 1
+        per_gpu_batch_size = target_total_batch_size_per_update // world_size
 
     return Seq2SeqTrainingArguments(
         output_dir,

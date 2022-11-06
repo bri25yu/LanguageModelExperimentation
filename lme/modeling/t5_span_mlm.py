@@ -15,11 +15,18 @@ from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.tokenization_utils import BatchEncoding
 
 
-__all__ = ["PyTorchDataCollatorForT5MLM"]
+__all__ = [
+    "get_group_texts_fn",
+    "create_t5_mlm_data_collator",
+]
+
+
+DEFAULT_MLM_PROBABILITY = 0.15
+DEFAULT_MEAN_NOISE_SPAN_LENGTH = 3.0
 
 
 @dataclass
-class PyTorchDataCollatorForT5MLM:
+class DataCollatorForT5MLM:
     """
     Data collator used for T5 span-masked language modeling.
     It is made sure that after masking the inputs are of length `data_args.max_seq_length` and targets are also of fixed length.
@@ -37,10 +44,8 @@ class PyTorchDataCollatorForT5MLM:
             The expected input length after masking.
         target_length (:obj:`int`):
             The expected target length after masking.
-        pad_token_id: (:obj:`int`):
-            The pad token id of the model
-        decoder_start_token_id: (:obj:`int):
-            The decoder start token id of the model. This is no longer used in this copy of the example function.
+        return_tensors (:obj:`str`):
+            The type of tensor to return
     """
 
     tokenizer: PreTrainedTokenizerBase
@@ -50,18 +55,6 @@ class PyTorchDataCollatorForT5MLM:
     target_length: int
     return_tensors: str = "pt"
 
-    ###############################
-    # START don't manually shift right
-    ###############################
-
-    # Original code:
-    # decoder_start_token_id: int
-
-    ###############################
-    # END don't manually shift right
-    ###############################
-
-    # This is an exact copy of the linked example at the top of this file unless specified otherwise
     def __call__(self, examples: Union[Dict[str, Sequence[Sequence]], List[Dict[str, Sequence]]]) -> BatchEncoding:
         if isinstance(examples, Mapping):
             batch = BatchEncoding(examples, tensor_type="np")
@@ -97,34 +90,12 @@ class PyTorchDataCollatorForT5MLM:
                 f" {self.target_length}."
             )
 
-        ###############################
-        # START don't manually shift right
-        ###############################
-
-        # Original code:
-        # to check that tokens are correctly preprocessed, one can run `self.tokenizer.batch_decode(input_ids)` and `self.tokenizer.batch_decode(labels)` here...
-        # batch["decoder_input_ids"] = shift_tokens_right(
-        #     batch["labels"], self.pad_token_id, self.decoder_start_token_id
-        # )
-
-        ###############################
-        # END don't manually shift right
-        ###############################
-
-        ###############################
-        # START convert batch from numpy to pytorch
-        ###############################
-
         if self.return_tensors == "pt":
             batch = BatchEncoding({k: torch.tensor(v, dtype=torch.long) for k, v in batch.items()})
         elif self.return_tensors == "np":
             pass
         else:
             raise ValueError(f"Available return tensors are pt and np but got {self.return_tensors}")
-
-        ###############################
-        # END convert batch from numpy to pytorch
-        ###############################
 
         return batch
 
@@ -266,7 +237,20 @@ def compute_input_and_target_lengths(inputs_length, noise_density, mean_noise_sp
 
 
 # Main data processing function that will concatenate all texts from our dataset and generate chunks of expanded_inputs_length.
-def get_group_texts_fn(expanded_inputs_length: int) -> Callable:
+# T5-like span masked language modeling will fuse consecutively masked tokens to a single sentinel token.
+# To ensure that the input length is `max_seq_length`, we need to increase the maximum length
+# according to `mlm_probability` and `mean_noise_span_length`. We can also define the label length accordingly.
+def get_group_texts_fn(
+    max_input_length: int,
+    mlm_probability: float=DEFAULT_MLM_PROBABILITY,
+    mean_noise_span_length: float=DEFAULT_MEAN_NOISE_SPAN_LENGTH,
+) -> Callable:
+    expanded_inputs_length, _ = compute_input_and_target_lengths(
+        inputs_length=max_input_length,
+        noise_density=mlm_probability,
+        mean_noise_span_length=mean_noise_span_length,
+    )
+
     def group_texts(examples) -> Dict[str, List[str]]:
         # Concatenate all texts.
         concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
@@ -286,3 +270,24 @@ def get_group_texts_fn(expanded_inputs_length: int) -> Callable:
         return result
 
     return group_texts
+
+
+def create_t5_mlm_data_collator(
+    tokenizer: PreTrainedTokenizerBase,
+    max_input_length: int,
+    mlm_probability: float=DEFAULT_MLM_PROBABILITY,
+    mean_noise_span_length: float=DEFAULT_MEAN_NOISE_SPAN_LENGTH,
+) -> Callable:
+    _, targets_length = compute_input_and_target_lengths(
+        inputs_length=max_input_length,
+        noise_density=mlm_probability,
+        mean_noise_span_length=mean_noise_span_length,
+    )
+
+    return DataCollatorForT5MLM(
+        tokenizer=tokenizer,
+        noise_density=mlm_probability,
+        mean_noise_span_length=mean_noise_span_length,
+        input_length=max_input_length,
+        target_length=targets_length,
+    )
