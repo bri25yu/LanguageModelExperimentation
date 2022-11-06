@@ -10,11 +10,14 @@ from lme.data_processors.utils import convert_df_to_hf_dataset
 from lme.data_processors.abstract import AbstractDataProcessor
 
 
-class FinetuneDataProcessor(AbstractDataProcessor):
+__all__ = ["TranslationDataProcessor"]
+
+
+class TranslationDataProcessor(AbstractDataProcessor):
     """
     Using data from https://github.com/Linguae-Dharmae/language-models
 
-    This data is for finetuning on Tibetan and English translation.
+    This data is for Tibetan and English translation.
 
     This class requires the LinguaeDharmae repository cloned to the correct location. See README.md
     """

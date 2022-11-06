@@ -3,7 +3,7 @@ from typing import Callable, List, Union
 
 from datasets import DatasetDict
 
-from transformers.tokenization_utils import PreTrainedTokenizer
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers.deepspeed import deepspeed_init
 
 from transformers import TrainingArguments, Trainer
@@ -23,15 +23,15 @@ class ZeroShotExperimentBase(ExperimentBase):
         pass
 
     @abstractmethod
-    def get_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
+    def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         pass
 
     @abstractmethod
-    def get_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
+    def get_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         pass
 
     @abstractmethod
-    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizer, training_arguments: TrainingArguments) -> DatasetDict:
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
         pass
 
     def run(self, batch_size: int, _: List[float]) -> None:

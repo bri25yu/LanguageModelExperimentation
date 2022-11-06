@@ -4,7 +4,7 @@ from argparse import ArgumentParser, Namespace
 
 from datasets import load_dataset, Dataset
 
-from transformers.tokenization_utils import PreTrainedTokenizer
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers import AutoTokenizer
 
 
@@ -48,14 +48,14 @@ class TrainMT5Tokenizer:
 
         return batch_iterator_fn
 
-    def load_old_tokenizer(self) -> PreTrainedTokenizer:
+    def load_old_tokenizer(self) -> PreTrainedTokenizerBase:
         old_tokenizer_name = self.OLD_TOKENIZER_NAME
 
         old_tokenizer = AutoTokenizer.from_pretrained(old_tokenizer_name)
 
         return old_tokenizer
 
-    def train_new_tokenizer(self, batch_iterator: Iterator, old_tokenizer: PreTrainedTokenizer, length: int) -> PreTrainedTokenizer:
+    def train_new_tokenizer(self, batch_iterator: Iterator, old_tokenizer: PreTrainedTokenizerBase, length: int) -> PreTrainedTokenizerBase:
         old_vocab_size = old_tokenizer.vocab_size
         new_vocab_size = old_vocab_size + 5000
 
@@ -65,7 +65,7 @@ class TrainMT5Tokenizer:
 
         return new_tokenizer
 
-    def save_new_tokenizer(self, new_tokenizer: PreTrainedTokenizer) -> None:
+    def save_new_tokenizer(self, new_tokenizer: PreTrainedTokenizerBase) -> None:
         new_tokenizer.push_to_hub("buddhist-nlp/mt5-tibetan-tokenizer")
 
 

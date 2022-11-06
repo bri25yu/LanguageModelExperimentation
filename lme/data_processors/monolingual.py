@@ -3,7 +3,10 @@ from datasets import load_dataset, DatasetDict
 from lme.data_processors.abstract import AbstractDataProcessor
 
 
-class PretrainDataProcessor(AbstractDataProcessor):
+__all__ = ["MonolingualDataProcessor"]
+
+
+class MonolingualDataProcessor(AbstractDataProcessor):
     """
     The original loaded dataset dict is 
     DatasetDict({

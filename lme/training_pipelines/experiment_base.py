@@ -7,7 +7,7 @@ import pickle
 
 from datasets import DatasetDict
 
-from transformers.tokenization_utils import PreTrainedTokenizer
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
 from transformers import Trainer, TrainingArguments, PrinterCallback
@@ -33,11 +33,11 @@ class ExperimentBase(ABC):
     MAX_INPUT_LENGTH: Union[None, int] = None
 
     @abstractmethod
-    def get_tokenizer(self) -> PreTrainedTokenizer:
+    def get_tokenizer(self) -> PreTrainedTokenizerBase:
         pass
 
     @abstractmethod
-    def get_model(self, tokenizer: PreTrainedTokenizer) -> PreTrainedModel:
+    def get_model(self, tokenizer: PreTrainedTokenizerBase) -> PreTrainedModel:
         pass
 
     @abstractmethod

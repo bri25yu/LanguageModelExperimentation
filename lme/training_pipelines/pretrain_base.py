@@ -6,7 +6,7 @@ from datasets import DatasetDict
 
 import torch
 
-from transformers.tokenization_utils import PreTrainedTokenizer
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers.trainer_utils import get_last_checkpoint
 
 from transformers import (
@@ -37,27 +37,27 @@ class PretrainExperimentBase(ExperimentBase):
         pass
 
     @abstractmethod
-    def get_pretrain_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
+    def get_pretrain_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         pass
 
     @abstractmethod
-    def get_finetune_data_collator(self, tokenizer: PreTrainedTokenizer) -> Callable:
+    def get_finetune_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         pass
 
     @abstractmethod
-    def get_pretrain_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
+    def get_pretrain_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         pass
 
     @abstractmethod
-    def get_finetune_compute_metrics(self, tokenizer: PreTrainedTokenizer) -> Callable:
+    def get_finetune_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         pass
 
     @abstractmethod
-    def get_pretrain_dataset(self, tokenizer: PreTrainedTokenizer, pretrain_training_arguments: TrainingArguments) -> DatasetDict:
+    def get_pretrain_dataset(self, tokenizer: PreTrainedTokenizerBase, pretrain_training_arguments: TrainingArguments) -> DatasetDict:
         pass
 
     @abstractmethod
-    def get_finetune_dataset(self, tokenizer: PreTrainedTokenizer, finetune_training_arguments: TrainingArguments) -> DatasetDict:
+    def get_finetune_dataset(self, tokenizer: PreTrainedTokenizerBase, finetune_training_arguments: TrainingArguments) -> DatasetDict:
         pass
 
     def run(self, batch_size: int, finetune_learning_rates: List[float]) -> None:

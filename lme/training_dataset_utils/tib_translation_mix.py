@@ -6,6 +6,12 @@ from lme.modeling.t5_span_mlm import create_t5_mlm_data_collator
 from lme.training_dataset_utils.utils import create_mix
 
 
+__all__ = [
+    "create_examples_proportional_mix",
+    "create_mix_by_proportion",
+]
+
+
 def create_mixed_training(
     translation_train_set: Dataset,
     monolingual_train_set: Dataset,
@@ -43,7 +49,7 @@ def create_examples_proportional_mix(
     )
 
 
-def create_examples_proportional_mix(
+def create_mix_by_proportion(
     translation_train_set: Dataset,
     monolingual_train_set: Dataset,
     tokenizer: PreTrainedTokenizerBase,

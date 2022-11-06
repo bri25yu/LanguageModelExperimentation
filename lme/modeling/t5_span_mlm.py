@@ -11,7 +11,7 @@ import numpy as np
 
 import torch
 
-from transformers.tokenization_utils_base import PreTrainedTokenizerBase
+from transformers.tokenization_utils_base import PreTrainedTokenizerBaseBase
 from transformers.tokenization_utils import BatchEncoding
 
 
@@ -34,7 +34,7 @@ class DataCollatorForT5MLM:
     at the `official paper <https://arxiv.org/pdf/1910.10683.pdf>`__
     or the `official code for preprocessing <https://github.com/google-research/text-to-text-transfer-transformer/blob/master/t5/data/preprocessors.py>`__ .
     Args:
-        tokenizer (:class:`~transformers.PreTrainedTokenizer` or :class:`~transformers.PreTrainedTokenizerFast`):
+        tokenizer (:class:`~transformers.PreTrainedTokenizerBase` or :class:`~transformers.PreTrainedTokenizerBaseFast`):
             The tokenizer used for encoding the data.
         noise_density (:obj:`float`):
             The probability with which to (randomly) mask tokens in the input.
@@ -48,7 +48,7 @@ class DataCollatorForT5MLM:
             The type of tensor to return
     """
 
-    tokenizer: PreTrainedTokenizerBase
+    tokenizer: PreTrainedTokenizerBaseBase
     noise_density: float
     mean_noise_span_length: float
     input_length: int
@@ -273,7 +273,7 @@ def get_group_texts_fn(
 
 
 def create_t5_mlm_data_collator(
-    tokenizer: PreTrainedTokenizerBase,
+    tokenizer: PreTrainedTokenizerBaseBase,
     max_input_length: int,
     mlm_probability: float=DEFAULT_MLM_PROBABILITY,
     mean_noise_span_length: float=DEFAULT_MEAN_NOISE_SPAN_LENGTH,
