@@ -4,13 +4,13 @@ from lme.training_argument_mixins import DecayLRFinetuneTrainingArgumentsMixin
 from lme.experiments.translation_mixins import TranslationMixin
 
 
-class FinetuneNLLBExperimentBase(DecayLRFinetuneTrainingArgumentsMixin, TranslationMixin, FinetuneExperimentBase):
+class TranslationNLLBExperimentBase(DecayLRFinetuneTrainingArgumentsMixin, TranslationMixin, FinetuneExperimentBase):
     pass
 
 
-class FinetuneNLLB600MExperiment(NLLB600MModelMixin, FinetuneNLLBExperimentBase):
+class TranslationNLLB600MExperiment(NLLB600MModelMixin, TranslationNLLBExperimentBase):
     pass
 
 
-class FinetuneNLLB1_3BExperiment(NLLB1_3BModelMixin, FinetuneNLLBExperimentBase):
+class TranslationNLLB1_3BExperiment(NLLB1_3BModelMixin, TranslationNLLBExperimentBase):
     pass
