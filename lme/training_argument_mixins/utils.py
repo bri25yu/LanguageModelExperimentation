@@ -9,7 +9,7 @@ from transformers import TrainingArguments, Seq2SeqTrainingArguments
 from lme import CONFIG_DIR
 
 
-__all__ = ["get_seq2seq_training_arguments"]
+__all__ = ["get_seq2seq_training_arguments", "calculate_total_examples"]
 
 
 def get_world_size() -> int:
@@ -93,3 +93,8 @@ def get_seq2seq_training_arguments(
         warmup_steps=warmup_steps,
         deepspeed=get_deepspeed_args(scheduler_type),
     )
+
+
+def calculate_total_examples(args: TrainingArguments) -> int:
+    world_size = get_world_size()
+    return args.max_steps * args.gradient_accumulation_steps * args.per_device_train_batch_size * world_size

@@ -6,9 +6,8 @@ from transformers import DataCollatorForSeq2Seq, Seq2SeqTrainer, TrainingArgumen
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.compute_metrics_utils import get_translation_compute_metrics
-
 from lme.data_processors import TranslationDataProcessor, MonolingualDataProcessor
-
+from lme.training_argument_mixins.utils import calculate_total_examples
 from lme.training_dataset_utils import (
     create_tib_to_eng_translation,
     create_examples_proportional_mix,
@@ -52,7 +51,7 @@ class TranslationMixin:
 class MixedExamplesProportionalMixin(TranslationMixin):
     def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
         max_input_length = self.MAX_INPUT_LENGTH
-        total_examples = training_arguments.max_steps * training_arguments.gradient_accumulation_steps * training_arguments.per_device_train_batch_size
+        total_examples = calculate_total_examples(training_arguments)
 
         translation_dataset = TranslationDataProcessor()(training_arguments)
         monolingual_dataset = MonolingualDataProcessor()(training_arguments)
@@ -88,7 +87,7 @@ class MixedMixinBase(TranslationMixin):
         translation_proportion = self.TRANSLATION_PROPORTION
         monolingual_proportion = self.MONOLINGUAL_PROPORTION
 
-        total_examples = training_arguments.max_steps * training_arguments.gradient_accumulation_steps * training_arguments.per_device_train_batch_size
+        total_examples = calculate_total_examples(training_arguments)
 
         translation_dataset = TranslationDataProcessor()(training_arguments)
         monolingual_dataset = MonolingualDataProcessor()(training_arguments)
