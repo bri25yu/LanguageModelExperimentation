@@ -12,8 +12,7 @@ def create_examples_proportional_monolingual(
     tokenizer: PreTrainedTokenizerBase, max_input_length: int, multilingual_dataset: DatasetDict
 ) -> DatasetDict:
     def tokenize_fn(examples):
-        tokenized = tokenizer(examples["text"])
-        return {"input_ids": tokenized["input_ids"]}
+        return tokenizer(examples["text"])
 
     group_texts = get_group_texts_fn(max_input_length)
 
