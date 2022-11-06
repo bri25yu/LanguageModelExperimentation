@@ -2,7 +2,6 @@ from lme.training_pipelines import FinetuneExperimentBase
 from lme.model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
 from lme.training_argument_mixins import ConstantLRFinetuneTrainingArgumentsMixin
 from lme.experiments.translation_mixins import (
-    MixedExamplesProportionalMixin,
     MixedProportion1Mixin,
     MixedProportion2Mixin,
     MixedProportion3Mixin,
@@ -10,18 +9,6 @@ from lme.experiments.translation_mixins import (
 
 
 class MixedMT5ExperimentBase(ConstantLRFinetuneTrainingArgumentsMixin, FinetuneExperimentBase):
-    pass
-
-
-class MixedExamplesProportionalExperimentBase(MixedExamplesProportionalMixin, MixedMT5ExperimentBase):
-    pass
-
-
-class MixedExamplesProportionalMT5BaseExperiment(MT5Base580MModelMixin, MixedExamplesProportionalExperimentBase):
-    pass
-
-
-class MixedExamplesProportionalMT5LargeExperiment(MT5Large1_2BModelMixin, MixedExamplesProportionalExperimentBase):
     pass
 
 

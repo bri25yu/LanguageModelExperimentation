@@ -10,7 +10,6 @@ from lme.data_processors import TranslationDataProcessor, MonolingualDataProcess
 from lme.training_argument_mixins.utils import calculate_total_examples
 from lme.training_dataset_utils import (
     create_tib_to_eng_translation,
-    create_examples_proportional_mix,
     create_mix_by_proportion,
     create_examples_proportional_monolingual,
 )
@@ -46,36 +45,6 @@ class TranslationMixin:
             tokenized_dataset = create_tib_to_eng_translation(translation_dataset, max_input_length, tokenizer)
 
         return tokenized_dataset
-
-
-class MixedExamplesProportionalMixin(TranslationMixin):
-    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
-        max_input_length = self.MAX_INPUT_LENGTH
-        total_examples = calculate_total_examples(training_arguments)
-
-        translation_dataset = TranslationDataProcessor()(training_arguments)
-        monolingual_dataset = MonolingualDataProcessor()(training_arguments)
-        monolingual_dataset = DatasetDict({"tibetan": monolingual_dataset["tibetan"]})
-
-        with training_arguments.main_process_first():
-            tokenized_translation_dataset = create_tib_to_eng_translation(translation_dataset, max_input_length, tokenizer)
-            monolingual_dataset = create_examples_proportional_monolingual(tokenizer, max_input_length, monolingual_dataset)
-
-            mixed_train_dataset = create_examples_proportional_mix(
-                tokenized_translation_dataset["train"],
-                monolingual_dataset["train"],
-                tokenizer,
-                max_input_length,
-                total_examples,
-            )
-
-            mixed_dataset = DatasetDict({
-                "train": mixed_train_dataset,
-                "val": tokenized_translation_dataset["val"],
-                "test": tokenized_translation_dataset["test"],
-            })
-
-        return mixed_dataset
 
 
 class MixedMixinBase(TranslationMixin):
