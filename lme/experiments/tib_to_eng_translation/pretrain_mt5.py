@@ -1,7 +1,3 @@
-from typing import Union
-
-import os
-
 from transformers import TrainingArguments
 from transformers.tokenization_utils import PreTrainedTokenizer
 
@@ -9,7 +5,7 @@ from datasets import DatasetDict, concatenate_datasets
 
 from lme.data_processors.pretrain import PretrainDataProcessor
 from lme.model_mixins.mt5_model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
-from lme.experiments.tib_to_eng_translation.tib_zh_eng_pretrain_mixin import TibZhEngPretrainExperimentMixin, TibZhEngPretrainWithPrefixExperimentMixin
+from lme.experiments.tib_to_eng_translation.tib_zh_eng_pretrain_mixin import TibZhEngPretrainExperimentMixin
 from lme.training_pipelines import PretrainExperimentBase
 from lme.modeling.t5_span_mlm import (
     compute_input_and_target_lengths, get_group_texts_fn
@@ -68,22 +64,6 @@ class PretrainMT5TestExperiment(MT5Base580MModelMixin, TibZhEngPretrainExperimen
 
         return pretrain_dataset
 
-    def get_pretrain_training_arguments(self, batch_size: int) -> TrainingArguments:
-        pretrain_training_arguments = super().get_pretrain_training_arguments(batch_size)
-
-        pretrain_training_arguments.max_steps = 10
-        pretrain_training_arguments.save_steps = 10
-
-        return pretrain_training_arguments
-
-    def get_finetune_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
-        finetune_training_arguments = super().get_finetune_training_arguments(batch_size, learning_rate)
-
-        finetune_training_arguments.max_steps = 10
-        finetune_training_arguments.save_steps = 10
-
-        return finetune_training_arguments
-
 
 class PretrainMT5Base580MExperiment(MT5Base580MModelMixin, TibZhEngPretrainExperimentMixin, PretrainExperimentBase):
     pass
@@ -91,33 +71,3 @@ class PretrainMT5Base580MExperiment(MT5Base580MModelMixin, TibZhEngPretrainExper
 
 class PretrainMT5Large1_2BExperiment(MT5Large1_2BModelMixin, TibZhEngPretrainExperimentMixin, PretrainExperimentBase):
     pass
-
-
-class PretrainMT5WithPrefixExperimentBase(TibZhEngPretrainWithPrefixExperimentMixin):
-    """
-    We don't want to re-pretrain for this new set of classes, so we just extend from the
-    base pretrain class lol
-
-    This is probably bad programming practice.
-    """
-    BASE_PRETRAIN_CLASS: Union[None, type] = None
-
-    def get_pretrain_training_arguments(self, batch_size: int) -> TrainingArguments:
-        pretrain_training_arguments = super().get_pretrain_training_arguments(batch_size)
-
-        base_pretrain_experiment = self.BASE_PRETRAIN_CLASS()
-        learning_rate = self.PRETRAIN_LEARNING_RATE
-        base_pretrain_output_dir = os.path.join(
-            base_pretrain_experiment.experiment_class_output_dir, "pretrain", f"{learning_rate:.0e}"
-        )
-        pretrain_training_arguments.output_dir = base_pretrain_output_dir
-
-        return pretrain_training_arguments
-
-
-class PretrainMT5Base580MWithPrefixExperiment(MT5Base580MModelMixin, PretrainMT5WithPrefixExperimentBase, PretrainExperimentBase):
-    BASE_PRETRAIN_CLASS = PretrainMT5Base580MExperiment
-
-
-class PretrainMT5Large1_2BWithPrefixExperiment(MT5Large1_2BModelMixin, PretrainMT5WithPrefixExperimentBase, PretrainExperimentBase):
-    BASE_PRETRAIN_CLASS = PretrainMT5Large1_2BExperiment
