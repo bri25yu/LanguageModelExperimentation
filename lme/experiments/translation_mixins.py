@@ -43,7 +43,7 @@ class TranslationMixin:
 
         translation_dataset = TranslationDataProcessor()(training_arguments)
 
-        with training_arguments.main_process_first(local=False):
+        with training_arguments.main_process_first():
             tokenized_dataset = create_tib_to_eng_translation(translation_dataset, max_input_length, tokenizer)
 
         return tokenized_dataset
@@ -58,7 +58,7 @@ class MixedExamplesProportionalMixin(TranslationMixin):
         monolingual_dataset = MonolingualDataProcessor()(training_arguments)
         monolingual_dataset = DatasetDict({"tibetan": monolingual_dataset["tibetan"]})
 
-        with training_arguments.main_process_first(local=False):
+        with training_arguments.main_process_first():
             tokenized_translation_dataset = create_tib_to_eng_translation(translation_dataset, max_input_length, tokenizer)
             monolingual_dataset = create_examples_proportional_monolingual(tokenizer, max_input_length, monolingual_dataset)
 
@@ -94,7 +94,7 @@ class MixedMixinBase(TranslationMixin):
         monolingual_dataset = MonolingualDataProcessor()(training_arguments)
         monolingual_dataset = DatasetDict({"tibetan": monolingual_dataset["tibetan"]})
 
-        with training_arguments.main_process_first(local=False):
+        with training_arguments.main_process_first():
             tokenized_translation_dataset = create_tib_to_eng_translation(translation_dataset, max_input_length, tokenizer)
             monolingual_dataset = create_examples_proportional_monolingual(tokenizer, max_input_length, monolingual_dataset)
 

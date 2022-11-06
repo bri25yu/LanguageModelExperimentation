@@ -12,7 +12,7 @@ from lme.data_processors.utils import dataset_summary
 
 class AbstractDataProcessor(ABC):
     def __call__(self, training_arguments: TrainingArguments) -> DatasetDict:
-        with training_arguments.main_process_first(local=False, desc="Loading data"):
+        with training_arguments.main_process_first(, desc="Loading data"):
             if os.path.exists(self.path):
                 dataset = load_from_disk(self.path)
             else:
