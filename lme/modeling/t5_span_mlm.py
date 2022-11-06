@@ -11,7 +11,7 @@ import numpy as np
 
 import torch
 
-from transformers.tokenization_utils_base import PreTrainedTokenizerBaseBase
+from transformers.tokenization_utils_base import PreTrainedTokenizerBase
 from transformers.tokenization_utils import BatchEncoding
 
 
@@ -48,7 +48,7 @@ class DataCollatorForT5MLM:
             The type of tensor to return
     """
 
-    tokenizer: PreTrainedTokenizerBaseBase
+    tokenizer: PreTrainedTokenizerBase
     noise_density: float
     mean_noise_span_length: float
     input_length: int
@@ -273,7 +273,7 @@ def get_group_texts_fn(
 
 
 def create_t5_mlm_data_collator(
-    tokenizer: PreTrainedTokenizerBaseBase,
+    tokenizer: PreTrainedTokenizerBase,
     max_input_length: int,
     mlm_probability: float=DEFAULT_MLM_PROBABILITY,
     mean_noise_span_length: float=DEFAULT_MEAN_NOISE_SPAN_LENGTH,
