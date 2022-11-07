@@ -38,4 +38,5 @@ class PretrainTrainingArgumentsMixin1(PretrainTrainingArgumentsMixinBase):
             per_gpu_batch_size=batch_size,
             scheduler_type="WarmupDecayLR",
             warmup_steps=10000,  # 10% of the total number of steps
+            fp16=False,
         )

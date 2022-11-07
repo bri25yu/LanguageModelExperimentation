@@ -86,13 +86,13 @@ class MixedMixinBase(TranslationMixin):
 
 
 class MixedProportion1Mixin(MixedMixinBase):
-    TRANSLATION_PROPORTION = 0.1
-    MONOLINGUAL_PROPORTION = 0.9
+    TRANSLATION_PROPORTION = 0.9
+    MONOLINGUAL_PROPORTION = 0.1
 
 
 class MixedProportion2Mixin(MixedMixinBase):
-    TRANSLATION_PROPORTION = 0.25
-    MONOLINGUAL_PROPORTION = 0.75
+    TRANSLATION_PROPORTION = 0.75
+    MONOLINGUAL_PROPORTION = 0.25
 
 
 class MixedProportion3Mixin(MixedMixinBase):

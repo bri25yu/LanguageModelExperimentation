@@ -52,6 +52,7 @@ def get_seq2seq_training_arguments(
     per_gpu_batch_size: int,
     scheduler_type: str,
     warmup_steps: int,
+    fp16: bool,
 ) -> Seq2SeqTrainingArguments:
     """
     Standardized Seq2Seq training arguments constructor
@@ -85,7 +86,7 @@ def get_seq2seq_training_arguments(
         do_train=True,
         do_eval=True,
         seed=42,
-        fp16=True,
+        fp16=fp16,
         log_level="error",
         log_on_each_node=False,
         logging_steps=1,

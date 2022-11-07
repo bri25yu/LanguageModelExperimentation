@@ -23,6 +23,7 @@ class ConstantLRFinetuneTrainingArgumentsMixin:
             per_gpu_batch_size=batch_size,
             scheduler_type="WarmupLR",
             warmup_steps=0,
+            fp16=False,
         )
 
 

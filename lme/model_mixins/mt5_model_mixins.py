@@ -3,10 +3,7 @@ from typing import Union
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers.modeling_utils import PreTrainedModel
 
-from transformers import AutoTokenizer
-
-from lme.modeling.mt5_fp16_utils import scale_weights_for_fp16_t5
-from lme.modeling.mt5_fp16 import MT5Fp16ForConditionalGeneration
+from transformers import AutoTokenizer, MT5ForConditionalGeneration
 
 
 __all__ = [
@@ -29,10 +26,7 @@ class MT5ModelMixinBase:
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
 
-        # We don't have access to bf16 capable Ampere + GPUs so we need to workaround it
-        model = MT5Fp16ForConditionalGeneration.from_pretrained(model_name)
-        scale_weights_for_fp16_t5(model)
-
+        model = MT5ForConditionalGeneration.from_pretrained(model_name)
         model.config.max_length = max_input_length
 
         return model
