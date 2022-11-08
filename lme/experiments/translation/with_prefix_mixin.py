@@ -16,6 +16,6 @@ class TranslationWithPrefixMixin(TranslationMixin):
         translation_dataset = TranslationDataProcessor()(training_arguments)
 
         with training_arguments.main_process_first():
-            tokenized_dataset = tokenize_tib_to_eng_translation_with_prefix(translation_dataset, max_input_length, tokenizer)
+            tokenized_dataset = tokenize_tib_to_eng_translation_with_prefix(translation_dataset, max_input_length, tokenizer, "Translate Tibetan to English")
 
         return tokenized_dataset

@@ -29,12 +29,13 @@ class MT5FinetuneArgsMixin:
             learning_rate=learning_rate,
             max_steps=10000,
             eval_steps=200,
-            warmup_steps=1000,  # 10% of the total number of steps
+            save_steps=200,
+            warmup_steps=0,  # 10% of the total number of steps
             gradient_accumulation_steps=gradient_accumulation_steps,
             per_device_train_batch_size=per_device_batch_size,
             per_device_eval_batch_size=per_device_batch_size,
             fp16=False,
-            **get_deepspeed_args("WarmupDecayLR"),
+            deepspeed=get_deepspeed_args("WarmupLR"),
             **get_default_training_arguments(),
         )
 
@@ -55,11 +56,12 @@ class NLLBFinetuneArgsMixin:
             learning_rate=learning_rate,
             max_steps=10000,
             eval_steps=200,
+            save_steps=200,
             warmup_steps=1000,  # 10% of the total number of steps
             gradient_accumulation_steps=gradient_accumulation_steps,
             per_device_train_batch_size=per_device_batch_size,
             per_device_eval_batch_size=per_device_batch_size,
             fp16=True,
-            **get_deepspeed_args("WarmupDecayLR"),
+            deepspeed=get_deepspeed_args("WarmupDecayLR"),
             **get_default_training_arguments(),
         )

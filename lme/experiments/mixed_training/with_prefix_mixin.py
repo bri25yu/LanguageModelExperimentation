@@ -30,10 +30,10 @@ class MixedWithPrefixMixinBase(TranslationMixin):
         with training_arguments.main_process_first():
             # Tokenize and add prefixes to our datasets
             translation_dataset = tokenize_tib_to_eng_translation_with_prefix(
-                translation_dataset, max_input_length, tokenizer, "Fill in the blank with Tibetan"
+                translation_dataset, max_input_length, tokenizer, "Translate Tibetan to English"
             )
             monolingual_train_set = tokenize_tibetan_monolingual_with_prefix(
-                monolingual_dataset["tibetan"], max_input_length, tokenizer, "Translate Tibetan to English"
+                monolingual_dataset["tibetan"], max_input_length, tokenizer, "Fill in the blank with Tibetan"
             )
 
             mixed_train_dataset = create_mix_by_proportion(
