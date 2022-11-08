@@ -39,6 +39,7 @@ class TranslationDataProcessor(AbstractDataProcessor):
 
     def load(self) -> DatasetDict:
         dataset = load_dataset("buddhist-nlp/tib_eng_bitext", use_auth_token=True)
+        dataset = dataset.filter(lambda e: all(e.values()))
 
         dataset = dataset.rename_columns({
             "input_text": "tibetan",
