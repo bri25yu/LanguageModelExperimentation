@@ -290,24 +290,18 @@ def get_group_texts_with_prefix_fn(
         concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
         total_length = len(concatenated_examples[list(examples.keys())[0]])
 
-        # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
-        # customize this part to your needs.
-        if total_length >= expanded_inputs_length:
-            total_length = (total_length // expanded_inputs_length) * expanded_inputs_length
-
         ###############################
         # START add prefix
         ###############################
 
-        # Original code:
-        # Split by chunks of max_len.
-        # result = {
-        #     k: [t[i : i + expanded_inputs_length] for i in range(0, total_length, expanded_inputs_length)]
-        #     for k, t in concatenated_examples.items()
-        # }
-
         prefix_length = len(tokenized_prefix[list(examples.keys())[0]])
         length_with_prefix = expanded_inputs_length - prefix_length
+
+        # We drop the small remainder, we could add padding if the model supported it instead of this drop, you can
+        # customize this part to your needs.
+        if total_length >= length_with_prefix:
+            total_length = (total_length // length_with_prefix) * length_with_prefix
+
         result = {
             k: [tokenized_prefix[k] + t[i : i + length_with_prefix] for i in range(0, total_length, length_with_prefix)]
             for k, t in concatenated_examples.items()
