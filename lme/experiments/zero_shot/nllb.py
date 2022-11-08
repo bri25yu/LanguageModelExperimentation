@@ -1,10 +1,10 @@
 from lme.training_pipelines import ZeroShotExperimentBase
 from lme.model_mixins import NLLB600MModelMixin, NLLB1_3BModelMixin
-from lme.training_argument_mixins import DecayLRFinetuneTrainingArgumentsMixin
-from lme.experiments.translation_mixins import TranslationMixin
+from lme.training_argument_mixins import NLLBFinetuneArgsMixin
+from lme.experiments.translation.mixin import TranslationMixin
 
 
-class ZeroShotNLLBExperimentBase(DecayLRFinetuneTrainingArgumentsMixin, TranslationMixin, ZeroShotExperimentBase):
+class ZeroShotNLLBExperimentBase(NLLBFinetuneArgsMixin, TranslationMixin, ZeroShotExperimentBase):
     pass
 
 

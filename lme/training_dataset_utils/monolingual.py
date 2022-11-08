@@ -1,29 +1,42 @@
-from transformers.tokenization_utils import PreTrainedTokenizerBase
+from datasets import Dataset
 
-from datasets import DatasetDict, concatenate_datasets
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.modeling.t5_span_mlm import get_group_texts_fn
 
 
-__all__ = ["create_examples_proportional_monolingual"]
-
-
-def create_examples_proportional_monolingual(
-    tokenizer: PreTrainedTokenizerBase, max_input_length: int, multilingual_dataset: DatasetDict
-) -> DatasetDict:
+def tokenize_tibetan_monolingual(dataset: Dataset, max_input_length: int, tokenizer: PreTrainedTokenizerBase) -> Dataset:
     def tokenize_fn(examples):
         return tokenizer(examples["text"])
 
     group_texts = get_group_texts_fn(max_input_length)
 
-    tokenized_grouped_dataset_dict = multilingual_dataset \
-        .map(tokenize_fn, batched=True, remove_columns=["text"]) \
+    return dataset \
+        .map(tokenize_fn, batched=True, remove_columns=["text"], desc="Tokenizing ") \
         .map(group_texts, batched=True)
 
-    tokenized_group_dataset = concatenate_datasets(list(tokenized_grouped_dataset_dict.values()))
 
-    shuffled_tokenized_grouped_dataset = tokenized_group_dataset.shuffle(seed=42)
+# This is an exact copy of `tokenize_tibetan_monolingual` unless specified otherwise
+def tokenize_tibetan_monolingual_with_prefix(
+    dataset: Dataset, max_input_length: int, tokenizer: PreTrainedTokenizerBase, prefix: str
+) -> Dataset:
+    def tokenize_fn(examples):
+        ###############################
+        # START add prefix
+        ###############################
 
-    pretrain_dataset = DatasetDict({"train": shuffled_tokenized_grouped_dataset})
+        # Original code:
+        # return tokenizer(examples["text"])
 
-    return pretrain_dataset
+        inputs_to_tokenize = [f"{prefix} {e}" for e in examples["text"]]
+        return tokenizer(inputs_to_tokenize)
+
+        ###############################
+        # END add prefix
+        ###############################
+
+    group_texts = get_group_texts_fn(max_input_length)
+
+    return dataset \
+        .map(tokenize_fn, batched=True, remove_columns=["text"], desc="Tokenizing ") \
+        .map(group_texts, batched=True)

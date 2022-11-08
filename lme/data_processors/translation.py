@@ -1,12 +1,5 @@
-import os
+from datasets import load_dataset, DatasetDict
 
-import csv
-import pandas as pd
-
-from datasets import DatasetDict
-
-from lme import ROOT_DIR
-from lme.data_processors.utils import convert_df_to_hf_dataset
 from lme.data_processors.abstract import AbstractDataProcessor
 
 
@@ -15,42 +8,49 @@ __all__ = ["TranslationDataProcessor"]
 
 class TranslationDataProcessor(AbstractDataProcessor):
     """
-    Using data from https://github.com/Linguae-Dharmae/language-models
+    The original loaded dataset dict is
+    DatasetDict({
+        train: Dataset({
+            features: ['input_text', 'target_text'],
+            num_rows: 458569
+        })
+        test: Dataset({
+            features: ['input_text', 'target_text'],
+            num_rows: 10000
+        })
+    })
 
-    This data is for Tibetan and English translation.
-
-    This class requires the LinguaeDharmae repository cloned to the correct location. See README.md
+    The output dataset dict is
+    DatasetDict({
+        train: Dataset({
+            features: ['tibetan', 'english'],
+            num_rows: 458569
+        })
+        val: Dataset({
+            features: ['tibetan', 'english'],
+            num_rows: 5000
+        })
+        test: Dataset({
+            features: ['tibetan', 'english'],
+            num_rows: 5000
+        })
+    })
     """
 
-    VAL_SPLIT_SIZE = 1000
-
     def load(self) -> DatasetDict:
-        val_split_size = self.VAL_SPLIT_SIZE
+        dataset = load_dataset("buddhist-nlp/tib_eng_bitext", use_auth_token=True)
 
-        train_dataset = self.load_single_dataset("train.tsv.gz")
-        test_dataset = self.load_single_dataset("eval.tsv.gz")
-
-        train_dataset, test_dataset = convert_df_to_hf_dataset((train_dataset, test_dataset))
-
-        train_val_dataset = train_dataset.train_test_split(val_split_size, seed=42)
-        dataset = DatasetDict(
-            train=train_val_dataset["train"],
-            val=train_val_dataset["test"],
-            test=test_dataset,
-        )
-
-        return dataset
-
-    def load_single_dataset(self, path: str) -> pd.DataFrame:
-        df = pd.read_csv(
-            os.path.join(ROOT_DIR, "..", "..", "language-models/tib/data", path),
-            sep="\t",
-            quoting=csv.QUOTE_NONE,
-        )
-        df = df.rename(columns={
+        dataset = dataset.rename_columns({
             "input_text": "tibetan",
             "target_text": "english",
         })
-        df = df.astype(str)
 
-        return df
+        total_eval_examples = len(dataset["test"])
+
+        dataset = DatasetDict({
+            "train": dataset["train"],
+            "val": dataset["test"].select(range(total_eval_examples//2)),
+            "test": dataset["test"].select(range(total_eval_examples//2, total_eval_examples)),
+        })
+
+        return dataset

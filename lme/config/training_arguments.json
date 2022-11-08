@@ -1,0 +1,14 @@
+{
+    "load_best_model_at_end": true,
+    "evaluation_strategy": "steps",
+    "save_strategy": "steps",
+    "save_total_limit": 1,
+    "eval_accumulation_steps": 1,
+    "do_train": true,
+    "do_eval": true,
+    "seed": 42,
+    "log_level": "error",
+    "log_on_each_node": false,
+    "logging_steps": 1,
+    "predict_with_generate": true
+}

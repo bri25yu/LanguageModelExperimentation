@@ -8,7 +8,7 @@ __all__ = ["MonolingualDataProcessor"]
 
 class MonolingualDataProcessor(AbstractDataProcessor):
     """
-    The original loaded dataset dict is 
+    The original loaded dataset dict is
     DatasetDict({
         tibetan: Dataset({
             features: ['text'],

@@ -1,15 +1,20 @@
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 import os
 
 import json
 
-from transformers import TrainingArguments, Seq2SeqTrainingArguments
+from transformers import TrainingArguments
 
 from lme import CONFIG_DIR
 
 
-__all__ = ["get_seq2seq_training_arguments", "calculate_total_examples"]
+__all__ = [
+    "get_deepspeed_args",
+    "calculate_total_examples",
+    "calculate_batch_size_args",
+    "get_default_training_arguments",
+]
 
 
 def get_world_size() -> int:
@@ -43,57 +48,21 @@ def get_deepspeed_args(scheduler_type: str) -> Dict[str, Any]:
     return deepspeed_args
 
 
-def get_seq2seq_training_arguments(
-    base_output_dir: str,
-    learning_rate: float,
-    max_steps: int,
-    eval_steps: int,
-    target_total_batch_size_per_update: int,
-    per_gpu_batch_size: int,
-    scheduler_type: str,
-    warmup_steps: int,
-    fp16: bool,
-) -> Seq2SeqTrainingArguments:
-    """
-    Standardized Seq2Seq training arguments constructor
-    """
-    output_dir = os.path.join(
-        base_output_dir, f"{learning_rate:.0e}"
-    )
-    eval_save_strategy = "steps"
-
+def calculate_batch_size_args(target_total_batch_size_per_update: int, per_device_batch_size: int) -> Tuple[int, int]:
     world_size = get_world_size()
-    gradient_accumulation_steps = target_total_batch_size_per_update // (per_gpu_batch_size * world_size)
+    gradient_accumulation_steps = target_total_batch_size_per_update // (per_device_batch_size * world_size)
     if gradient_accumulation_steps < 1:
         # We ensure our true target batch size is constant, irregardless of hardware restrictions
         gradient_accumulation_steps = 1
-        per_gpu_batch_size = target_total_batch_size_per_update // world_size
+        per_device_batch_size = target_total_batch_size_per_update // world_size
 
-    return Seq2SeqTrainingArguments(
-        output_dir,
-        learning_rate=learning_rate,
-        load_best_model_at_end=True,
-        evaluation_strategy=eval_save_strategy,
-        save_strategy=eval_save_strategy,
-        max_steps=max_steps,
-        eval_steps=eval_steps,
-        save_steps=eval_steps,
-        save_total_limit=1,
-        per_device_train_batch_size=per_gpu_batch_size,
-        per_device_eval_batch_size=per_gpu_batch_size,
-        gradient_accumulation_steps=gradient_accumulation_steps,
-        eval_accumulation_steps=1,
-        do_train=True,
-        do_eval=True,
-        seed=42,
-        fp16=fp16,
-        log_level="error",
-        log_on_each_node=False,
-        logging_steps=1,
-        predict_with_generate=True,
-        warmup_steps=warmup_steps,
-        deepspeed=get_deepspeed_args(scheduler_type),
-    )
+    return gradient_accumulation_steps, per_device_batch_size
+
+
+def get_default_training_arguments() -> Dict[str, Any]:
+    training_arguments_path = os.path.join(CONFIG_DIR, "training_arguments.json")
+
+    return json.load(open(training_arguments_path))
 
 
 def calculate_total_examples(args: TrainingArguments) -> int:

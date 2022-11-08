@@ -1,18 +1,18 @@
 from lme.training_pipelines import FinetuneExperimentBase
 from lme.model_mixins import MT5Base580MModelMixin, MT5Large1_2BModelMixin
-from lme.training_argument_mixins import ConstantLRFinetuneTrainingArgumentsMixin
-from lme.experiments.translation_mixins import (
-    MixedProportion1Mixin,
-    MixedProportion2Mixin,
-    MixedProportion3Mixin,
+from lme.training_argument_mixins import MT5FinetuneArgsMixin
+from lme.experiments.mixed_training.with_prefix_mixin import (
+    MixedWithPrefixProportion1Mixin,
+    MixedWithPrefixProportion2Mixin,
+    MixedWithPrefixProportion3Mixin,
 )
 
 
-class MixedMT5ExperimentBase(ConstantLRFinetuneTrainingArgumentsMixin, FinetuneExperimentBase):
+class MixedMT5ExperimentBase(MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
 
-class MixedProportion1ExperimentBase(MixedProportion1Mixin, MixedMT5ExperimentBase):
+class MixedProportion1ExperimentBase(MixedWithPrefixProportion1Mixin, MixedMT5ExperimentBase):
     pass
 
 
@@ -24,7 +24,7 @@ class MixedProportion1MT5LargeExperiment(MT5Large1_2BModelMixin, MixedProportion
     pass
 
 
-class MixedProportion2ExperimentBase(MixedProportion2Mixin, MixedMT5ExperimentBase):
+class MixedProportion2ExperimentBase(MixedWithPrefixProportion2Mixin, MixedMT5ExperimentBase):
     pass
 
 
@@ -36,7 +36,7 @@ class MixedProportion2MT5LargeExperiment(MT5Large1_2BModelMixin, MixedProportion
     pass
 
 
-class MixedProportion3ExperimentBase(MixedProportion3Mixin, MixedMT5ExperimentBase):
+class MixedProportion3ExperimentBase(MixedWithPrefixProportion3Mixin, MixedMT5ExperimentBase):
     pass
 
 
