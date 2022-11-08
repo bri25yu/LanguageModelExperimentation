@@ -12,37 +12,37 @@ class MixedMT5ExperimentBase(MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
 
-class MixedProportion1ExperimentBase(MixedWithPrefixProportion1Mixin, MixedMT5ExperimentBase):
+class MixedWithPrefixProportion1ExperimentBase(MixedWithPrefixProportion1Mixin, MixedMT5ExperimentBase):
     pass
 
 
-class MixedProportion1MT5BaseExperiment(MT5Base580MModelMixin, MixedProportion1ExperimentBase):
+class MixedWithPrefixProportion1MT5BaseExperiment(MT5Base580MModelMixin, MixedWithPrefixProportion1ExperimentBase):
     pass
 
 
-class MixedProportion1MT5LargeExperiment(MT5Large1_2BModelMixin, MixedProportion1ExperimentBase):
+class MixedWithPrefixProportion1MT5LargeExperiment(MT5Large1_2BModelMixin, MixedWithPrefixProportion1ExperimentBase):
     pass
 
 
-class MixedProportion2ExperimentBase(MixedWithPrefixProportion2Mixin, MixedMT5ExperimentBase):
+class MixedWithPrefixProportion2ExperimentBase(MixedWithPrefixProportion2Mixin, MixedMT5ExperimentBase):
     pass
 
 
-class MixedProportion2MT5BaseExperiment(MT5Base580MModelMixin, MixedProportion2ExperimentBase):
+class MixedWithPrefixProportion2MT5BaseExperiment(MT5Base580MModelMixin, MixedWithPrefixProportion2ExperimentBase):
     pass
 
 
-class MixedProportion2MT5LargeExperiment(MT5Large1_2BModelMixin, MixedProportion2ExperimentBase):
+class MixedWithPrefixProportion2MT5LargeExperiment(MT5Large1_2BModelMixin, MixedWithPrefixProportion2ExperimentBase):
     pass
 
 
-class MixedProportion3ExperimentBase(MixedWithPrefixProportion3Mixin, MixedMT5ExperimentBase):
+class MixedWithPrefixProportion3ExperimentBase(MixedWithPrefixProportion3Mixin, MixedMT5ExperimentBase):
     pass
 
 
-class MixedProportion3MT5BaseExperiment(MT5Base580MModelMixin, MixedProportion3ExperimentBase):
+class MixedWithPrefixProportion3MT5BaseExperiment(MT5Base580MModelMixin, MixedWithPrefixProportion3ExperimentBase):
     pass
 
 
-class MixedProportion3MT5LargeExperiment(MT5Large1_2BModelMixin, MixedProportion3ExperimentBase):
+class MixedWithPrefixProportion3MT5LargeExperiment(MT5Large1_2BModelMixin, MixedWithPrefixProportion3ExperimentBase):
     pass
