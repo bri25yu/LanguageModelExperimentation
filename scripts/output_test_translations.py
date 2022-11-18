@@ -1,22 +1,21 @@
-from argparse import ArgumentParser
+from typing import List
+
+import os
 
 import pickle
 
-from datasets import load_from_disk
+from tqdm import tqdm
 
+from datasets import Dataset
+
+from lme import TRAIN_OUTPUT_DIR
 from lme.experiments import available_experiments
-from lme.data_processors import FinetuneDataProcessor
+from lme.data_processors import TranslationDataProcessor
 
 
-def load_experiment():
-    parser = ArgumentParser()
-    parser.add_argument(
-        "--experiment", "-e", required=True, help="Experiment name to print predictions for"
-    )
-
-    args = parser.parse_args()
-
-    return available_experiments[args.experiment]()
+EXPERIMENTS_TO_OUTPUT: List[str] = [
+    
+]
 
 
 def load_results(experiment):
@@ -44,19 +43,18 @@ def decode_tokens(experiment, results):
     return predictions
 
 
-def main():
-    experiment = load_experiment()
-    test_dataset = load_from_disk(FinetuneDataProcessor().path)["test"]
+def output_single(experiment_name: str) -> None:
+    experiment = available_experiments[experiment_name]()
+    test_dataset = TranslationDataProcessor().load()["test"]
+
     results = load_results(experiment)
     predictions = decode_tokens(experiment, results)
 
-    for i in range(5):
-        print(f"*****Example translation {i+1}*****")
-        print("Tibetan input:", test_dataset[i]["tibetan"])
-        print("English translation:", test_dataset[i]["english"])
-        print("Predicted translation:", predictions[i])
-        print()
+    test_dataset: Dataset = test_dataset.add_column("prediction", predictions)
+
+    test_dataset.to_csv(os.path.join(TRAIN_OUTPUT_DIR, f"{experiment.name}.tsv"), sep="\t")
 
 
 if __name__ == "__main__":
-    main()
+    for experiment_name in tqdm(EXPERIMENTS_TO_OUTPUT, desc="Outputting test translations"):
+        output_single(experiment_name)
