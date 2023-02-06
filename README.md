@@ -2,9 +2,6 @@
 
 ### Example setup
 ```bash
-# Clone data repository
-git clone https://github.com/Linguae-Dharmae/language-models
-
 # Clone this repository
 git clone https://github.com/bri25yu/LanguageModelExperimentation
 
