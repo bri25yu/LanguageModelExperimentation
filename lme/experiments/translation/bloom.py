@@ -1,10 +1,10 @@
 from lme.training_pipelines import FinetuneExperimentBase
 from lme.model_mixins import Bloom3BModelMixin, Bloom7B1ModelMixin
-from lme.training_argument_mixins import BloomArgsMixin
+from lme.training_argument_mixins import BloomFinetuneArgsMixin
 from lme.experiments.translation.mixin import TranslationMixin
 
 
-class TranslationBloomExperimentBase(BloomArgsMixin, TranslationMixin, FinetuneExperimentBase):
+class TranslationBloomExperimentBase(BloomFinetuneArgsMixin, TranslationMixin, FinetuneExperimentBase):
     pass
 
 
