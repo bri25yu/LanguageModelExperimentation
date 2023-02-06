@@ -3,7 +3,7 @@ from typing import Union
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers.modeling_utils import PreTrainedModel
 
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, BloomForCausalLM
 
 
 __all__ = [
@@ -26,7 +26,7 @@ class BloomModelMixinBase:
         model_name = self.MODEL_NAME
         max_input_length = self.MAX_INPUT_LENGTH
 
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        model = BloomForCausalLM.from_pretrained(model_name)
         model.config.max_length = max_input_length
 
         return model
