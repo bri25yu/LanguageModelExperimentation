@@ -9,6 +9,7 @@ from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 __all__ = [
     "NLLB600MModelMixin",
     "NLLB1_3BModelMixin",
+    "NLLB3_3BModelMixin",
 ]
 
 
@@ -47,3 +48,7 @@ class NLLB600MModelMixin(NLLBModelMixinBase):
 
 class NLLB1_3BModelMixin(NLLBModelMixinBase):
     MODEL_NAME = "facebook/nllb-200-1.3B"
+
+
+class NLLB3_3BModelMixin(NLLBModelMixinBase):
+    MODEL_NAME = "facebook/nllb-200-3.3B"
