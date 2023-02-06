@@ -9,6 +9,8 @@ from transformers import AutoTokenizer, MT5ForConditionalGeneration
 __all__ = [
     "MT5Base580MModelMixin",
     "MT5Large1_2BModelMixin",
+    "MT53BModelMixin",
+    "MT513BModelMixin",
 ]
 
 
@@ -38,3 +40,11 @@ class MT5Base580MModelMixin(MT5ModelMixinBase):
 
 class MT5Large1_2BModelMixin(MT5ModelMixinBase):
     MODEL_NAME = "google/mt5-large"
+
+
+class MT53BModelMixin(MT5ModelMixinBase):
+    MODEL_NAME = "google/mt5-xl"
+
+
+class MT513BModelMixin(MT5ModelMixinBase):
+    MODEL_NAME = "google/mt5-xxl"
