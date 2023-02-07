@@ -8,5 +8,5 @@ mt5 large fp32 - 1 - 40 hours
 nllb 3b fp16 - 1 - 40 hours
 
 on 49GB GPU (all in fp16):
-mt5 xl 3B - 1 - 70 hours
+mt5 xl 3B - 4 - 21 hours
 

@@ -4,7 +4,21 @@ This is a convenience script for running experiments
 from lme.experiments import available_experiments
 
 
-EXPERIMENTS_TO_RUN = [  # Each element is a tuple (experiment name, batch size, learning rates: Optional[List[float]])
+"""
+Parameters
+----------
+experiment_name: str
+    The name of the experiment class to run, as a string.
+batch_size: int
+    The batch size to use per device.
+learning_rates: List[float]]
+    The learning rates to run.
+
+Examples:
+    ("TranslationMT5LargeExperiment", 16, [1e-3])
+
+"""
+EXPERIMENTS_TO_RUN = [
 ]
 
 
@@ -15,7 +29,4 @@ for experiment_name, batch_size, learning_rates in EXPERIMENTS_TO_RUN:
         print(f"Experiment {experiment_name} is not recognized")
         continue
 
-    for learning_rate in learning_rates:
-        experiment = experiment_cls()
-
-        experiment.run(batch_size, [learning_rate])
+    [experiment_cls().run(batch_size, [lr]) for lr in learning_rates]
