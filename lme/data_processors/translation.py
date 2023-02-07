@@ -12,11 +12,15 @@ class TranslationDataProcessor(AbstractDataProcessor):
     DatasetDict({
         train: Dataset({
             features: ['input_text', 'target_text'],
-            num_rows: 458569
+            num_rows: 448849
+        })
+        validation: Dataset({
+            features: ['input_text', 'target_text'],
+            num_rows: 5000
         })
         test: Dataset({
             features: ['input_text', 'target_text'],
-            num_rows: 10000
+            num_rows: 5000
         })
     })
 
@@ -24,7 +28,7 @@ class TranslationDataProcessor(AbstractDataProcessor):
     DatasetDict({
         train: Dataset({
             features: ['tibetan', 'english'],
-            num_rows: 458569
+            num_rows: 448849
         })
         val: Dataset({
             features: ['tibetan', 'english'],
@@ -39,19 +43,16 @@ class TranslationDataProcessor(AbstractDataProcessor):
 
     def load(self) -> DatasetDict:
         dataset = load_dataset("buddhist-nlp/tib_eng_bitext", use_auth_token=True)
-        dataset = dataset.filter(lambda e: all(e.values()))
 
         dataset = dataset.rename_columns({
             "input_text": "tibetan",
             "target_text": "english",
         })
 
-        total_eval_examples = len(dataset["test"])
-
         dataset = DatasetDict({
             "train": dataset["train"],
-            "val": dataset["test"].select(range(total_eval_examples//2)),
-            "test": dataset["test"].select(range(total_eval_examples//2, total_eval_examples)),
+            "val": dataset["validation"],
+            "test": dataset["test"],
         })
 
         return dataset
