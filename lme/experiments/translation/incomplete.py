@@ -1,3 +1,17 @@
+"""
+Incomplete1
+    50% chance for the sequence to be unaltered. The other 50% of the time, we truncate the
+    labels and append it to the input. The amount of truncation here is uniformly random.
+    For sequences that are longer than the max_length, we append as many tokens as possible.
+
+Incomplete2
+    The baseline experiment with no changes to the input.
+
+Incomplete3
+    Truncate the labels and append it to the input. The amount of truncation here is uniformly random.
+    For sequences that are longer than the max_length, we append as many tokens as possible.
+
+"""
 from typing import Callable, Dict, List, Sequence
 
 from torch import randint
@@ -27,8 +41,34 @@ class TranslationIncomplete1Mixin(TranslationMixin):
                 else:
                     # The other 50% of the time, we truncate the labels and append it to the input
                     # The amount of truncation here is uniformly random
-                    truncation_amount = randint(len(d["label"]), ())
-                    d["input_ids"] = d["input_ids"] + d["label"][:truncation_amount]
+                    truncation_amount = randint(len(d["labels"]), ())
+                    truncation_amount = min(truncation_amount, max_input_length - len(d["input_ids"]))
+
+                    to_append = d["labels"][:truncation_amount]
+                    d["input_ids"] = d["input_ids"] + to_append
+                    d["attention_mask"] = d["attention_mask"] + [1] * len(to_append)
+
+            return collator(inputs)
+
+        return collate_fn
+
+
+class TranslationIncomplete3Mixin(TranslationMixin):
+    def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
+        max_input_length = self.MAX_INPUT_LENGTH
+
+        collator = DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
+
+        def collate_fn(inputs: List[Dict[str, Sequence]]) -> Dict[str, List]:
+            for d in inputs:
+                # Truncate the labels and append it to the input
+                # The amount of truncation here is uniformly random
+                truncation_amount = randint(len(d["labels"]), ())
+                truncation_amount = min(truncation_amount, max_input_length - len(d["input_ids"]))
+
+                to_append = d["labels"][:truncation_amount]
+                d["input_ids"] = d["input_ids"] + to_append
+                d["attention_mask"] = d["attention_mask"] + [1] * len(to_append)
 
             return collator(inputs)
 
@@ -40,4 +80,12 @@ class TranslationIncompleteExperimentBase(MT5Base580MModelMixin, MT5FinetuneArgs
 
 
 class TranslationIncomplete1Experiment(TranslationIncomplete1Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete2Experiment(TranslationMixin, TranslationIncompleteExperimentBase):
+    pass  # Baseline experiment
+
+
+class TranslationIncomplete3Experiment(TranslationIncomplete3Mixin, TranslationIncompleteExperimentBase):
     pass
