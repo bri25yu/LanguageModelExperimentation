@@ -14,4 +14,3 @@ class TranslationBloom3BExperiment(Bloom3BModelMixin, TranslationBloomExperiment
 
 class TranslationBloom7B1Experiment(Bloom7B1ModelMixin, TranslationBloomExperimentBase):
     pass
-

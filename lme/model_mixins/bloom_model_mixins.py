@@ -38,4 +38,3 @@ class Bloom3BModelMixin(BloomModelMixinBase):
 
 class Bloom7B1ModelMixin(BloomModelMixinBase):
     MODEL_NAME = "bigscience/bloom-7b1"
-
