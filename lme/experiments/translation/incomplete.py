@@ -28,7 +28,7 @@ from lme.training_argument_mixins.utils import calculate_total_examples
 
 from lme.training_dataset_utils.utils import repeat_examples
 
-from lme.model_mixins import MT5Base580MModelMixin
+from lme.model_mixins import MT5600MModelMixin
 
 from lme.experiments.translation.mixin import TranslationMixin
 
@@ -95,7 +95,7 @@ class TranslationIncomplete2Mixin(TranslationMixin):
         return dataset_dict
 
 
-class TranslationIncompleteExperimentBase(MT5Base580MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
+class TranslationIncompleteExperimentBase(MT5600MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
 

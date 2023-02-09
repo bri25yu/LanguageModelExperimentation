@@ -7,8 +7,10 @@ from transformers import AutoTokenizer, BloomForCausalLM
 
 
 __all__ = [
+    "Bloom600MModelMixin",
+    "Bloom1BModelMixin",
     "Bloom3BModelMixin",
-    "Bloom7B1ModelMixin",
+    "Bloom7BModelMixin",
 ]
 
 
@@ -32,9 +34,17 @@ class BloomModelMixinBase:
         return model
 
 
+class Bloom600MModelMixin(BloomModelMixinBase):
+    MODEL_NAME = "bigscience/bloom-560m"
+
+
+class Bloom1BModelMixin(BloomModelMixinBase):
+    MODEL_NAME = "bigscience/bloom-1b7"
+
+
 class Bloom3BModelMixin(BloomModelMixinBase):
     MODEL_NAME = "bigscience/bloom-3b"
 
 
-class Bloom7B1ModelMixin(BloomModelMixinBase):
+class Bloom7BModelMixin(BloomModelMixinBase):
     MODEL_NAME = "bigscience/bloom-7b1"
