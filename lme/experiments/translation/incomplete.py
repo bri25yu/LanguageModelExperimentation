@@ -26,7 +26,7 @@ from lme.training_pipelines import FinetuneExperimentBase
 from lme.training_argument_mixins import MT5FinetuneArgsMixin
 from lme.training_argument_mixins.utils import calculate_total_examples
 
-from lme.training_dataset_utils.tib_translation_mix import repeat_examples
+from lme.training_dataset_utils.utils import repeat_examples
 
 from lme.model_mixins import MT5Base580MModelMixin
 
