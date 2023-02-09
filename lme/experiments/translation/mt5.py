@@ -1,7 +1,7 @@
 from lme.training_pipelines import FinetuneExperimentBase
 from lme.model_mixins import (
-    MT5Base580MModelMixin,
-    MT5Large1_2BModelMixin,
+    MT5Base600MModelMixin,
+    MT5Large1BModelMixin,
     MT53BModelMixin,
     MT513BModelMixin,
 )
@@ -13,11 +13,11 @@ class TranslationMT5ExperimentBase(MT5FinetuneArgsMixin, TranslationMixin, Finet
     pass
 
 
-class TranslationMT5BaseExperiment(MT5Base580MModelMixin, TranslationMT5ExperimentBase):
+class TranslationMT5600MExperiment(MT5Base600MModelMixin, TranslationMT5ExperimentBase):
     pass
 
 
-class TranslationMT5LargeExperiment(MT5Large1_2BModelMixin, TranslationMT5ExperimentBase):
+class TranslationMT51BExperiment(MT5Large1BModelMixin, TranslationMT5ExperimentBase):
     pass
 
 

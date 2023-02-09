@@ -36,7 +36,7 @@ class MT5FinetuneArgsMixin:
             warmup_steps=0,
             gradient_accumulation_steps=gradient_accumulation_steps,
             per_device_train_batch_size=per_device_batch_size,
-            per_device_eval_batch_size=per_device_batch_size,
+            per_device_eval_batch_size=2 * per_device_batch_size,
             fp16=False,
             bf16=True,
             metric_for_best_model="bleu_score",
@@ -66,7 +66,7 @@ class NLLBFinetuneArgsMixin:
             warmup_steps=1000,  # 10% of the total number of steps
             gradient_accumulation_steps=gradient_accumulation_steps,
             per_device_train_batch_size=per_device_batch_size,
-            per_device_eval_batch_size=per_device_batch_size,
+            per_device_eval_batch_size=2 * per_device_batch_size,
             fp16=True,
             metric_for_best_model="bleu_score",
             greater_is_better=True,
@@ -95,7 +95,7 @@ class BloomFinetuneArgsMixin:
             warmup_steps=1000,  # 10% of the total number of steps
             gradient_accumulation_steps=gradient_accumulation_steps,
             per_device_train_batch_size=per_device_batch_size,
-            per_device_eval_batch_size=per_device_batch_size,
+            per_device_eval_batch_size=2 * per_device_batch_size,
             fp16=False,
             bf16=True,
             metric_for_best_model="bleu_score",

@@ -1,3 +1,12 @@
+### Max batch sizes
+on 24GB Ampere GPU:
+mT5 600M - 8 - 6 hours
+
+on 49GB Ampere GPU:
+mT5 3B - 4 - 32 hours
+NLLB 3B - 16 - 16 hours
+
+### Plans
 On one of a21/a22 (a22 it looks like):
 - mT5 3B (2 days, 02/06 - 02/07)
 - NLLB 3B (1 day, 02/08)

@@ -33,7 +33,7 @@ from lme.model_mixins import MT5Base580MModelMixin
 from lme.experiments.translation.mixin import TranslationMixin
 
 
-class TranslationIncomplete2Mixin(TranslationMixin):
+class TranslationIncomplete1Mixin(TranslationMixin):
     def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
         dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
 
@@ -67,7 +67,7 @@ class TranslationIncomplete2Mixin(TranslationMixin):
         return dataset_dict
 
 
-class TranslationIncomplete3Mixin(TranslationMixin):
+class TranslationIncomplete2Mixin(TranslationMixin):
     def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
         dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
 
@@ -99,13 +99,9 @@ class TranslationIncompleteExperimentBase(MT5Base580MModelMixin, MT5FinetuneArgs
     pass
 
 
-class TranslationIncomplete1Experiment(TranslationMixin, TranslationIncompleteExperimentBase):
+class TranslationIncomplete1Experiment(TranslationIncomplete1Mixin, TranslationIncompleteExperimentBase):
     pass
 
 
 class TranslationIncomplete2Experiment(TranslationIncomplete2Mixin, TranslationIncompleteExperimentBase):
-    pass
-
-
-class TranslationIncomplete3Experiment(TranslationIncomplete3Mixin, TranslationIncompleteExperimentBase):
     pass
