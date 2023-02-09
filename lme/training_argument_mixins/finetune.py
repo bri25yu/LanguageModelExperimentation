@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 import os
 
 from transformers import TrainingArguments, Seq2SeqTrainingArguments
@@ -37,6 +39,8 @@ class MT5FinetuneArgsMixin:
             per_device_eval_batch_size=per_device_batch_size,
             fp16=False,
             bf16=True,
+            metric_for_best_model="bleu_score",
+            greater_is_better=True,
             deepspeed=get_deepspeed_args("WarmupLR"),
             **get_default_training_arguments(),
         )
@@ -64,6 +68,8 @@ class NLLBFinetuneArgsMixin:
             per_device_train_batch_size=per_device_batch_size,
             per_device_eval_batch_size=per_device_batch_size,
             fp16=True,
+            metric_for_best_model="bleu_score",
+            greater_is_better=True,
             deepspeed=get_deepspeed_args("WarmupDecayLR"),
             **get_default_training_arguments(),
         )
@@ -92,6 +98,8 @@ class BloomFinetuneArgsMixin:
             per_device_eval_batch_size=per_device_batch_size,
             fp16=False,
             bf16=True,
+            metric_for_best_model="bleu_score",
+            greater_is_better=True,
             deepspeed=get_deepspeed_args("WarmupDecayLR"),
             **get_default_training_arguments(),
         )
