@@ -18,3 +18,7 @@ On one of a18/a19/a20:
 - Ablations of incomplete on mT5 600M
 - One run of mT5 1B with the best ablation
 - NLLB 600M, NLLB 1B, mT5 1B, on newly aligned data.
+
+### Ideas
+- Activation function diversification
+- Single layer model with many attention heads
