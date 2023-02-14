@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from datasets import Dataset
 
-from lme import TRAIN_OUTPUT_DIR
+from lme import RESULTS_DIR
 from lme.experiments import available_experiments
 from lme.data_processors import TranslationDataProcessor
 
@@ -52,7 +52,7 @@ def output_single(experiment_name: str) -> None:
 
     test_dataset: Dataset = test_dataset.add_column("prediction", predictions)
 
-    test_dataset.to_csv(os.path.join(TRAIN_OUTPUT_DIR, f"{experiment.name}.tsv"), sep="\t")
+    test_dataset.to_csv(os.path.join(RESULTS_DIR, f"{experiment.name}.tsv"), sep="\t")
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from transformers.modeling_utils import PreTrainedModel
 from transformers.trainer_utils import PredictionOutput
 from transformers import Trainer, TrainingArguments, PrinterCallback
 
-from lme import RESULTS_DIR, TRAIN_OUTPUT_DIR
+from lme import RESULTS_DIR, RESULTS_DIR
 
 
 __all__ = ["ExperimentBase"]
@@ -50,7 +50,7 @@ class ExperimentBase(ABC):
 
     @property
     def experiment_class_output_dir(self) -> str:
-        return os.path.join(TRAIN_OUTPUT_DIR, self.name)
+        return os.path.join(RESULTS_DIR, self.name)
 
     @property
     def predictions_output_path(self) -> str:
