@@ -26,8 +26,10 @@ class BloomModelMixinBase:
 
     def get_model(self, tokenizer: PreTrainedTokenizerBase) -> PreTrainedModel:
         model_name = self.MODEL_NAME
+        max_input_length = self.MAX_INPUT_LENGTH
 
         model = BloomForCausalLM.from_pretrained(model_name)
+        model.config.max_length = max_input_length
 
         return model
 
