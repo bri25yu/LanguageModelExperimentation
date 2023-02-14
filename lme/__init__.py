@@ -9,3 +9,8 @@ RESULTS_DIR = os.path.join(ROOT_DIR, "..", "results")
 CONFIG_DIR = os.path.join(ROOT_DIR, "config")
 TRAIN_OUTPUT_DIR = os.path.join(ROOT_DIR, "..", "train_output")
 DATASET_CACHE_DIR = os.path.join(ROOT_DIR, "..", "dataset_cache")
+HUGGINGFACE_CACHE_DIR = os.path.join(ROOT_DIR, "..", "..", "huggingface_cache")
+
+
+os.environ["TRANSFORMERS_CACHE"] = HUGGINGFACE_CACHE_DIR
+os.environ["HF_DATASETS_CACHE"] = HUGGINGFACE_CACHE_DIR
