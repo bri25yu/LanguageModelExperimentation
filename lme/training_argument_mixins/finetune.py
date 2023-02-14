@@ -100,6 +100,6 @@ class BloomFinetuneArgsMixin:
             bf16=True,
             metric_for_best_model="bleu_score",
             greater_is_better=True,
-            deepspeed=get_deepspeed_args("WarmupDecayLR"),
+            deepspeed=get_deepspeed_args("WarmupLR"),
             **get_default_training_arguments(),
         )
