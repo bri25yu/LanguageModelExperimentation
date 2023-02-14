@@ -1,2 +1,2 @@
-*
-!.gitignore
+*Experiment/*/checkpoint*
+*Experiment/*/runs/*/*/events.out.tfevents.*
