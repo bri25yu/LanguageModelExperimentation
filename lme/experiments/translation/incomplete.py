@@ -14,7 +14,7 @@ Incomplete3
 """
 from typing import Dict, Sequence
 
-from torch import randint
+from torch import rand, randint
 
 from datasets import DatasetDict
 
@@ -33,6 +33,16 @@ from lme.model_mixins import MT5600MModelMixin
 from lme.experiments.translation.mixin import TranslationMixin
 
 
+def truncate_uniformly_randomly(inputs: Dict[str, Sequence], max_input_length: int) -> None:
+    # Truncate the labels and append it to the input
+    truncation_amount = randint(len(inputs["labels"]), ())
+    truncation_amount = min(truncation_amount, max_input_length - len(inputs["input_ids"]))
+
+    to_append = inputs["labels"][:truncation_amount]
+    inputs["input_ids"] = inputs["input_ids"] + to_append
+    inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
+
+
 class TranslationIncomplete1Mixin(TranslationMixin):
     def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
         dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
@@ -45,20 +55,10 @@ class TranslationIncomplete1Mixin(TranslationMixin):
             train_dataset = repeat_examples(train_dataset, total_examples)
 
             def map_fn(inputs: Dict[str, Sequence]) -> Dict[str, Sequence]:
-                to_truncate = randint(2, ())
-
-                if not to_truncate:
-                    # 50% of the time, we leave the sequence as is
+                if rand(()) < 0.5:
                     pass
                 else:
-                    # The other 50% of the time, we truncate the labels and append it to the input
-                    # The amount of truncation here is uniformly random
-                    truncation_amount = randint(len(inputs["labels"]), ())
-                    truncation_amount = min(truncation_amount, max_input_length - len(inputs["input_ids"]))
-
-                    to_append = inputs["labels"][:truncation_amount]
-                    inputs["input_ids"] = inputs["input_ids"] + to_append
-                    inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
+                    truncate_uniformly_randomly(inputs, max_input_length)
 
                 return inputs
 
@@ -79,18 +79,44 @@ class TranslationIncomplete2Mixin(TranslationMixin):
             train_dataset = repeat_examples(train_dataset, total_examples)
 
             def map_fn(inputs: Dict[str, Sequence]) -> Dict[str, Sequence]:
-                # Truncate the labels and append it to the input
-                # The amount of truncation here is uniformly random
-                truncation_amount = randint(len(inputs["labels"]), ())
-                truncation_amount = min(truncation_amount, max_input_length - len(inputs["input_ids"]))
-
-                to_append = inputs["labels"][:truncation_amount]
-                inputs["input_ids"] = inputs["input_ids"] + to_append
-                inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
+                truncate_uniformly_randomly(inputs, max_input_length)
 
                 return inputs
 
             dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete")
+
+        return dataset_dict
+
+
+class TranslationIncomplete3Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+
+                if progress <= 0.2:
+                    p_full = 0.2
+                elif progress <= 0.6:
+                    p_full = progress
+                else:
+                    p_full = 1
+
+                if rand(()) < p_full:
+                    pass
+                else:
+                    truncate_uniformly_randomly(inputs, max_input_length)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
 
         return dataset_dict
 
@@ -104,4 +130,8 @@ class TranslationIncomplete1Experiment(TranslationIncomplete1Mixin, TranslationI
 
 
 class TranslationIncomplete2Experiment(TranslationIncomplete2Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete3Experiment(TranslationIncomplete3Mixin, TranslationIncompleteExperimentBase):
     pass
