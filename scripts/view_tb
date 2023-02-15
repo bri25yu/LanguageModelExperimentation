@@ -1,0 +1,2 @@
+#!/bin/bash
+start chrome "" "http://localhost:6006/" & ssh -N -L 6006:localhost:27426 bri25yu@a22.millennium.berkeley.edu
