@@ -121,6 +121,84 @@ class TranslationIncomplete3Mixin(TranslationMixin):
         return dataset_dict
 
 
+class TranslationIncomplete4Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    truncate_uniformly_randomly(inputs, max_input_length)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
+class TranslationIncomplete5Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                max_label_append = max_input_length - len(inputs["input_ids"])
+                truncation_amount = int((1 - progress) * max_label_append)
+
+                to_append = inputs["labels"][:truncation_amount]
+                inputs["input_ids"] = inputs["input_ids"] + to_append
+                inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
+class TranslationIncomplete6Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+        TARGET_WARMUP_STEPS = 2000
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = min(idx / TARGET_WARMUP_STEPS, 1)
+                max_label_append = max_input_length - len(inputs["input_ids"])
+                truncation_amount = int((1 - progress) * max_label_append)
+
+                to_append = inputs["labels"][:truncation_amount]
+                inputs["input_ids"] = inputs["input_ids"] + to_append
+                inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
 class TranslationIncompleteExperimentBase(MT5600MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
@@ -134,4 +212,16 @@ class TranslationIncomplete2Experiment(TranslationIncomplete2Mixin, TranslationI
 
 
 class TranslationIncomplete3Experiment(TranslationIncomplete3Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete4Experiment(TranslationIncomplete4Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete5Experiment(TranslationIncomplete5Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete6Experiment(TranslationIncomplete6Mixin, TranslationIncompleteExperimentBase):
     pass
