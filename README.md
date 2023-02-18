@@ -21,10 +21,10 @@ python scripts/read_results.py
 |        |    NLLB 1B|         4|
 |        |   mT5 600M|         8|
 |        |     mT5 1B|         ?|
-|        |  byT5 600M|         ?|
+|        |  byT5 600M|        16|
 |        |    byT5 1B|         ?|
-|        |FlanT5 300M|         ?|
-|        |FlanT5 800M|         ?|
+|        |FlanT5 300M|        32|
+|        |FlanT5 800M|         8|
 |        |  FlanT5 3B|         ?|
 |    49GB|    NLLB 1B|        16|
 |        |    NLLB 3B|        16|
