@@ -1,15 +1,31 @@
 """
-Incomplete1
-    The baseline experiment with no changes to the input.
+Incomplete1 - 23.9 BLEU
+    50% no addition, 50% uniformly distributed addition.
+    Less variance in the first 2000 steps, most consistently better than baseline
 
-Incomplete2
-    50% chance for the sequence to be unaltered. The other 50% of the time, we truncate the
-    labels and append it to the input. The amount of truncation here is uniformly random.
-    For sequences that are longer than the max_length, we append as many tokens as possible.
+Incomplete2 - 21.1 BLEU
+    Uniformly distributed addition.
+    Less variance in the first 2000 steps, dataset later on is not challenging enough to peak properly
+    Less steep learning in the inital 2000 steps
 
-Incomplete3
-    Truncate the labels and append it to the input. The amount of truncation here is uniformly random.
-    For sequences that are longer than the max_length, we append as many tokens as possible.
+Incomplete3 - 24.7 BLEU
+    20% no addition/80% uniform, 20-60% linear no addition, 100% no addition/0% uniform
+    A little shakier in the first 2000 steps compared to incomplete 1/2
+    More variance in the learning curves ://
+
+Incomplete 4 - 24.6 BLEU
+    First 2000 steps uniformly distributed addition, rest no addition
+    Little struggle in the beginning to learn quickly, but still faster than baseline
+    Super consistent among LRs
+
+Incomplete 5 - We don't talk about this one 17.4 BLEU
+    Linear addition from 100% to 0%
+    Yeah this one is definitely not hard enough
+
+Incomplete 6 - 24.9 BLEU
+    Linear addition from 100% to 0% for the first 2000 steps, rest no addition
+    Not sure why, but for some reason LR 1e-3 works but 2e-3 fails to train i.e. the loss spikes to inf and the BLEU score drops to 0. Not sure why
+    Very varied initial performance unfortunately.
 
 """
 from typing import Dict, Sequence
@@ -28,7 +44,7 @@ from lme.training_argument_mixins.utils import calculate_total_examples
 
 from lme.training_dataset_utils.utils import repeat_examples
 
-from lme.model_mixins import MT5600MModelMixin
+from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 
 from lme.experiments.translation.mixin import TranslationMixin
 
@@ -224,4 +240,16 @@ class TranslationIncomplete5Experiment(TranslationIncomplete5Mixin, TranslationI
 
 
 class TranslationIncomplete6Experiment(TranslationIncomplete6Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncompleteMT51BExperiment(
+    TranslationIncomplete4Mixin, MT51BModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase
+):
+    pass
+
+
+class TranslationIncompleteMT53BExperiment(
+    TranslationIncomplete4Mixin, MT53BModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase
+):
     pass
