@@ -27,6 +27,14 @@ class TyDiQAExperimentBase(MT5FinetuneArgsMixin, FinetuneExperimentBase):
     MAX_INPUT_LENGTH = 2 ** 9  # Covers 96% of the TyDiQA gold dataset
     TRAINER_CLS = Seq2SeqTrainer
 
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        # !TODO: This is not proper coding/engineering patterning, but I'm too lazy to invest time to properly fix it.
+        training_args = super().get_training_arguments(batch_size, learning_rate)
+
+        training_args.metric_for_best_model = "exact_match"
+
+        return training_args
+
     def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         max_input_length = self.MAX_INPUT_LENGTH
 
