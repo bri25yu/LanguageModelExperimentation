@@ -10,6 +10,7 @@ from lme.data_processors import TranslationDataProcessor
 
 from lme.training_dataset_utils.tib_to_eng_translation import tokenize_tib_to_eng_translation
 
+
 class TranslationMixin:
     MAX_INPUT_LENGTH = 256  # Covers 96% of the translation dataset
     TRAINER_CLS = Seq2SeqTrainer

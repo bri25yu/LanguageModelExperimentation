@@ -18,6 +18,8 @@ class AbstractDataProcessor(ABC):
             else:
                 print("Loading dataset from scratch")
                 dataset = self.load()
+                assert set(dataset) == set(["train", "val", "test"]), f"Loaded dataset must have train/val/test splits, but got {dataset.keys()}"
+
                 print("Saving dataset")
                 dataset.save_to_disk(self.path)
 
