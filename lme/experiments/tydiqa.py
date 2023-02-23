@@ -19,21 +19,13 @@ from lme.model_mixins import (
 from lme.training_pipelines import FinetuneExperimentBase
 from lme.compute_metrics_utils import get_exact_match_compute_metrics
 
-from lme.training_argument_mixins import MT5FinetuneArgsMixin
+from lme.training_argument_mixins import TyDiQAMT5FinetuneArgsMixin
 from lme.training_argument_mixins.utils import calculate_total_examples
 
 
-class TyDiQAExperimentBase(MT5FinetuneArgsMixin, FinetuneExperimentBase):
+class TyDiQAExperimentBase(TyDiQAMT5FinetuneArgsMixin, FinetuneExperimentBase):
     MAX_INPUT_LENGTH = 2 ** 9  # Covers 96% of the TyDiQA gold dataset
     TRAINER_CLS = Seq2SeqTrainer
-
-    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
-        # !TODO: This is not proper coding/engineering patterning, but I'm too lazy to invest time to properly fix it.
-        training_args = super().get_training_arguments(batch_size, learning_rate)
-
-        training_args.metric_for_best_model = "exact_match"
-
-        return training_args
 
     def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         max_input_length = self.MAX_INPUT_LENGTH
