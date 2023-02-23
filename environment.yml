@@ -8,7 +8,10 @@ dependencies:
   - pip
   - pip:
     - torch --extra-index-url https://download.pytorch.org/whl/cu113
-    - transformers[accelerate,sentencepiece,deepspeed]==4.26.1
+    - transformers==4.26.1
+    - accelerate==0.16.0
+    - sentencepiece==0.1.97
+    - deepspeed==0.8.1
     - sacrebleu==2.3.1
     - datasets==2.9.0
     - evaluate==0.4.0
