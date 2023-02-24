@@ -25,17 +25,16 @@ def read_results(results_dir: str):
 
         for learning_rate, result_by_lr in sorted(results.items()):
             for split_name, result in result_by_lr.items():
-                loss = result.metrics["test_loss"]
+                if split_name == "train": continue  # We don't bother displaying results for the train split
 
                 config_data = {
                     "name": experiment_name,
                     "lr": learning_rate,
                     "split": split_name,
-                    "loss": loss,
                 }
 
                 for attr_name, attr_value in result.metrics.items():
-                    if not attr_name.endswith("score"):
+                    if not (attr_name.endswith("score") or attr_name.endswith("exact_match")):
                         continue
 
                     attr_name = attr_name.removeprefix("test_")
@@ -52,13 +51,17 @@ def read_results(results_dir: str):
 
     # Some display improvements
     df.lr = df.lr.map(lambda lr: f"{lr:.0e}")
-    df.loss = df.loss.round(3)
+    if "exact_match" in df.columns: df.exact_match = df.exact_match.round(3)
     df.name = df.name.str.removesuffix("Experiment")
 
-    value_names = ["loss"]
+    value_names = ["exact_match"] if "exact_match" in df.columns else []
     for value_name in df.columns:
-        if not value_name.endswith("score"):
+        if not value_name.endswith("_score"):
             continue
+
+        new_value_name = value_name.removesuffix("_score")
+        df = df.rename(columns={value_name: new_value_name})
+        value_name = new_value_name
 
         df[value_name] = df[value_name].round(1)
         value_names.append(value_name)
@@ -73,7 +76,7 @@ def read_results(results_dir: str):
 
     # Order the index and columns properly
     index_reordered = pd.MultiIndex.from_tuples(sorted(df.index.values, key=lambda t: [t[0], float(t[1])]), names=df.index.names)
-    columns_rordered = pd.MultiIndex.from_product([value_names, ["train", "val", "test"]], names=df.columns.names)
+    columns_rordered = pd.MultiIndex.from_product([value_names, ["val", "test"]], names=df.columns.names)
     df = pd.DataFrame(df, columns=columns_rordered, index=index_reordered)
 
     print(df.to_string())
