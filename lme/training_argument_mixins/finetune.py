@@ -23,6 +23,10 @@ class MT5FinetuneArgsMixin:
             self.experiment_class_output_dir, f"{learning_rate:.0e}"
         )
 
+        # !TODO: This is very poor engineering and programming practice. Sue me
+        use_bf16 = os.environ.get("USE_BF16", "true")
+        use_bf16 = use_bf16 == "true"
+
         target_total_batch_size_per_update = 2 ** 9  # 512
         gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
         return Seq2SeqTrainingArguments(
@@ -36,7 +40,7 @@ class MT5FinetuneArgsMixin:
             per_device_train_batch_size=per_device_batch_size,
             per_device_eval_batch_size=2 * per_device_batch_size,
             fp16=False,
-            bf16=True,
+            bf16=use_bf16,
             metric_for_best_model="bleu_score",
             greater_is_better=True,
             deepspeed=get_deepspeed_args("WarmupLR"),
