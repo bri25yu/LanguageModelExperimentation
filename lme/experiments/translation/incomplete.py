@@ -43,20 +43,11 @@ from lme.training_argument_mixins import MT5FinetuneArgsMixin
 from lme.training_argument_mixins.utils import calculate_total_examples
 
 from lme.training_dataset_utils.utils import repeat_examples
+from lme.training_dataset_utils.utils import add_prefix_truncated_output, add_prefix_and_suffix_truncated_output, add_middle_truncated_output, add_suffix_truncated_output
 
 from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 
 from lme.experiments.translation.mixin import TranslationMixin
-
-
-def truncate_uniformly_randomly(inputs: Dict[str, Sequence], max_input_length: int) -> None:
-    # Truncate the labels and append it to the input
-    truncation_amount = randint(len(inputs["labels"]), ())
-    truncation_amount = min(truncation_amount, max_input_length - len(inputs["input_ids"]))
-
-    to_append = inputs["labels"][:truncation_amount]
-    inputs["input_ids"] = inputs["input_ids"] + to_append
-    inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
 
 
 class TranslationIncomplete1Mixin(TranslationMixin):
@@ -74,7 +65,7 @@ class TranslationIncomplete1Mixin(TranslationMixin):
                 if rand(()) < 0.5:
                     pass
                 else:
-                    truncate_uniformly_randomly(inputs, max_input_length)
+                    add_prefix_truncated_output(inputs, max_input_length)
 
                 return inputs
 
@@ -95,7 +86,7 @@ class TranslationIncomplete2Mixin(TranslationMixin):
             train_dataset = repeat_examples(train_dataset, total_examples)
 
             def map_fn(inputs: Dict[str, Sequence]) -> Dict[str, Sequence]:
-                truncate_uniformly_randomly(inputs, max_input_length)
+                add_prefix_truncated_output(inputs, max_input_length)
 
                 return inputs
 
@@ -128,7 +119,7 @@ class TranslationIncomplete3Mixin(TranslationMixin):
                 if rand(()) < p_full:
                     pass
                 else:
-                    truncate_uniformly_randomly(inputs, max_input_length)
+                    add_prefix_truncated_output(inputs, max_input_length)
 
                 return inputs
 
@@ -151,7 +142,7 @@ class TranslationIncomplete4Mixin(TranslationMixin):
             def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
                 progress = idx / total_examples
                 if progress <= 0.2:
-                    truncate_uniformly_randomly(inputs, max_input_length)
+                    add_prefix_truncated_output(inputs, max_input_length)
 
                 return inputs
 
@@ -215,6 +206,29 @@ class TranslationIncomplete6Mixin(TranslationMixin):
         return dataset_dict
 
 
+class TranslationIncomplete7Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    add_prefix_and_suffix_truncated_output(inputs, max_input_length)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
 class TranslationIncompleteExperimentBase(MT5600MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
@@ -240,6 +254,10 @@ class TranslationIncomplete5Experiment(TranslationIncomplete5Mixin, TranslationI
 
 
 class TranslationIncomplete6Experiment(TranslationIncomplete6Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete7Experiment(TranslationIncomplete7Mixin, TranslationIncompleteExperimentBase):
     pass
 
 
