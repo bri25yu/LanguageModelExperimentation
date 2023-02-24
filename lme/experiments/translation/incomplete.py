@@ -229,6 +229,29 @@ class TranslationIncomplete7Mixin(TranslationMixin):
         return dataset_dict
 
 
+class TranslationIncomplete8Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    add_suffix_truncated_output(inputs, max_input_length)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
 class TranslationIncompleteExperimentBase(MT5600MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
@@ -258,6 +281,10 @@ class TranslationIncomplete6Experiment(TranslationIncomplete6Mixin, TranslationI
 
 
 class TranslationIncomplete7Experiment(TranslationIncomplete7Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete8Experiment(TranslationIncomplete8Mixin, TranslationIncompleteExperimentBase):
     pass
 
 
