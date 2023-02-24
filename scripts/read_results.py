@@ -79,7 +79,7 @@ def read_results(results_dir: str):
     columns_rordered = pd.MultiIndex.from_product([value_names, ["val", "test"]], names=df.columns.names)
     df = pd.DataFrame(df, columns=columns_rordered, index=index_reordered)
 
-    print(df.to_string())
+    print(df.to_string(justify="left", na_rep=""))
 
     return df
 
