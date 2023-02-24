@@ -28,6 +28,9 @@ def add_prefix_and_suffix_truncated_output(inputs: Dict[str, Sequence], max_inpu
     result_length = randint(len(inputs["labels"]), ())
     result_length = min(result_length, max_input_length - len(inputs["input_ids"]))
 
+    # Create space for the sentinel token
+    result_length -= 1
+
     # Generate suffix and prefix locations based on max length
     prefix_cutoff = randint(result_length, ())
     prefix = inputs["labels"][:prefix_cutoff]
