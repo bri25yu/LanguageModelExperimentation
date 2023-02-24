@@ -31,17 +31,20 @@ def add_prefix_and_suffix_truncated_output(inputs: Dict[str, Sequence], max_inpu
     # Create space for the sentinel token
     result_length -= 1
 
+    if result_length <= 0:
+        return
+
     # Generate suffix and prefix locations based on max length
     prefix_cutoff = randint(result_length, ())
     prefix = inputs["labels"][:prefix_cutoff]
     suffix_cutoff = result_length - prefix_cutoff
-    suffix = inputs["labels"][-suffix_cutoff:]
+    suffix = inputs["labels"][(-suffix_cutoff):] if suffix_cutoff > 0 else []
 
     # Add the prefix and suffix and a sentinel token in between
-    to_append = prefix + '<extra_id_12>' + suffix
-
-    inputs["input_ids"] = inputs["input_ids"] + to_append
-    inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
+    inputs["input_ids"] = inputs["input_ids"] + prefix
+    inputs["input_ids"] = inputs["input_ids"] + [32087] # Extra input sentinal token
+    inputs["input_ids"] = inputs["input_ids"] + suffix
+    inputs["attention_mask"] = inputs["attention_mask"] + [1] * (len(prefix)+len(suffix)+1)
 
 
 def add_middle_truncated_output(inputs: Dict[str, Sequence], max_input_length: int) -> None:
@@ -66,8 +69,11 @@ def add_suffix_truncated_output(inputs: Dict[str, Sequence], max_input_length: i
     result_length = randint(len(inputs["labels"]), ())
     result_length = min(result_length, max_input_length - len(inputs["input_ids"]))
 
+    if result_length == 0:
+        return
+
     # Add the suffix
-    to_append = inputs["labels"][result_length:]
+    to_append = inputs["labels"][(-result_length):]
 
     inputs["input_ids"] = inputs["input_ids"] + to_append
     inputs["attention_mask"] = inputs["attention_mask"] + [1] * len(to_append)
