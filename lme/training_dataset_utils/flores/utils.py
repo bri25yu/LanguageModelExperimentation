@@ -1,7 +1,5 @@
 from typing import Dict, List
 
-import os
-
 from tqdm import trange
 
 from numpy import array, ndarray
@@ -62,7 +60,6 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
             batched=True,
             fn_kwargs=fn_kwargs,
             with_indices=True,
-            num_proc=os.cpu_count(),
         )
         res.append(dataset)
 
