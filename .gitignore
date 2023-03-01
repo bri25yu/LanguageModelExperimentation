@@ -130,3 +130,6 @@ dmypy.json
 
 # Ignore copies of the run file
 run_*.py
+
+# Ignore hostfiles
+hostfile*.txt
