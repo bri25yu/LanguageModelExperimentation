@@ -1,2 +1,2 @@
 #!/bin/bash
-start chrome "" "http://localhost:6006/" & ssh -N -L 6006:localhost:27426 bri25yu@a22.millennium.berkeley.edu
+start chrome "" "http://localhost:6006/?tagFilter=%28chrf_score%7Cbleu_score%29" & ssh -N -L 6006:localhost:27426 bri25yu@a22.millennium.berkeley.edu
