@@ -36,7 +36,7 @@ def main():
         "test": val_test_dict["test"],
     })
 
-    dataset_dict = tokenize_baseline_mt5(dataset_dict)
+    dataset_dict = tokenize_baseline_mt5(dataset_dict, MAX_SEQ_LEN)
 
     dataset_dict.push_to_hub(DATASET_NAME, private=True)
 
