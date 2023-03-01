@@ -22,12 +22,13 @@ from datasets import DatasetDict, load_dataset
 
 from lme.training_dataset_utils.flores.utils import tokenize_baseline_mt5
 
+
 MAX_SEQ_LEN = 128
-DATASET_NAME = "flores200_baseline_small_mt5"
+DATASET_NAME = "flores200_baseline_medium_mt5"
 
 
 def main():
-    train_dataset = load_dataset("bri25yu/flores200_baseline_small")["train"]
+    train_dataset = load_dataset("bri25yu/flores200_baseline_medium")["train"]
     val_test_dict = load_dataset("bri25yu/flores200_val_test")
     dataset_dict = DatasetDict({
         "train": train_dataset,

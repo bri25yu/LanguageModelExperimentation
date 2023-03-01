@@ -1,11 +1,15 @@
 from typing import Dict, List
 
+import os
+
 from tqdm.notebook import trange
 
 from numpy import array, ndarray
 from numpy.random import choice, seed as set_seed
 
-from datasets import Dataset, concatenate_datasets
+from datasets import Dataset, DatasetDict, concatenate_datasets
+
+from transformers import AutoTokenizer
 
 
 def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000) -> Dataset:
@@ -53,8 +57,38 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
             dataset = raw_dataset
 
         dataset = dataset.map(
-            map_fn, remove_columns=columns_to_remove, batched=True, fn_kwargs=fn_kwargs, with_indices=True
+            map_fn,
+            remove_columns=columns_to_remove,
+            batched=True,
+            fn_kwargs=fn_kwargs,
+            with_indices=True,
+            num_proc=os.cpu_count(),
         )
         res.append(dataset)
 
     return concatenate_datasets(res).select(range(n)).flatten_indices()
+
+
+def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> DatasetDict:
+    tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
+    sep = tokenizer.eos_token
+
+    def tokenize_fn(examples):
+        inputs = [
+            f"{source_lang} {sep} {target_lang} {sep} {s}"
+            for source_lang, target_lang, s in
+            zip(examples["source_lang"], examples["target_lang"], examples["source"])
+        ]
+
+        model_inputs = tokenizer(inputs, max_length=max_seq_len, truncation=True)
+        labels = tokenizer(text_target=examples["target"], max_length=max_seq_len, truncation=True)
+
+        model_inputs["labels"] = labels["input_ids"]
+        return model_inputs
+
+    columns_to_remove = set(dataset_dict["train"].column_names) - set(["id"])
+    dataset_dict = dataset_dict.map(
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
+    )
+
+    return dataset_dict

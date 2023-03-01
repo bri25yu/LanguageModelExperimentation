@@ -15,6 +15,8 @@ python scripts/read_results.py
 
 
 ### Max batch sizes
+For tib to eng translation:
+
 |GPU size|Model      |Batch size|
 |--------|-----------|----------|
 |    24GB|  NLLB 600M|        16|
@@ -26,6 +28,12 @@ python scripts/read_results.py
 |        |     mT5 1B|        16|
 |        |     mT5 3B|         4|
 |        |    mT5 13B|         ?|
+
+For Flores200:
+
+|GPU size|Model      |Seq len|Batch size|
+|--------|-----------|-------|----------|
+|    24GB|   mT5 300M|    128|        32|
 
 
 ### Ideas
