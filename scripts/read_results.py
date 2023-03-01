@@ -34,7 +34,11 @@ def read_results(results_dir: str):
                 }
 
                 for attr_name, attr_value in result.metrics.items():
-                    if not (attr_name.endswith("score") or attr_name.endswith("exact_match")):
+                    if not (
+                        attr_name.endswith("score")
+                        or attr_name.endswith("exact_match")
+                        or attr_name.endswith("chrf++")
+                    ):
                         continue
 
                     attr_name = attr_name.removeprefix("test_")
@@ -52,9 +56,10 @@ def read_results(results_dir: str):
     # Some display improvements
     df.lr = df.lr.map(lambda lr: f"{lr:.0e}")
     if "exact_match" in df.columns: df.exact_match = df.exact_match.round(3)
+    if "chrf++" in df.columns: df["chrf++"] = df["chrf++"].round(1)
     df.name = df.name.str.removesuffix("Experiment")
 
-    value_names = ["exact_match"] if "exact_match" in df.columns else []
+    value_names = list(set(["exact_match", "chrf++"]).intersection(set(df.columns)))
     for value_name in df.columns:
         if not value_name.endswith("_score"):
             continue
