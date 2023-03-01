@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import os
 
-from tqdm.notebook import trange
+from tqdm import trange
 
 from numpy import array, ndarray
 from numpy.random import choice, seed as set_seed
