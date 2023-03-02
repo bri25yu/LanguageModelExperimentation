@@ -1,2 +1,4 @@
 #!/bin/bash
-ssh -L 6006:localhost:27426 bri25yu@"$1".millennium.berkeley.edu
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_rsa
+ssh -A -L 6006:localhost:27426 bri25yu@"$1".millennium.berkeley.edu
