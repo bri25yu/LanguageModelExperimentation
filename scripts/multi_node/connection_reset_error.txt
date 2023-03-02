@@ -1,0 +1,11 @@
+
+  File "/home/eecs/bri25yu/miniconda3/envs/LME/lib/python3.9/site-packages/transformers/trainer.py", line 2107, in _maybe_log_save_evaluate
+    tr_loss_scalar = self._nested_gather(tr_loss).mean().item()  
+  File "/home/eecs/bri25yu/miniconda3/envs/LME/lib/python3.9/site-packages/transformers/trainer.py", line 3149, in _nested_gather
+    tensors = distributed_concat(tensors)
+  File "/home/eecs/bri25yu/miniconda3/envs/LME/lib/python3.9/site-packages/transformers/trainer_pt_utils.py", line 194, in distributed_concat
+    dist.all_gather(output_tensors, tensor)
+  File "/home/eecs/bri25yu/miniconda3/envs/LME/lib/python3.9/site-packages/torch/distributed/distributed_c10d.py", line 2275, in all_gather                                                        ---------   
+    work = default_pg.allgather([tensor_list], [tensor])
+RuntimeError: [2] is setting up NCCL communicator and retreiving 
+ncclUniqueId from [0] via c10d key-value store by key '1', but store->get('1') got error: Connection reset by peer
