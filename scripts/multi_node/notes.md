@@ -16,6 +16,7 @@ Make sure the values for your IP addresses are correct.
 Make sure the values for your network interfaces are correct.
 - launcher/multinode_runner.py: 154
 
+
 # Running tests
 ## Deepspeed setup
 ```bash
@@ -24,5 +25,5 @@ deepspeed --hostfile=scripts/multi_node/hostfile.txt --launcher=openmpi scripts/
 
 ## Connection reset by peer error
 ```bash
-mpirun --hostfile scripts/multi_node/hostfile.txt ~/miniconda3/envs/LME/bin/python nccl_test.py
+mpirun --hostfile scripts/multi_node/hostfile.txt ~/miniconda3/envs/LME/bin/python scripts/multi_node/nccl_test.py
 ```

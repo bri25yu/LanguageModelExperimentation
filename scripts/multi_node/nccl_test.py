@@ -30,4 +30,5 @@ for i in trange(NUM_ITERS):
     tensor_list = [local_tensor.clone() for _ in range(WORLD_SIZE)]
 
     all_gather(tensor_list, local_tensor)
-    # barrier()  # Somehow this fixes the error
+
+barrier()
