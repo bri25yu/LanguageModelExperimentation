@@ -27,6 +27,27 @@ Incomplete 6 - 24.9 BLEU
     Not sure why, but for some reason LR 1e-3 works but 2e-3 fails to train i.e. the loss spikes to inf and the BLEU score drops to 0. Not sure why
     Very varied initial performance unfortunately.
 
+Incomplete 7 - 
+    First 2000 steps uniformly distributed addition of suffix and prefix, rest no addition
+    Peforms similarly to the other best incomplete experiments.
+    For one ablation ran into some unknown issue with a very large spike in loss and BLEU score dropping, then it recovers. 
+
+Incomplete 8 - 
+    First 4000 steps uniformly distributed addition of suffix and prefix (same as #7)
+
+
+Incomplete 9 - 
+    First 1200 steps uniformly distributed addition of suffix and prefix (same as #7), rest no addition
+    Potentially making the task easier for a lesser amount of the training is helpful for the model to then adapt to the task more quickly
+    during the rest of training. 
+
+Incomplete 10 - 
+    First 2000 steps uniformly distributed addition of masked target added to the input
+
+Incomplete 11 - 
+    First 2000 steps uniformly distributed addition, rest no addition, same as #4. 
+    Last 2000 steps, mask portions of the input (not the target), so removing information from the input. Perhaps this more difficult task will
+    help the model to learn better.
 """
 from typing import Dict, Sequence
 
@@ -43,7 +64,7 @@ from lme.training_argument_mixins import MT5FinetuneArgsMixin
 from lme.training_argument_mixins.utils import calculate_total_examples
 
 from lme.training_dataset_utils.utils import repeat_examples
-from lme.training_dataset_utils.incomplete_utils import add_prefix_truncated_output, add_prefix_and_suffix_truncated_output, add_middle_truncated_output, add_suffix_truncated_output
+from lme.training_dataset_utils.incomplete_utils import add_prefix_truncated_output, add_prefix_and_suffix_truncated_output, add_middle_truncated_output, add_suffix_truncated_output, add_masked_output
 
 from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 
@@ -242,8 +263,8 @@ class TranslationIncomplete8Mixin(TranslationMixin):
 
             def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
                 progress = idx / total_examples
-                if progress <= 0.2:
-                    add_suffix_truncated_output(inputs, max_input_length)
+                if progress <= 0.4:
+                    add_prefix_and_suffix_truncated_output(inputs, max_input_length, tokenizer)
 
                 return inputs
 
@@ -267,6 +288,53 @@ class TranslationIncomplete9Mixin(TranslationMixin):
                 progress = idx / total_examples
                 if progress <= 0.12:
                     add_prefix_and_suffix_truncated_output(inputs, max_input_length)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
+class TranslationIncomplete10Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    add_masked_output(inputs, max_input_length, tokenizer)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
+class TranslationIncomplete11Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    # TODO 
+                    add_masked_output(inputs, max_input_length, tokenizer)
 
                 return inputs
 
@@ -312,6 +380,14 @@ class TranslationIncomplete8Experiment(TranslationIncomplete8Mixin, TranslationI
 
 
 class TranslationIncomplete9Experiment(TranslationIncomplete9Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete10Experiment(TranslationIncomplete10Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+
+class TranslationIncomplete11Experiment(TranslationIncomplete11Mixin, TranslationIncompleteExperimentBase):
     pass
 
 
