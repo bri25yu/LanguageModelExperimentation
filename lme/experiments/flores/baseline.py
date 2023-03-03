@@ -13,6 +13,7 @@ from lme.data_processors.flores200 import (
 from lme.model_mixins import MT5300MModelMixin
 from lme.training_pipelines import FinetuneExperimentBase
 from lme.training_argument_mixins import MT5FinetuneArgsMixin
+from lme.training_argument_mixins.utils import calculate_batch_size_args
 
 
 class FloresBaselineExperimentBase(MT5FinetuneArgsMixin, MT5300MModelMixin, FinetuneExperimentBase):
@@ -46,3 +47,17 @@ class FloresBaselineSmallExperiment(FloresBaselineExperimentBase):
 
 class FloresBaselineMediumExperiment(FloresBaselineExperimentBase):
     DATA_PROCESSOR_CLS = BaselineMediumDataProcessor
+
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
+
+        args.max_steps = 25000
+
+        target_total_batch_size_per_update = 2 ** 10  # 1024
+        gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
+
+        args.gradient_accumulation_steps = gradient_accumulation_steps
+        args.per_device_train_batch_size = per_device_batch_size
+        args.per_device_eval_batch_size = 2 * per_device_batch_size
+
+        return args
