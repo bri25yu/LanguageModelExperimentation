@@ -61,3 +61,22 @@ class FloresBaselineMediumExperiment(FloresBaselineExperimentBase):
         args.per_device_eval_batch_size = 2 * per_device_batch_size
 
         return args
+
+
+# This is `FloresBaselineMediumExperiment` with the original number of steps i.e. 10k but with a larger batch size
+class FloresBaselineMedium2Experiment(FloresBaselineMediumExperiment):
+    DATA_PROCESSOR_CLS = BaselineMediumDataProcessor
+
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
+
+        args.max_steps = 10000
+
+        target_total_batch_size_per_update = 2 ** 11  # 2048
+        gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
+
+        args.gradient_accumulation_steps = gradient_accumulation_steps
+        args.per_device_train_batch_size = per_device_batch_size
+        args.per_device_eval_batch_size = 2 * per_device_batch_size
+
+        return args
