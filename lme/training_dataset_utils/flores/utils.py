@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Sequence
 
 from tqdm import trange
 
@@ -8,6 +8,8 @@ from numpy.random import choice, seed as set_seed
 from datasets import Dataset, DatasetDict, concatenate_datasets
 
 from transformers import AutoTokenizer
+
+from lme.training_dataset_utils.incomplete_utils import add_prefix_truncated_output
 
 
 def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000) -> Dataset:
@@ -89,3 +91,14 @@ def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> Datase
     )
 
     return dataset_dict
+
+
+def apply_incomplete(train_dataset: Dataset, max_seq_len: int, total_examples: int) -> Dataset:
+    def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+        progress = idx / total_examples
+        if progress <= 0.2:
+            add_prefix_truncated_output(inputs, max_seq_len)
+
+        return inputs
+
+    return train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
