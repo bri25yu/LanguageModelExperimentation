@@ -94,11 +94,12 @@ def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> Datase
 
 
 def apply_incomplete(train_dataset: Dataset, max_seq_len: int, total_examples: int) -> Dataset:
-    def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
-        progress = idx / total_examples
-        if progress <= 0.2:
-            add_prefix_truncated_output(inputs, max_seq_len)
-
+    num_incomplete = int(total_examples * 0.2)
+    def map_fn(inputs: Dict[str, Sequence]) -> Dict[str, Sequence]:
+        add_prefix_truncated_output(inputs, max_seq_len)
         return inputs
 
-    return train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+    incomplete_examples = train_dataset.select(range(num_incomplete)).map(map_fn, desc="Applying incomplete")
+    baseline_examples = train_dataset.select(range(num_incomplete, total_examples))
+
+    return concatenate_datasets([incomplete_examples, baseline_examples]).flatten_indices()

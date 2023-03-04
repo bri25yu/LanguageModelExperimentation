@@ -35,9 +35,6 @@ total_examples = BATCH_SIZE_PER_UPDATE * NUM_UPDATES
 def main():
     dataset_dict = load_dataset("bri25yu/flores200_baseline_medium_mt5")
 
-    # This line is only here because the medium dataset is larger than the target dataset in the end
-    dataset_dict["train"] = dataset_dict["train"].select(range(total_examples)).flatten_indices()
-
     dataset_dict["train"] = apply_incomplete(dataset_dict["train"], MAX_SEQ_LEN, total_examples)
 
     dataset_dict.push_to_hub(DATASET_NAME, private=True)
