@@ -116,8 +116,6 @@ def apply_packing(
     examples_per_pack: int,
     seed: int=42,
 ) -> Dataset:
-    set_seed(seed)
-
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
     sep = tokenizer.eos_token
 
@@ -127,41 +125,41 @@ def apply_packing(
     flatten = lambda l: list(chain.from_iterable(l))
     keys_to_langs = lambda keys: [k[len("sentence_"):] for k in keys]
 
-    datapoints_per_flores_example = (total_datapoints // len(flores_train_dataset)) + 1
+    def map_fn(
+        inputs: Dict[str, str], source_lang_keys: Sequence[str], target_lang_keys: Sequence[str]
+    ) -> Dict[str, Sequence]:
+        source_langs = keys_to_langs(source_lang_keys)
+        target_langs = keys_to_langs(target_lang_keys)
 
-    def map_fn(inputs: Dict[str, str]) -> Dict[str, Sequence]:
-        res = {
-            "input_ids": [],
-            "attention_mask": [],
-            "labels": [],
+        source_sentences = [
+            f"{source_lang}{sep}{target_lang}{sep}{inputs[k]}"
+            for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
+        ]
+        target_sentences = [inputs[k] for k in target_lang_keys]
+
+        source_tokens = tokenizer(source_sentences, max_length=max_seq_len_per_example, truncation=True)
+        target_tokens = tokenizer(text_target=target_sentences, max_length=max_seq_len_per_example, truncation=True)
+
+        return {
+            "input_ids": flatten(source_tokens["input_ids"]),
+            "attention_mask": flatten(source_tokens["attention_mask"]),
+            "labels": flatten(target_tokens["input_ids"]),
         }
-        for _ in range(datapoints_per_flores_example):
-            batch_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack), replace=False)
-            source_lang_keys = batch_lang_keys[0]
-            target_lang_keys = batch_lang_keys[1]
-
-            source_langs = keys_to_langs(source_lang_keys)
-            target_langs = keys_to_langs(target_lang_keys)
-
-            source_sentences = [
-                f"{source_lang}{sep}{target_lang}{sep}{inputs[k]}"
-                for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
-            ]
-            target_sentences = [inputs[k] for k in target_lang_keys]
-
-            source_tokens = tokenizer(source_sentences, max_length=max_seq_len_per_example, truncation=True)
-            target_tokens = tokenizer(text_target=target_sentences, max_length=max_seq_len_per_example, truncation=True)
-
-            res["input_ids"].append(flatten(source_tokens["input_ids"]))
-            res["attention_mask"].append(flatten(source_tokens["attention_mask"]))
-            res["labels"].append(flatten(target_tokens["input_ids"]))
-
-        return res
 
     columns_to_remove = set(flores_train_dataset.column_names) - set(["id"])
 
-    mapped_dataset = flores_train_dataset.map(
-        map_fn, remove_columns=columns_to_remove, desc="Applying packing", num_proc=4
-    )
+    set_seed(seed)
+    res: List[Dataset] = []
+    for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing")
+        batch_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack), replace=False)
+        fn_kwargs = {
+            "source_lang_keys": batch_lang_keys[0],
+            "target_lang_keys": batch_lang_keys[1],
+        }
 
-    return mapped_dataset.shuffle(seed=seed).select(range(total_datapoints)).flatten_indices()
+        mapped_dataset = flores_train_dataset.map(
+            map_fn, remove_columns=columns_to_remove, num_proc=4, fn_kwargs=fn_kwargs
+        )
+        res.append(mapped_dataset)
+
+    return concatenate_datasets(res).select(range(total_datapoints)).flatten_indices()
