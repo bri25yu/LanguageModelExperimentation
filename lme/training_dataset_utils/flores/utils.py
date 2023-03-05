@@ -115,7 +115,11 @@ def apply_packing(
     max_seq_len_per_example: int,
     examples_per_pack: int,
     seed: int=42,
+    max_single_size: int=10000,
 ) -> Dataset:
+    max_n_copies = max_single_size // len(flores_train_dataset)
+    flores_train_dataset = concatenate_datasets([flores_train_dataset] * max_n_copies).flatten_indices()
+
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
     sep = tokenizer.eos_token
 
