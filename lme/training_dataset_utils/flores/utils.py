@@ -116,13 +116,8 @@ def select_language_pairs_to_pack(
     total_datapoints: int,
     examples_per_datapoint: int,
     seed: int=42,
-    max_single_size: int=10000,
 ) -> Dataset:
     set_seed(seed)
-
-    max_n_copies = max_single_size // len(flores_train_dataset)
-    flores_train_dataset = concatenate_datasets([flores_train_dataset] * max_n_copies)
-    flores_train_dataset = flores_train_dataset.rename_column("id", "id_copy")  # For convenience later
 
     sep = tokenizer.eos_token
 
@@ -130,27 +125,38 @@ def select_language_pairs_to_pack(
     all_lang_keys = array(sorted(filter(is_lang_key, flores_train_dataset.column_names)))
     keys_to_langs = lambda keys: [k[len("sentence_"):] for k in keys]
 
-    def select_language_pairs(inputs: Dict[str, str]) -> Dict[str, Sequence]:
-        source_lang_keys, target_lang_keys = choice(all_lang_keys, size=(2, examples_per_datapoint), replace=False)
-        source_langs = keys_to_langs(source_lang_keys)
-        target_langs = keys_to_langs(target_lang_keys)
+    repeats_per_datapoint = (total_datapoints // len(flores_train_dataset)) + 1
 
-        return {
-            "id": [inputs["id_copy"]] * len(target_lang_keys),
-            "source": [
+    def select_language_pairs(inputs: Dict[str, str]) -> Dict[str, List[str]]:
+        source, target = [], []
+        for _ in trange(repeats_per_datapoint):
+            source_lang_keys, target_lang_keys = choice(all_lang_keys, size=(2, examples_per_datapoint), replace=False)
+            source_langs = keys_to_langs(source_lang_keys)
+            target_langs = keys_to_langs(target_lang_keys)
+
+            source.extend([
                 f"{source_lang}{sep}{target_lang}{sep}{inputs[k]}"
                 for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
-            ],
-            "target": [inputs[k] for k in target_lang_keys],
+            ])
+            target.extend([inputs[k] for k in target_lang_keys])
+
+        return {
+            "id": [inputs["id"]] * len(source),
+            "source": source,
+            "target": target,
         }
 
-    res: List[Dataset] = []
-    for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Selecting languages pairs"):
-        res_dataset = flores_train_dataset.map(select_language_pairs, remove_columns=flores_train_dataset.column_names, num_proc=4)
-        assert len(res_dataset) == len(flores_train_dataset) * examples_per_datapoint, len(res_dataset)
-        res.append(res_dataset)
+    text_dataset = flores_train_dataset.map(
+        select_language_pairs,
+        remove_columns=flores_train_dataset.column_names,
+        num_proc=4,
+        batched=True,
+        batch_size=1,
+        desc="Selecting languages pairs",
+    )
+    assert len(text_dataset) == repeats_per_datapoint * len(flores_train_dataset) * examples_per_datapoint, len(text_dataset)
 
-    return concatenate_datasets(res)
+    return text_dataset.select(range(total_datapoints * examples_per_datapoint))
 
 
 def tokenize_language_pairs_to_pack(text_dataset: Dataset, tokenizer: PreTrainedTokenizerBase, max_seq_len_per_example: int) -> Dataset:
