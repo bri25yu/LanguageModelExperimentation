@@ -176,9 +176,9 @@ def tokenize_language_pairs_to_pack(text_dataset: Dataset, tokenizer: PreTrained
 def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int) -> Dataset:
     def pack(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         return {
-            "id": examples["id"][0],
+            "id": [examples["id"][0]],
             **{
-                key: list(chain.from_iterable(examples[key]))
+                key: [list(chain.from_iterable(examples[key]))]
                 for key in ["input_ids", "attention_mask", "labels"]
             },
         }
