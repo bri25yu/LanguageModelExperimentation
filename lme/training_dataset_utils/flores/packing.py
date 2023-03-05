@@ -21,7 +21,13 @@ DatasetDict({
 
 from datasets import DatasetDict, load_dataset
 
-from lme.training_dataset_utils.flores.utils import apply_packing
+from transformers import AutoTokenizer
+
+from lme.training_dataset_utils.flores.utils import (
+    select_language_pairs_to_pack,
+    tokenize_language_pairs_to_pack,
+    apply_packing,
+)
 
 
 MAX_SEQ_LEN_PER_EXAMPLE = 128
@@ -36,18 +42,36 @@ total_datapoints = num_datapoints_per_update * NUM_UPDATES
 
 
 def main():
-    tokenized_dataset_dict = load_dataset("bri25yu/flores200_baseline_medium_mt5")
+    tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
+
     flores_train_dataset = load_dataset("facebook/flores", "all")["dev"]
 
-    train_dataset = apply_packing(
+    text_dataset = select_language_pairs_to_pack(
+        flores_train_dataset=flores_train_dataset,
+        tokenizer=tokenizer,
+        total_datapoints=total_datapoints,
+        examples_per_datapoint=NUM_EXAMPLES_PER_DATAPOINT,
+    )
+    print(f"Text dataset of language pairs\n{text_dataset}\n{text_dataset[0]}")
+
+    tokenized_dataset = tokenize_language_pairs_to_pack(
+        text_dataset=text_dataset,
+        tokenizer=tokenizer,
+        max_seq_len_per_example=MAX_SEQ_LEN_PER_EXAMPLE,
+    )
+    print(f"Tokenized dataset of language pairs\n{tokenized_dataset}")
+
+    packed_dataset = apply_packing(
         flores_train_dataset=flores_train_dataset,
         total_datapoints=total_datapoints,
         max_seq_len_per_example=MAX_SEQ_LEN_PER_EXAMPLE,
         examples_per_pack=NUM_EXAMPLES_PER_DATAPOINT,
     )
+    print(f"Packed dataset\n{packed_dataset}\n{packed_dataset[0]}")
 
+    tokenized_dataset_dict = load_dataset("bri25yu/flores200_baseline_medium_mt5")
     dataset_dict = DatasetDict({
-        "train": train_dataset,
+        "train": packed_dataset,
         "val": tokenized_dataset_dict["val"],
         "test": tokenized_dataset_dict["test"],
     })

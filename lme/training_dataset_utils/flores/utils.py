@@ -9,6 +9,7 @@ from numpy.random import choice, seed as set_seed
 
 from datasets import Dataset, DatasetDict, concatenate_datasets
 
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers import AutoTokenizer
 
 from lme.training_dataset_utils.incomplete_utils import add_prefix_truncated_output
@@ -109,59 +110,64 @@ def apply_incomplete(train_dataset: Dataset, max_seq_len: int, total_examples: i
     return concatenate_datasets([incomplete_examples, baseline_examples]).flatten_indices()
 
 
-def apply_packing(
+def select_language_pairs_to_pack(
     flores_train_dataset: Dataset,
+    tokenizer: PreTrainedTokenizerBase,
     total_datapoints: int,
-    max_seq_len_per_example: int,
-    examples_per_pack: int,
+    examples_per_datapoint: int,
     seed: int=42,
+    max_single_size: int=10000,
 ) -> Dataset:
     set_seed(seed)
 
-    tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
+    max_n_copies = max_single_size // len(flores_train_dataset)
+    flores_train_dataset = concatenate_datasets([flores_train_dataset] * max_n_copies)
+    flores_train_dataset = flores_train_dataset.rename_column("id", "id_copy")  # For convenience later
+
     sep = tokenizer.eos_token
 
     is_lang_key = lambda s: s.startswith("sentence_")
     all_lang_keys = array(sorted(filter(is_lang_key, flores_train_dataset.column_names)))
-
     keys_to_langs = lambda keys: [k[len("sentence_"):] for k in keys]
-    repeats_per_example = (total_datapoints // len(flores_train_dataset)) + 1
 
     def select_language_pairs(inputs: Dict[str, str]) -> Dict[str, Sequence]:
-        source_sentences, target_sentences = [], []
-        for _ in trange(repeats_per_example, desc="Selecting languages pairs"):
-            source_lang_keys, target_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack), replace=False)
-            source_langs = keys_to_langs(source_lang_keys)
-            target_langs = keys_to_langs(target_lang_keys)
-
-            source_sentences.extend([
-                f"{source_lang}{sep}{target_lang}{sep}{inputs[k]}"
-                for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
-            ])
-            target_sentences.extend([inputs[k] for k in target_lang_keys])
+        source_lang_keys, target_lang_keys = choice(all_lang_keys, size=(2, examples_per_datapoint), replace=False)
+        source_langs = keys_to_langs(source_lang_keys)
+        target_langs = keys_to_langs(target_lang_keys)
 
         return {
-            "id": [inputs["id"]] * (repeats_per_example * examples_per_pack),
-            "source": source_sentences,
-            "target": target_sentences,
+            "id": [inputs["id_copy"]] * len(target_lang_keys),
+            "source": [
+                f"{source_lang}{sep}{target_lang}{sep}{inputs[k]}"
+                for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
+            ],
+            "target": [inputs[k] for k in target_lang_keys],
         }
 
-    text_dataset = flores_train_dataset.map(select_language_pairs, remove_columns=flores_train_dataset.column_names, num_proc=4)
-    print(f"Text dataset of language pairs\n{text_dataset}\n{text_dataset[0]}")
+    res: List[Dataset] = []
+    for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Selecting languages pairs"):
+        res_dataset = flores_train_dataset.map(select_language_pairs, remove_columns=flores_train_dataset.column_names, num_proc=4)
+        assert len(res_dataset) == len(flores_train_dataset) * examples_per_datapoint, len(res_dataset)
+        res.append(res_dataset)
 
-    def tokenize(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
+    return concatenate_datasets(res)
+
+
+def tokenize_language_pairs_to_pack(text_dataset: Dataset, tokenizer: PreTrainedTokenizerBase, max_seq_len_per_example: int) -> Dataset:
+    def tokenize_fn(examples):
         model_inputs = tokenizer(examples["source"], max_length=max_seq_len_per_example, truncation=True)
         labels = tokenizer(text_target=examples["target"], max_length=max_seq_len_per_example, truncation=True)
 
         model_inputs["labels"] = labels["input_ids"]
         return model_inputs
 
-    columns_to_remove = set(text_dataset.column_names) - set(["id"])
-    tokenized_dataset = text_dataset.map(
-        tokenize, remove_columns=columns_to_remove, desc="Tokenizing", batched=True
+    columns_to_remove = set(text_dataset["train"].column_names) - set(["id"])
+    return text_dataset.map(
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
     )
-    print(f"Tokenized dataset of language pairs\n{tokenized_dataset}\n{tokenized_dataset[0]}")
 
+
+def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int) -> Dataset:
     def pack(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         return {
             "id": examples["id"][0],
@@ -178,6 +184,5 @@ def apply_packing(
         batched=True,
         batch_size=examples_per_pack,
     )
-    print(f"Packed dataset\n{packed_dataset}\n{packed_dataset[0]}")
 
-    return packed_dataset.shuffle(seed=seed).flatten_indices()
+    return packed_dataset
