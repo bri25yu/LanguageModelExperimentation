@@ -2,7 +2,7 @@ from typing import Dict, List, Sequence
 
 from itertools import chain
 
-from tqdm import trange
+from tqdm.auto import trange
 
 from numpy import array, ndarray
 from numpy.random import choice, seed as set_seed
