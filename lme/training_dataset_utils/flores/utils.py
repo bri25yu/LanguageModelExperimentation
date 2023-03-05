@@ -150,7 +150,7 @@ def apply_packing(
 
     set_seed(seed)
     res: List[Dataset] = []
-    for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing")
+    for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing"):
         batch_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack), replace=False)
         fn_kwargs = {
             "source_lang_keys": batch_lang_keys[0],
