@@ -173,7 +173,7 @@ def tokenize_language_pairs_to_pack(text_dataset: Dataset, tokenizer: PreTrained
     )
 
 
-def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int) -> Dataset:
+def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int, seed: int=42) -> Dataset:
     def pack(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         return {
             "id": [examples["id"][0]],
@@ -189,6 +189,7 @@ def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int) -> Dataset
         desc="Packing",
         batched=True,
         batch_size=examples_per_pack,
+        num_proc=32,  # We use a large number of processes here since the operation per step is small
     )
 
-    return packed_dataset
+    return packed_dataset.shuffle(seed=seed)
