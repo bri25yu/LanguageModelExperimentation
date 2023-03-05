@@ -141,13 +141,13 @@ def apply_packing(
             target_sentences.extend([inputs[k] for k in target_lang_keys])
 
         return {
-            "id": [inputs["id"]] * repeats_per_example,
+            "id": [inputs["id"]] * (repeats_per_example * examples_per_pack),
             "source": source_sentences,
             "target": target_sentences,
         }
 
     text_dataset = flores_train_dataset.map(select_language_pairs, remove_columns=flores_train_dataset.column_names, num_proc=4)
-    print(f"Text dataset of language pairs {text_dataset}")
+    print(f"Text dataset of language pairs\n{text_dataset}\n{text_dataset[0]}")
 
     def tokenize(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         model_inputs = tokenizer(examples["source"], max_length=max_seq_len_per_example, truncation=True)
@@ -160,7 +160,7 @@ def apply_packing(
     tokenized_dataset = text_dataset.map(
         tokenize, remove_columns=columns_to_remove, desc="Tokenizing", batched=True
     )
-    print(f"Tokenized dataset of language pairs {tokenized_dataset}")
+    print(f"Tokenized dataset of language pairs\n{tokenized_dataset}\n{tokenized_dataset[0]}")
 
     def pack(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         return {
@@ -178,6 +178,6 @@ def apply_packing(
         batched=True,
         batch_size=examples_per_pack,
     )
-    print(f"Packed dataset {packed_dataset}")
+    print(f"Packed dataset\n{packed_dataset}\n{packed_dataset[0]}")
 
     return packed_dataset.shuffle(seed=seed).flatten_indices()
