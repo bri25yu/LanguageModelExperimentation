@@ -126,8 +126,11 @@ def apply_packing(
     keys_to_langs = lambda keys: [k[len("sentence_"):] for k in keys]
 
     def map_fn(
-        inputs: Dict[str, str], source_lang_keys: Sequence[str], target_lang_keys: Sequence[str]
+        inputs: Dict[str, str], idx: int, batch_lang_keys: List[Sequence[str]]
     ) -> Dict[str, Sequence]:
+        source_lang_keys = batch_lang_keys[idx][0]
+        target_lang_keys = batch_lang_keys[idx][1]
+
         source_langs = keys_to_langs(source_lang_keys)
         target_langs = keys_to_langs(target_lang_keys)
 
@@ -151,14 +154,12 @@ def apply_packing(
     set_seed(seed)
     res: List[Dataset] = []
     for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing"):
-        batch_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack), replace=False)
         fn_kwargs = {
-            "source_lang_keys": batch_lang_keys[0],
-            "target_lang_keys": batch_lang_keys[1],
+            "batch_lang_keys": [choice(all_lang_keys, size=(2, examples_per_pack), replace=False) for _ in range(len(flores_train_dataset))],
         }
 
         mapped_dataset = flores_train_dataset.map(
-            map_fn, remove_columns=columns_to_remove, num_proc=4, fn_kwargs=fn_kwargs
+            map_fn, remove_columns=columns_to_remove, num_proc=4, fn_kwargs=fn_kwargs, with_indices=True
         )
         res.append(mapped_dataset)
 
