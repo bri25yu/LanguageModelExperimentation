@@ -30,7 +30,8 @@ NUM_EXAMPLES_PER_UPDATE = 2048
 NUM_UPDATES = 10000
 DATASET_NAME = "flores200_packing"
 
-num_datapoints_per_update = NUM_EXAMPLES_PER_UPDATE / NUM_EXAMPLES_PER_DATAPOINT
+assert NUM_EXAMPLES_PER_UPDATE % NUM_EXAMPLES_PER_DATAPOINT == 0
+num_datapoints_per_update = NUM_EXAMPLES_PER_UPDATE // NUM_EXAMPLES_PER_DATAPOINT
 total_datapoints = num_datapoints_per_update * NUM_UPDATES
 
 
