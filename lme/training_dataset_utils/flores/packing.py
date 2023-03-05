@@ -67,11 +67,10 @@ def main():
     )
     print(f"Packed dataset\n{packed_dataset}\n{packed_dataset[0]}")
 
-    tokenized_dataset_dict = load_dataset("bri25yu/flores200_baseline_medium_mt5")
     dataset_dict = DatasetDict({
         "train": packed_dataset,
-        "val": tokenized_dataset_dict["val"],
-        "test": tokenized_dataset_dict["test"],
+        "val": load_dataset("bri25yu/flores200_baseline_medium_mt5", "val"),
+        "test": load_dataset("bri25yu/flores200_baseline_medium_mt5", "test"),
     })
     dataset_dict.push_to_hub(DATASET_NAME, private=True)
 
