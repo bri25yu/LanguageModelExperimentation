@@ -156,7 +156,9 @@ def apply_packing(
         return model_inputs
 
     columns_to_remove = set(text_dataset.column_names) - set(["id"])
-    tokenized_dataset = text_dataset.map(tokenize, remove_columns=columns_to_remove, desc="Tokenizing")
+    tokenized_dataset = text_dataset.map(
+        tokenize, remove_columns=columns_to_remove, desc="Tokenizing", batched=True
+    )
 
     def pack(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         return {
@@ -165,6 +167,12 @@ def apply_packing(
         }
 
     columns_to_remove = set(tokenized_dataset.column_names) - set(["id"])
-    packed_dataset = tokenized_dataset.map(pack, remove_columns=columns_to_remove, desc="Packing", batch_size=examples_per_pack)
+    packed_dataset = tokenized_dataset.map(
+        pack,
+        remove_columns=columns_to_remove,
+        desc="Packing",
+        batched=True,
+        batch_size=examples_per_pack,
+    )
 
     return packed_dataset.shuffle(seed=seed).flatten_indices()
