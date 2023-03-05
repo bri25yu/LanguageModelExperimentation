@@ -136,7 +136,7 @@ def apply_packing(
             "labels": [],
         }
         for _ in range(datapoints_per_flores_example):
-            batch_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack))
+            batch_lang_keys = choice(all_lang_keys, size=(2, examples_per_pack), replace=False)
             source_lang_keys = batch_lang_keys[0]
             target_lang_keys = batch_lang_keys[1]
 
@@ -160,6 +160,8 @@ def apply_packing(
 
     columns_to_remove = set(flores_train_dataset.column_names) - set(["id"])
 
-    mapped_dataset = flores_train_dataset.map(map_fn, remove_columns=columns_to_remove, desc="Applying packing")
+    mapped_dataset = flores_train_dataset.map(
+        map_fn, remove_columns=columns_to_remove, desc="Applying packing", num_proc=4
+    )
 
     return mapped_dataset.shuffle(seed=seed).select(range(total_datapoints)).flatten_indices()
