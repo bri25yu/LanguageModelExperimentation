@@ -135,13 +135,13 @@ def select_language_pairs_to_pack(
             target_langs = keys_to_langs(target_lang_keys)
 
             source.extend([
-                f"{source_lang}{sep}{target_lang}{sep}{inputs[k]}"
+                f"{source_lang}{sep}{target_lang}{sep}{inputs[k][0]}"
                 for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
             ])
-            target.extend([inputs[k] for k in target_lang_keys])
+            target.extend([inputs[k][0] for k in target_lang_keys])
 
         return {
-            "id": [inputs["id"]] * len(source),
+            "id": [inputs["id"][0]] * len(source),
             "source": source,
             "target": target,
         }
@@ -167,7 +167,7 @@ def tokenize_language_pairs_to_pack(text_dataset: Dataset, tokenizer: PreTrained
         model_inputs["labels"] = labels["input_ids"]
         return model_inputs
 
-    columns_to_remove = set(text_dataset["train"].column_names) - set(["id"])
+    columns_to_remove = set(text_dataset.column_names) - set(["id"])
     return text_dataset.map(
         tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
     )
