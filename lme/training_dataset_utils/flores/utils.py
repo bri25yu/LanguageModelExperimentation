@@ -147,6 +147,7 @@ def apply_packing(
 
     columns_to_remove = set(flores_train_dataset.column_names) - set(["id"])
     text_dataset = flores_train_dataset.map(select_language_pairs, remove_columns=columns_to_remove, num_proc=4)
+    print(f"Text dataset of language pairs {text_dataset}")
 
     def tokenize(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         model_inputs = tokenizer(examples["source"], max_length=max_seq_len_per_example, truncation=True)
@@ -159,6 +160,7 @@ def apply_packing(
     tokenized_dataset = text_dataset.map(
         tokenize, remove_columns=columns_to_remove, desc="Tokenizing", batched=True
     )
+    print(f"Tokenized dataset of language pairs {tokenized_dataset}")
 
     def pack(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
         return {
@@ -174,5 +176,6 @@ def apply_packing(
         batched=True,
         batch_size=examples_per_pack,
     )
+    print(f"Packed dataset {packed_dataset}")
 
     return packed_dataset.shuffle(seed=seed).flatten_indices()
