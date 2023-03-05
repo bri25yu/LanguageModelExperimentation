@@ -152,7 +152,7 @@ def select_language_pairs_to_pack(
         num_proc=4,
         batched=True,
         batch_size=1,
-        desc="Selecting languages pairs",
+        desc="Selecting language pairs",
     )
     assert len(text_dataset) == repeats_per_datapoint * len(flores_train_dataset) * examples_per_datapoint, len(text_dataset)
 

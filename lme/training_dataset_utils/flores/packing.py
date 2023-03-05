@@ -62,9 +62,7 @@ def main():
     print(f"Tokenized dataset of language pairs\n{tokenized_dataset}")
 
     packed_dataset = apply_packing(
-        flores_train_dataset=flores_train_dataset,
-        total_datapoints=total_datapoints,
-        max_seq_len_per_example=MAX_SEQ_LEN_PER_EXAMPLE,
+        tokenized_dataset=tokenized_dataset,
         examples_per_pack=NUM_EXAMPLES_PER_DATAPOINT,
     )
     print(f"Packed dataset\n{packed_dataset}\n{packed_dataset[0]}")
