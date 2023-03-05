@@ -69,8 +69,8 @@ def main():
 
     dataset_dict = DatasetDict({
         "train": packed_dataset,
-        "val": load_dataset("bri25yu/flores200_baseline_medium_mt5", "val"),
-        "test": load_dataset("bri25yu/flores200_baseline_medium_mt5", "test"),
+        "val": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="val"),
+        "test": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="test"),
     })
     dataset_dict.push_to_hub(DATASET_NAME, private=True)
 
