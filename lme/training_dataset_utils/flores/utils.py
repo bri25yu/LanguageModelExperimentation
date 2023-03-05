@@ -117,14 +117,16 @@ def apply_packing(
     seed: int=42,
     max_single_size: int=10000,
 ) -> Dataset:
+    set_seed(seed)
+
     max_n_copies = max_single_size // len(flores_train_dataset)
-    flores_train_dataset = concatenate_datasets([flores_train_dataset] * max_n_copies).flatten_indices()
+    flores_train_dataset = concatenate_datasets([flores_train_dataset] * max_n_copies)
 
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
     sep = tokenizer.eos_token
 
     is_lang_key = lambda s: s.startswith("sentence_")
-    all_lang_keys = array(list(filter(is_lang_key, flores_train_dataset.column_names)))
+    all_lang_keys = array(sorted(filter(is_lang_key, flores_train_dataset.column_names)))
 
     flatten = lambda l: list(chain.from_iterable(l))
     keys_to_langs = lambda keys: [k[len("sentence_"):] for k in keys]
@@ -155,7 +157,6 @@ def apply_packing(
 
     columns_to_remove = set(flores_train_dataset.column_names) - set(["id"])
 
-    set_seed(seed)
     res: List[Dataset] = []
     for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing"):
         fn_kwargs = {
