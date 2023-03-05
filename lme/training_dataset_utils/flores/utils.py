@@ -148,7 +148,7 @@ def apply_packing(
     columns_to_remove = set(flores_train_dataset.column_names) - set(["id"])
 
     res: List[Dataset] = []
-    for _ in trange((total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing"):
+    for _ in trange(int(total_datapoints // len(flores_train_dataset)) + 1, desc="Applying packing"):
         mapped_dataset = flores_train_dataset.map(map_fn, remove_columns=columns_to_remove)
         res.append(mapped_dataset)
 
