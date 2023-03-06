@@ -4,6 +4,9 @@ from torch import randint
 
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
+from numpy.random import rand
+
+from numpy import ndarray, array
 
 def add_prefix_truncated_output(inputs: Dict[str, Sequence], max_input_length: int) -> None:
     # Truncate the labels and append it to the input, taking the first part. 
@@ -109,4 +112,24 @@ def add_masked_output(inputs: Dict[str, Sequence], max_input_length: int, tokeni
     inputs["input_ids"] = inputs["input_ids"] + [tokenizer.eos_token_id]
 
     inputs["attention_mask"] = inputs["attention_mask"] + [1] * (len(inputs["input_ids"]) - len(inputs["attention_mask"]))
+
+
+
+def mask_input(inputs: Dict[str, Sequence], tokenizer: PreTrainedTokenizerBase, mask_p=0.1) -> None:
+    # Add masks randomly to the INPUT and change the input without modifying the output
+    # INPUT: [* * *] - [* * *] - [* *] - [*]
+    MASK_ID = tokenizer.pad_token_id
+    
+    input_ids: ndarray = array(inputs["input_ids"])
+
+    # Get random mask and apply
+    mask = rand(len(inputs["input_ids"])) < mask_p
+
+    # Make sure that the eos token is not masked accidentally
+    mask = mask & (input_ids != tokenizer.eos_token_id)
+
+    input_ids[mask] = MASK_ID
+
+    # Transform input_ids back into a list
+    inputs["input_ids"] = input_ids.tolist()
 

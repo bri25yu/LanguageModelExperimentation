@@ -70,6 +70,7 @@ from lme.training_dataset_utils.incomplete_utils import (
     add_middle_truncated_output,
     add_suffix_truncated_output,
     add_masked_output,
+    mask_input,
 )
 
 from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
@@ -339,8 +340,9 @@ class TranslationIncomplete11Mixin(TranslationMixin):
             def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
                 progress = idx / total_examples
                 if progress <= 0.2:
-                    # TODO 
-                    add_masked_output(inputs, max_input_length, tokenizer)
+                    add_prefix_truncated_output(inputs, max_input_length)
+                elif progress >= 0.8:
+                    mask_input(inputs, max_input_length, tokenizer)
 
                 return inputs
 
