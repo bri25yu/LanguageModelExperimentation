@@ -1,7 +1,6 @@
 from transformers import TrainingArguments
 
 from lme.data_processors.flores200 import PackedDataProcessor
-from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 from lme.training_argument_mixins.utils import calculate_batch_size_args
 
 from lme.experiments.flores.baseline import FloresBaselineMedium2Experiment
@@ -27,16 +26,4 @@ class FloresPackedExperimentBase(FloresBaselineMedium2Experiment):
 
 
 class FloresPacked300MExperiment(FloresPackedExperimentBase):
-    pass
-
-
-class FloresPacked600MExperiment(MT5600MModelMixin, FloresPackedExperimentBase):
-    pass
-
-
-class FloresPacked1BExperiment(MT51BModelMixin, FloresPackedExperimentBase):
-    pass
-
-
-class FloresPacked3BExperiment(MT53BModelMixin, FloresPackedExperimentBase):
     pass
