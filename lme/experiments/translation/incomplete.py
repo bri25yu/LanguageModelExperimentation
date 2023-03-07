@@ -342,7 +342,7 @@ class TranslationIncomplete11Mixin(TranslationMixin):
                 if progress <= 0.2:
                     add_prefix_truncated_output(inputs, max_input_length)
                 elif progress >= 0.8:
-                    mask_input(inputs, max_input_length, tokenizer)
+                    mask_input(inputs, tokenizer)
 
                 return inputs
 
