@@ -7,5 +7,5 @@ class FloresPackedCurriculumExperimentBase(FloresPackedExperimentBase):
     DATA_PROCESSOR_CLS = PackedCurriculumDataProcessor
 
 
-class FloresPacked300MExperiment(FloresPackedCurriculumExperimentBase):
+class FloresPackedCurriculum300MExperiment(FloresPackedCurriculumExperimentBase):
     pass
