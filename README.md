@@ -1,5 +1,11 @@
 # LanguageModelExperimentation
 
+Research conducted under Prof. Kurt Keutzer at Berkeley Artificial Intelligence Research (BAIR). 
+
+<img src="http://bair.berkeley.edu/images/BAIR_Logo_BlueType_Tag.png" width="525" height="280">
+
+
+
 ### Example setup
 ```bash
 # Install conda if not already installed
