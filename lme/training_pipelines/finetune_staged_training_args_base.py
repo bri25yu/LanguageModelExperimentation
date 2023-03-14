@@ -3,12 +3,13 @@ This class:
 1) Trains with the first stage of training arguments
 2) Switches to a succeeding set of training arguments with the same trainer
 3) Trains with the second stage of training arguments
+... for all the stages
 
 """
 from abc import abstractmethod
 from typing import Callable, List
 
-from datasets import Dataset
+from datasets import DatasetDict
 
 from transformers import TrainingArguments, Trainer
 from transformers.tokenization_utils import PreTrainedTokenizerBase
@@ -23,21 +24,32 @@ __all__ = ["FinetuneStagedTrainingArgsExperimentBase"]
 
 class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
     @abstractmethod
+    def get_tokenized_datasets(
+        self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments
+    ) -> List[DatasetDict]:
+        pass
+
+    @abstractmethod
     def update_training_arguments(
-        self, training_arguments: TrainingArguments, batch_size: int
-    ) -> TrainingArguments:
+        self, training_arguments: TrainingArguments, batch_size: int, stage: int
+    ) -> None:
+        """
+        Stage is 1-indexed.
+        """
         pass
 
     @abstractmethod
-    def create_stage2_training_dataset(self, training_dataset: Dataset) -> Dataset:
+    def update_model(self, model: PreTrainedModel, stage: int) -> None:
+        """
+        Stage is 1-indexed.
+        """
         pass
 
     @abstractmethod
-    def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
-        pass
-
-    @abstractmethod
-    def update_model(self, model: PreTrainedModel) -> None:
+    def update_data_collator(self, data_collator: Callable, stage: int) -> None:
+        """
+        Stage is 1-indexed.
+        """
         pass
 
     # This is an exact copy of `FinetuneExperimentBase.run` unless specified otherwise
@@ -46,39 +58,42 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
         assert trainer_cls, f"Must override the `TRAINER_CLS` property of {self.name}"
 
         tokenizer = self.get_tokenizer()
+        compute_metrics = self.get_compute_metrics(tokenizer)
         data_collator = self.get_data_collator(tokenizer)
 
         ########################################
-        # START Staged training data collator
+        # START Staged training datasets
         ########################################
 
-        stage2_data_collator = self.get_stage2_data_collator(tokenizer)
+        # Original code:
+        # tokenized_dataset = None
+
+        tokenized_datasets = None
 
         ########################################
-        # END Staged training data collator
+        # END Staged training datasets
         ########################################
-
-        compute_metrics = self.get_compute_metrics(tokenizer)
-        tokenized_dataset = None
 
         for learning_rate in learning_rates:
             training_arguments = self.get_training_arguments(batch_size, learning_rate)
-            self.print_on_main_process_only(training_arguments, training_arguments)
 
-            if tokenized_dataset is None:
-                tokenized_dataset = self.get_tokenized_dataset(tokenizer, training_arguments)
-                self.print_on_main_process_only(training_arguments, dataset_summary(tokenized_dataset))
+            ########################################
+            # START Staged training arguments and dataset
+            ########################################
 
-                ########################################
-                # START Staged training dataset
-                ########################################
+            # Original code:
+            # self.print_on_main_process_only(training_arguments, training_arguments)
 
-                stage2_train_dataset = self.create_stage2_training_dataset(tokenized_dataset["train"])
-                self.print_on_main_process_only(training_arguments, dataset_summary(stage2_train_dataset))
+            # if tokenized_dataset is None:
+            #     tokenized_dataset = self.get_tokenized_dataset(tokenizer, training_arguments)
+            #     self.print_on_main_process_only(training_arguments, dataset_summary(tokenized_dataset))
 
-                ########################################
-                # END Staged training dataset
-                ########################################
+            tokenized_datasets = self.get_tokenized_datasets(tokenizer, training_arguments)
+            tokenized_dataset = tokenized_datasets[0]
+
+            ########################################
+            # END Staged training arguments and dataset
+            ########################################
 
             model = self.get_model(tokenizer)
             trainer: Trainer = trainer_cls(
@@ -92,25 +107,33 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
             )
             self.setup_trainer_log_callbacks(trainer)
 
-            trainer.train()
-
             ########################################
-            # START Staged training arguments and stage 2 run
+            # START Staged training
             ########################################
 
-            training_arguments = self.update_training_arguments(training_arguments, batch_size)
-            self.print_on_main_process_only(training_arguments, training_arguments)
+            # Original code:
+            # trainer.train()
 
-            self.update_model(model)
+            for stage, tokenized_dataset in enumerate(tokenized_datasets):
+                stage = stage + 1  # 1-indexed
 
-            trainer.args = training_arguments
-            trainer.train_dataset = stage2_train_dataset
-            trainer.data_collator = stage2_data_collator
+                self.update_training_arguments(training_arguments, batch_size, stage)
+                self.update_model(model, stage)
+                self.update_data_collator(data_collator, stage)
 
-            trainer.train(resume_from_checkpoint=True)
+                trainer.train_dataset = tokenized_dataset["train"]
+
+                self.print_on_main_process_only(
+                    training_arguments, f"Dataset for stage {stage}:\n{dataset_summary(tokenized_dataset)}"
+                )
+                self.print_on_main_process_only(training_arguments, training_arguments)
+
+                trainer.train(resume_from_checkpoint=(stage != 1))
+
+            # We implicitly keep the last tokenized dataset for final evaluation
 
             ########################################
-            # END Staged training arguments and stage 2 run
+            # END Staged training
             ########################################
 
             predictions = self.get_predictions(trainer, tokenized_dataset)

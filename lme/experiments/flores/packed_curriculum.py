@@ -1,12 +1,12 @@
-from typing import Callable
+from typing import Callable, List
 
-from datasets import Dataset
+from datasets import DatasetDict
 
-from transformers import TrainingArguments, Seq2SeqTrainer
+from transformers import TrainingArguments
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers.modeling_utils import PreTrainedModel
 
-from lme.data_processors.flores200 import PackedCurriculumDataProcessor
+from lme.data_processors.flores200 import BaselineMediumDataProcessor, PackedDataProcessor
 from lme.training_argument_mixins.utils import calculate_batch_size_args
 
 from lme.training_pipelines import FinetuneStagedTrainingArgsExperimentBase
@@ -14,90 +14,64 @@ from lme.training_pipelines import FinetuneStagedTrainingArgsExperimentBase
 from lme.experiments.flores.packed import FloresPackedExperimentBase
 
 
-class NoShufflingSeq2SeqTrainer(Seq2SeqTrainer):
-    def _get_train_sampler(self):
-        train_sampler = super()._get_train_sampler()
-
-        if train_sampler is not None and hasattr(train_sampler, "shuffle"):
-            train_sampler.shuffle = False
-
-        return train_sampler
-
-
 class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentBase, FloresPackedExperimentBase):
-    MAX_INPUT_LENGTH = 128
-    DATA_PROCESSOR_CLS = PackedCurriculumDataProcessor
-    TRAINER_CLS = NoShufflingSeq2SeqTrainer
+    DATA_PROCESSOR_CLASSES = [
+        BaselineMediumDataProcessor,
+        PackedDataProcessor,
+    ]
 
-    STAGE2_SEQUENCE_LENGTH = 1024
+    def get_tokenized_datasets(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> List[DatasetDict]:
+        return list(map(lambda c: c()(training_arguments, self.DATA_PROCESSOR_CLASSES)))
 
-    STAGE1_TARGET_BATCH_SIZE = 2 ** 11  # 2048
-    STAGE2_TARGET_BATCH_SIZE = 2 ** 8   # (2048/8) = 256
+    def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
+        if stage == 1:
+            max_steps = 2000
 
-    STAGE1_MAX_STEPS = 2000
-    STAGE2_MAX_STEPS = 10000
+            stage1_batch_size_factor = 8  # Approximate
+            batch_size = batch_size * stage1_batch_size_factor
 
-    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
-        args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
+            target_total_batch_size_per_update = 2 ** 11  # 2048
+        elif stage == 2:
+            max_steps = 10000
 
-        args.max_steps = self.STAGE1_MAX_STEPS
+            target_total_batch_size_per_update = 2 ** 8  # (2048 / 8) = 256
+        else:
+            raise ValueError(f"Unknown stage {stage}")
 
-        stage1_batch_size_factor = 8  # Approximate
-        batch_size = batch_size * stage1_batch_size_factor
-
-        target_total_batch_size_per_update = self.STAGE1_TARGET_BATCH_SIZE
         gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
 
-        args.gradient_accumulation_steps = gradient_accumulation_steps
-        args.per_device_train_batch_size = per_device_batch_size
-        args.per_device_eval_batch_size = 2 * per_device_batch_size
-
-        return args
-
-    def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int) -> TrainingArguments:
-        training_arguments.max_steps = self.STAGE2_MAX_STEPS
-
-        target_total_batch_size_per_update = self.STAGE2_TARGET_BATCH_SIZE
-        gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
-
+        training_arguments.max_steps = max_steps
         training_arguments.gradient_accumulation_steps = gradient_accumulation_steps
         training_arguments.per_device_train_batch_size = per_device_batch_size
         training_arguments.per_device_eval_batch_size = 2 * per_device_batch_size
 
-        return training_arguments
+    def update_data_collator(self, data_collator: Callable, stage: int) -> None:
+        if stage == 1:
+            max_length = 128
+        elif stage == 2:
+            max_length = 1024
 
-    def create_stage2_training_dataset(self, training_dataset: Dataset) -> Dataset:
-        # Skip past the datapoints already trained on that the trainer won't skip
-        # (num_old_steps * old_batch_size) - (num_old_steps * new_batch_size)
-        num_old_steps = self.STAGE1_MAX_STEPS
-        old_batch_size = self.STAGE1_TARGET_BATCH_SIZE
-        new_batch_size = self.STAGE2_TARGET_BATCH_SIZE
+        data_collator.max_length = max_length
 
-        total_to_skip = num_old_steps * old_batch_size
-        trainer_skipped = num_old_steps * new_batch_size
-        manually_skip = total_to_skip - trainer_skipped
+    def update_model(self, model: PreTrainedModel, stage: int) -> None:
+        if stage == 1:
+            max_length = 128
+        elif stage == 2:
+            max_length = 1024
 
-        total_n_points = len(training_dataset)
-        return training_dataset.select(range(manually_skip, total_n_points))
-
-    # Second stage data collator uses sequence length of 1024
-    def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
-        data_collator = super().get_data_collator(tokenizer)
-
-        max_input_length = self.STAGE2_SEQUENCE_LENGTH
-
-        data_collator.max_length = max_input_length
-
-        return data_collator
-
-    def update_model(self, model: PreTrainedModel) -> None:
-        max_input_length = self.STAGE2_SEQUENCE_LENGTH
-
-        model.config.max_length = max_input_length
+        model.config.max_length = max_length
 
 
 class TestFloresPackedCurriculumExperiment(FloresPackedCurriculumExperimentBase):
-    STAGE1_MAX_STEPS = 400
+    def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
+        super().update_training_arguments(training_arguments, batch_size, stage)
+
+        if stage == 1:
+            max_steps = 400
+        elif stage == 2:
+            max_steps = 800
+
+        training_arguments.max_steps = max_steps
 
 
 class FloresPackedCurriculum300MExperiment(FloresPackedCurriculumExperimentBase):
