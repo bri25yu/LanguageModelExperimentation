@@ -284,7 +284,7 @@ class TranslationIncomplete8Mixin(TranslationMixin):
             def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
                 progress = idx / total_examples
                 if progress <= 0.4:
-                    add_prefix_and_suffix_truncated_output(inputs, max_input_length, tokenizer)
+                    add_prefix_and_suffix_truncated_output(inputs, max_input_length)
 
                 return inputs
 
