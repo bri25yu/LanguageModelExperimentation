@@ -21,9 +21,13 @@ def convert_df_to_hf_dataset(
         raise ValueError("Input dfs typing for conversion to HF datasets is not supported!")
 
 
-def dataset_summary(dataset_dict: DatasetDict) -> str:
-    summary = str(dataset_dict) + "\n"
-    for split_name, split in dataset_dict.items():
-        summary += f"Example from {split_name}\n{split[0]}\n"
+def dataset_summary(dataset: Union[Dataset, DatasetDict]) -> str:
+    summary = str(dataset) + "\n"
+
+    if isinstance(dataset, Dataset):
+        summary += f"Example\n{dataset[0]}\n"
+    else:  # Is a DatasetDict
+        for split_name, split in dataset.items():
+            summary += f"Example from {split_name}\n{split[0]}\n"
 
     return summary
