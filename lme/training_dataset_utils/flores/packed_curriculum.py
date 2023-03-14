@@ -24,6 +24,7 @@ from datasets import DatasetDict, concatenate_datasets, load_dataset
 
 
 BASELINE_FRACTION = 0.2  # 20%
+NUM_EXAMPLES_PER_DATAPOINT = 8
 DATASET_NAME = "flores200_packed_curriculum"
 
 
@@ -33,7 +34,7 @@ def main():
     packed_train_dataset = load_dataset("bri25yu/flores200_packing", split="train")
 
     total_train_examples = len(packed_train_dataset)
-    baseline_train_examples = int(BASELINE_FRACTION * total_train_examples)
+    baseline_train_examples = int(BASELINE_FRACTION * total_train_examples) * NUM_EXAMPLES_PER_DATAPOINT
 
     train_dataset = concatenate_datasets([
         baseline_train_dataset.select(range(baseline_train_examples)),

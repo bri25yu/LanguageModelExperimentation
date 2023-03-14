@@ -71,16 +71,22 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
     return concatenate_datasets(res).select(range(n)).flatten_indices()
 
 
+def create_inputs_from_examples(
+    source_langs: List[str], target_langs: List[str], source_sentences: List[str], sep: str
+) -> List[str]:
+    return [
+        f"{source_lang} {sep} {target_lang} {sep} {source_sentence}"
+        for source_lang, target_lang, source_sentence in
+        zip(source_langs, target_langs, source_sentences)
+    ]
+
+
 def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> DatasetDict:
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
     sep = tokenizer.eos_token
 
     def tokenize_fn(examples):
-        inputs = [
-            f"{source_lang} {sep} {target_lang} {sep} {s}"
-            for source_lang, target_lang, s in
-            zip(examples["source_lang"], examples["target_lang"], examples["source"])
-        ]
+        inputs = create_inputs_from_examples(examples["source_lang"], examples["target_lang"], examples["source"], sep)
 
         model_inputs = tokenizer(inputs, max_length=max_seq_len, truncation=True)
         labels = tokenizer(text_target=examples["target"], max_length=max_seq_len, truncation=True)
@@ -127,17 +133,17 @@ def select_language_pairs_to_pack(
 
     repeats_per_datapoint = (total_datapoints // len(flores_train_dataset)) + 1
 
-    def select_language_pairs(inputs: Dict[str, str]) -> Dict[str, List[str]]:
+    def select_language_pairs(inputs: Dict[str, List[str]]) -> Dict[str, List[str]]:
         source, target = [], []
         for _ in trange(repeats_per_datapoint):
             source_lang_keys, target_lang_keys = choice(all_lang_keys, size=(2, examples_per_datapoint), replace=False)
             source_langs = keys_to_langs(source_lang_keys)
             target_langs = keys_to_langs(target_lang_keys)
 
-            source.extend([
-                f"{source_lang}{sep}{target_lang}{sep}{inputs[k][0]}"
-                for k, source_lang, target_lang in zip(source_lang_keys, source_langs, target_langs)
-            ])
+            source_sentences = [inputs[source_lang_key][0] for source_lang_key in source_lang_keys]
+            source_inputs = create_inputs_from_examples(source_langs, target_langs, source_sentences, sep)
+
+            source.extend(source_inputs)
             target.extend([inputs[k][0] for k in target_lang_keys])
 
         return {
