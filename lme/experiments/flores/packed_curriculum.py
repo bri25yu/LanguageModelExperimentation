@@ -19,7 +19,7 @@ class NoShufflingSeq2SeqTrainer(Seq2SeqTrainer):
 
         if train_sampler is not None and hasattr(train_sampler, "shuffle"):
             train_sampler.shuffle = False
-        
+
         return train_sampler
 
 
@@ -31,6 +31,9 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
         args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
 
         args.max_steps = 2000
+
+        stage1_batch_size_factor = 8  # Approximate
+        batch_size = batch_size * stage1_batch_size_factor
 
         target_total_batch_size_per_update = 2 ** 11  # 2048, the baseline batch size
         gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
