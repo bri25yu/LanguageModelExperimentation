@@ -48,6 +48,18 @@ Incomplete 11 -
     First 2000 steps uniformly distributed addition, rest no addition, same as #4. 
     Last 2000 steps, mask portions of the input (not the target), so removing information from the input. Perhaps this more difficult task will
     help the model to learn better.
+
+Incomplete 12 - 
+    First 2000 steps uniformly distributed addition, rest no addition, same as #4. 
+    Last 5000 steps, mask portions of the input (not the target), so removing information from the input. This is a more difficult task than #11
+    because the transition to the incomplete input takes place earlier in the training. Additionally, the probability of masking has been increased
+    to 0.25. 
+
+Incomplete 13 - 
+    First 2000 steps uniformly distributed addition, rest no addition, same as #4. 
+    Last 5000 steps, mask portions of the input (not the target), so removing information from the input. This is a more difficult task than #11
+    because the transition to the incomplete input takes place earlier in the training. In addition, compared to #12, it has masked tokens as a 
+    subsequence rather than individual tokens. 
 """
 from typing import Dict, Sequence
 
@@ -351,6 +363,56 @@ class TranslationIncomplete11Mixin(TranslationMixin):
         return dataset_dict
 
 
+class TranslationIncomplete12Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    add_prefix_truncated_output(inputs, max_input_length)
+                elif progress >= 0.5:
+                    mask_input(inputs, tokenizer, 0.25)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
+class TranslationIncomplete13Mixin(TranslationMixin):
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        dataset_dict = super().get_tokenized_dataset(tokenizer, training_arguments)
+
+        max_input_length = self.MAX_INPUT_LENGTH
+        total_examples = calculate_total_examples(training_arguments)
+
+        with training_arguments.main_process_first():
+            train_dataset = dataset_dict["train"]
+            train_dataset = repeat_examples(train_dataset, total_examples)
+
+            def map_fn(inputs: Dict[str, Sequence], idx: int) -> Dict[str, Sequence]:
+                progress = idx / total_examples
+                if progress <= 0.2:
+                    add_prefix_truncated_output(inputs, max_input_length)
+                elif progress >= 0.5: # TODO
+                    mask_input(inputs, tokenizer, 0.25)
+
+                return inputs
+
+            dataset_dict["train"] = train_dataset.map(map_fn, desc="Applying incomplete", with_indices=True)
+
+        return dataset_dict
+
+
 class TranslationIncompleteExperimentBase(MT5600MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
@@ -398,6 +460,11 @@ class TranslationIncomplete10Experiment(TranslationIncomplete10Mixin, Translatio
 class TranslationIncomplete11Experiment(TranslationIncomplete11Mixin, TranslationIncompleteExperimentBase):
     pass
 
+class TranslationIncomplete12Experiment(TranslationIncomplete12Mixin, TranslationIncompleteExperimentBase):
+    pass
+
+class TranslationIncomplete13Experiment(TranslationIncomplete13Mixin, TranslationIncompleteExperimentBase):
+    pass
 
 class TranslationIncompleteMT51BExperiment(
     TranslationIncomplete4Mixin, MT51BModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase
