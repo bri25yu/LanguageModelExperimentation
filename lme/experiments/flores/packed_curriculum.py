@@ -25,10 +25,10 @@ class NoShufflingSeq2SeqTrainer(Seq2SeqTrainer):
 
 
 class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentBase, FloresPackedExperimentBase):
+    MAX_INPUT_LENGTH = 128
     DATA_PROCESSOR_CLS = PackedCurriculumDataProcessor
     TRAINER_CLS = NoShufflingSeq2SeqTrainer
 
-    STAGE1_SEQUENCE_LENGTH = 128
     STAGE2_SEQUENCE_LENGTH = 1024
 
     STAGE1_TARGET_BATCH_SIZE = 2 ** 11  # 2048
@@ -80,16 +80,6 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
         total_n_points = len(training_dataset)
         return training_dataset.select(range(manually_skip, total_n_points))
 
-    # First stage data collator uses sequence length of 128
-    def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
-        data_collator = super().get_data_collator(tokenizer)
-
-        max_input_length = self.STAGE1_SEQUENCE_LENGTH
-
-        data_collator.max_length = max_input_length
-
-        return data_collator
-
     # Second stage data collator uses sequence length of 1024
     def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         data_collator = super().get_data_collator(tokenizer)
@@ -100,19 +90,14 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
 
         return data_collator
 
-    def get_model(self, tokenizer: PreTrainedTokenizerBase) -> PreTrainedModel:
-        model = super().get_model(tokenizer)
-
-        max_input_length = self.STAGE1_SEQUENCE_LENGTH
-
-        model.config.max_length = max_input_length
-
-        return model
-
     def update_model(self, model: PreTrainedModel) -> None:
         max_input_length = self.STAGE2_SEQUENCE_LENGTH
 
         model.config.max_length = max_input_length
+
+
+class TestFloresPackedCurriculumExperiment(FloresPackedCurriculumExperimentBase):
+    STAGE1_MAX_STEPS = 400
 
 
 class FloresPackedCurriculum300MExperiment(FloresPackedCurriculumExperimentBase):
