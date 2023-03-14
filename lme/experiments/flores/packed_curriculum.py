@@ -21,7 +21,7 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
     ]
 
     def get_tokenized_datasets(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> List[DatasetDict]:
-        return list(map(lambda c: c()(training_arguments, self.DATA_PROCESSOR_CLASSES)))
+        return list(map(lambda c: c()(training_arguments), self.DATA_PROCESSOR_CLASSES))
 
     def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
         if stage == 1:
