@@ -114,10 +114,9 @@ def add_masked_output(inputs: Dict[str, Sequence], max_input_length: int, tokeni
     inputs["attention_mask"] = inputs["attention_mask"] + [1] * (len(inputs["input_ids"]) - len(inputs["attention_mask"]))
 
 
-
 def mask_input(inputs: Dict[str, Sequence], tokenizer: PreTrainedTokenizerBase, mask_p=0.1) -> None:
     # Add masks randomly to the INPUT and change the input without modifying the output
-    # INPUT: [* * *] - [* * *] - [* *] - [*]
+    # INPUT: [* * *] - [* * *] - [* *] - [*] [EOS]
     MASK_ID = tokenizer.pad_token_id
     
     input_ids: ndarray = array(inputs["input_ids"])
@@ -133,3 +132,33 @@ def mask_input(inputs: Dict[str, Sequence], tokenizer: PreTrainedTokenizerBase, 
     # Transform input_ids back into a list
     inputs["input_ids"] = input_ids.tolist()
 
+
+def mask_input_subsequence(inputs: Dict[str, Sequence], tokenizer: PreTrainedTokenizerBase, mask_p=0.1) -> None:
+    # Add masks randomly to the INPUT and change the input without modifying the output, as subsequences. 
+    # Length of masked subsequences are uniformly distributed between 1 and 5 tokens
+    # INPUT: [* * *] ---- [* * *] --- [* *] ----- [*] [EOS]
+    MASK_ID = tokenizer.pad_token_id
+
+    # mask_p is the probability of masking a token 
+    # we have sequence length of variability, so we need to adjust the denominator accordingly
+    mask_denom = int(1 / mask_p)
+    
+    input_ids: ndarray = array(inputs["input_ids"])
+
+    # Randomize number of masked tokens 
+    num_masks = randint(2 + len(inputs["labels"]) // (mask_denom * 3), ()) + 1
+    avg_dist = len(inputs["input_ids"]) // num_masks
+    last_cutoff = randint(avg_dist + 2, ()) // 2 + 1
+    next_cutoff = 0
+
+    for _ in range(num_masks):
+        next_cutoff = next_cutoff + randint(5, ()) + 1
+        
+        if next_cutoff > len(input_ids):
+            break
+        input_ids[last_cutoff:next_cutoff] = MASK_ID
+        next_cutoff = next_cutoff + randint(avg_dist + 2, ()) + 1
+        last_cutoff = next_cutoff
+
+    # Transform input_ids back into a list
+    inputs["input_ids"] = input_ids.tolist()
