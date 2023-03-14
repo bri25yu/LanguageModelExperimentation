@@ -11,10 +11,10 @@ from lme.training_argument_mixins.utils import calculate_batch_size_args
 
 from lme.training_pipelines import FinetuneStagedTrainingArgsExperimentBase
 
-from lme.experiments.flores.packed import FloresPackedExperimentBase
+from lme.experiments.flores.baseline import FloresBaselineMedium2Experiment
 
 
-class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentBase, FloresPackedExperimentBase):
+class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentBase, FloresBaselineMedium2Experiment):
     DATA_PROCESSOR_CLASSES = [
         BaselineMediumDataProcessor,
         PackedDataProcessor,
@@ -60,7 +60,7 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
             max_length = 1024
 
         model.config.max_length = max_length
-        model.generation_config.max_length = max_length
+        model.generation_config.max_length = 128
 
 
 class TestFloresPackedCurriculumExperiment(FloresPackedCurriculumExperimentBase):
