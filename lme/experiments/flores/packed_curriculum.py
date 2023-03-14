@@ -60,6 +60,7 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
             max_length = 1024
 
         model.config.max_length = max_length
+        model.generation_config.max_length = max_length
 
 
 class TestFloresPackedCurriculumExperiment(FloresPackedCurriculumExperimentBase):

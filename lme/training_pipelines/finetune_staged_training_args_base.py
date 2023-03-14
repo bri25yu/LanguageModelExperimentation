@@ -117,16 +117,18 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
             for stage, tokenized_dataset in enumerate(tokenized_datasets):
                 stage = stage + 1  # 1-indexed
 
+                trainer.train_dataset = tokenized_dataset["train"]
                 self.update_training_arguments(training_arguments, batch_size, stage)
                 self.update_model(model, stage)
                 self.update_data_collator(data_collator, stage)
-
-                trainer.train_dataset = tokenized_dataset["train"]
 
                 self.print_on_main_process_only(
                     training_arguments, f"Dataset for stage {stage}:\n{dataset_summary(tokenized_dataset)}"
                 )
                 self.print_on_main_process_only(training_arguments, training_arguments)
+                self.print_on_main_process_only(training_arguments, model.config)
+                self.print_on_main_process_only(training_arguments, model.generation_config)
+                self.print_on_main_process_only(training_arguments, data_collator)
 
                 trainer.train(resume_from_checkpoint=(stage != 1))
 
