@@ -8,9 +8,9 @@ This class:
 from abc import abstractmethod
 from typing import List
 
-from transformers import (
-    TrainingArguments, Trainer
-)
+from datasets import Dataset
+
+from transformers import TrainingArguments, Trainer
 
 from lme.data_processors.utils import dataset_summary
 from lme.training_pipelines.finetune_base import FinetuneExperimentBase
@@ -24,6 +24,10 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
     def update_training_arguments(
         self, training_arguments: TrainingArguments, batch_size: int
     ) -> TrainingArguments:
+        pass
+
+    @abstractmethod
+    def create_stage2_training_dataset(self, training_dataset: Dataset) -> Dataset:
         pass
 
     # This is an exact copy of `FinetuneExperimentBase.run` unless specified otherwise
@@ -43,6 +47,17 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
             if tokenized_dataset is None:
                 tokenized_dataset = self.get_tokenized_dataset(tokenizer, training_arguments)
                 self.print_on_main_process_only(training_arguments, dataset_summary(tokenized_dataset))
+
+                ########################################
+                # START Staged training dataset
+                ########################################
+
+                stage2_dataset = self.create_stage2_training_dataset(tokenized_dataset)
+                self.print_on_main_process_only(training_arguments, dataset_summary(stage2_dataset))
+
+                ########################################
+                # END Staged training dataset
+                ########################################
 
             model = self.get_model(tokenizer)
             trainer: Trainer = trainer_cls(
@@ -66,6 +81,7 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
             self.print_on_main_process_only(training_arguments, training_arguments)
 
             trainer.args = training_arguments
+            trainer.train_dataset = stage2_dataset
 
             trainer.train(resume_from_checkpoint=True)
 
