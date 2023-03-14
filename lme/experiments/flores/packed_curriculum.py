@@ -45,15 +45,7 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
         training_arguments.per_device_train_batch_size = per_device_batch_size
         training_arguments.per_device_eval_batch_size = 2 * per_device_batch_size
 
-        deepspeed_config = training_arguments.hf_deepspeed_config
-
-        # train_batch_size = world_size * train_micro_batch_size_per_gpu * gradient_accumulation_steps
-        train_batch_size = training_arguments.world_size * training_arguments.per_device_train_batch_size * training_arguments.gradient_accumulation_steps
-        deepspeed_config.fill_match(
-            "train_micro_batch_size_per_gpu", training_arguments.per_device_train_batch_size, "per_device_train_batch_size"
-        )
-        deepspeed_config.fill_match("gradient_accumulation_steps", training_arguments.gradient_accumulation_steps, "gradient_accumulation_steps")
-        deepspeed_config.fill_match("train_batch_size", train_batch_size, "train_batch_size (calculated)")
+        training_arguments.__post_init__()
 
     def update_data_collator(self, data_collator: Callable, stage: int) -> None:
         if stage == 2:

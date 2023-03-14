@@ -126,6 +126,7 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
                     training_arguments, f"Dataset for stage {stage}:\n{dataset_summary(tokenized_dataset)}"
                 )
                 self.print_on_main_process_only(training_arguments, training_arguments)
+                self.print_on_main_process_only(training_arguments, training_arguments.hf_deepspeed_config.__dict__)
                 self.print_on_main_process_only(training_arguments, model.config)
                 self.print_on_main_process_only(training_arguments, model.generation_config)
                 self.print_on_main_process_only(training_arguments, data_collator)
