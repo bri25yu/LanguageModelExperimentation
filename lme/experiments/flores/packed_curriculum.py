@@ -2,7 +2,7 @@ from typing import Callable
 
 from datasets import Dataset
 
-from transformers import DataCollatorForSeq2Seq, TrainingArguments
+from transformers import DataCollatorForSeq2Seq, TrainingArguments, Seq2SeqTrainer
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.data_processors.flores200 import PackedCurriculumDataProcessor
@@ -13,8 +13,19 @@ from lme.training_pipelines import FinetuneStagedTrainingArgsExperimentBase
 from lme.experiments.flores.packed import FloresPackedExperimentBase
 
 
+class NoShufflingSeq2SeqTrainer(Seq2SeqTrainer):
+    def _get_train_sampler(self):
+        train_sampler = super()._get_train_sampler()
+
+        if train_sampler is not None and hasattr(train_sampler, "shuffle"):
+            train_sampler.shuffle = False
+        
+        return train_sampler
+
+
 class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentBase, FloresPackedExperimentBase):
     DATA_PROCESSOR_CLS = PackedCurriculumDataProcessor
+    TRAINER_CLS = NoShufflingSeq2SeqTrainer
 
     def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
         args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
