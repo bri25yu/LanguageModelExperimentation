@@ -60,15 +60,13 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
     def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         max_input_length = 128
 
-        # We use `padding=True` here to save on some compute
-        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding=True)
+        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
 
     # Second stage data collator uses sequence length of 1024
     def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         max_input_length = 1024
 
-        # We use `padding=True` here to save on some compute
-        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding=True)
+        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding="max_length")
 
 
 class FloresPackedCurriculum300MExperiment(FloresPackedCurriculumExperimentBase):
