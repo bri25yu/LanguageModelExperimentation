@@ -45,22 +45,23 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
         training_arguments.per_device_train_batch_size = per_device_batch_size
         training_arguments.per_device_eval_batch_size = 2 * per_device_batch_size
 
-    def update_data_collator(self, data_collator: Callable, stage: int) -> None:
-        if stage == 1:
-            max_length = 128
-        elif stage == 2:
-            max_length = 1024
+        deepspeed_config = training_arguments.hf_deepspeed_config
 
-        data_collator.max_length = max_length
+        # train_batch_size = world_size * train_micro_batch_size_per_gpu * gradient_accumulation_steps
+        train_batch_size = training_arguments.world_size * training_arguments.per_device_train_batch_size * training_arguments.gradient_accumulation_steps
+        deepspeed_config.fill_match(
+            "train_micro_batch_size_per_gpu", training_arguments.per_device_train_batch_size, "per_device_train_batch_size"
+        )
+        deepspeed_config.fill_match("gradient_accumulation_steps", training_arguments.gradient_accumulation_steps, "gradient_accumulation_steps")
+        deepspeed_config.fill_match("train_batch_size", train_batch_size, "train_batch_size (calculated)")
+
+    def update_data_collator(self, data_collator: Callable, stage: int) -> None:
+        if stage == 2:
+            data_collator.max_length = 1024
 
     def update_model(self, model: PreTrainedModel, stage: int) -> None:
-        if stage == 1:
-            max_length = 128
-        elif stage == 2:
-            max_length = 1024
-
-        model.config.max_length = max_length
-        model.generation_config.max_length = 128
+        if stage == 2:
+            model.config.max_length = 1024
 
 
 class TestFloresPackedCurriculumExperiment(FloresPackedCurriculumExperimentBase):
