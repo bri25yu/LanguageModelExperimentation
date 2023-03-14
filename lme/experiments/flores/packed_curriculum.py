@@ -45,7 +45,7 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
         training_arguments.per_device_train_batch_size = per_device_batch_size
         training_arguments.per_device_eval_batch_size = 2 * per_device_batch_size
 
-        training_arguments.__post_init__()
+        training_arguments.__post_init__()  # Recreate hf deepspeed config
 
     def update_data_collator(self, data_collator: Callable, stage: int) -> None:
         if stage == 2:
