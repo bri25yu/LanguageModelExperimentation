@@ -35,10 +35,11 @@ def main():
 
     total_train_examples = len(packed_train_dataset)
     baseline_train_examples = int(BASELINE_FRACTION * total_train_examples) * NUM_EXAMPLES_PER_DATAPOINT
+    packed_train_examples_start = int(BASELINE_FRACTION * total_train_examples)
 
     train_dataset = concatenate_datasets([
         baseline_train_dataset.select(range(baseline_train_examples)),
-        packed_train_dataset.select(range(baseline_train_examples, total_train_examples)),
+        packed_train_dataset.select(range(packed_train_examples_start, total_train_examples)),
     ]).flatten_indices()
     dataset_dict = DatasetDict({
         "train": train_dataset,
