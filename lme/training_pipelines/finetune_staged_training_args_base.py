@@ -12,6 +12,7 @@ from datasets import Dataset
 
 from transformers import TrainingArguments, Trainer
 from transformers.tokenization_utils import PreTrainedTokenizerBase
+from transformers.modeling_utils import PreTrainedModel
 
 from lme.data_processors.utils import dataset_summary
 from lme.training_pipelines.finetune_base import FinetuneExperimentBase
@@ -33,6 +34,10 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
 
     @abstractmethod
     def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
+        pass
+
+    @abstractmethod
+    def update_model(self, model: PreTrainedModel) -> None:
         pass
 
     # This is an exact copy of `FinetuneExperimentBase.run` unless specified otherwise
@@ -95,6 +100,8 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
 
             training_arguments = self.update_training_arguments(training_arguments, batch_size)
             self.print_on_main_process_only(training_arguments, training_arguments)
+
+            self.update_model(model)
 
             trainer.args = training_arguments
             trainer.train_dataset = stage2_train_dataset
