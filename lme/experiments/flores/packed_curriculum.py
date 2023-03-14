@@ -1,6 +1,9 @@
+from typing import Callable
+
 from datasets import Dataset
 
-from transformers import TrainingArguments
+from transformers import DataCollatorForSeq2Seq, TrainingArguments
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.data_processors.flores200 import PackedCurriculumDataProcessor
 from lme.training_argument_mixins.utils import calculate_batch_size_args
@@ -52,6 +55,20 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
 
         total_n_points = len(training_dataset)
         return training_dataset.select(range(manually_skip, total_n_points))
+
+    # First stage data collator uses sequence length of 128
+    def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
+        max_input_length = 128
+
+        # We use `padding=True` here to save on some compute
+        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding=True)
+
+    # Second stage data collator uses sequence length of 1024
+    def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
+        max_input_length = 1024
+
+        # We use `padding=True` here to save on some compute
+        return DataCollatorForSeq2Seq(tokenizer, max_length=max_input_length, padding=True)
 
 
 class FloresPackedCurriculum300MExperiment(FloresPackedCurriculumExperimentBase):

@@ -6,11 +6,12 @@ This class:
 
 """
 from abc import abstractmethod
-from typing import List
+from typing import Callable, List
 
 from datasets import Dataset
 
 from transformers import TrainingArguments, Trainer
+from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.data_processors.utils import dataset_summary
 from lme.training_pipelines.finetune_base import FinetuneExperimentBase
@@ -30,6 +31,10 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
     def create_stage2_training_dataset(self, training_dataset: Dataset) -> Dataset:
         pass
 
+    @abstractmethod
+    def get_stage2_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
+        pass
+
     # This is an exact copy of `FinetuneExperimentBase.run` unless specified otherwise
     def run(self, batch_size: int, learning_rates: List[float]) -> None:
         trainer_cls = self.TRAINER_CLS
@@ -37,6 +42,17 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
 
         tokenizer = self.get_tokenizer()
         data_collator = self.get_data_collator(tokenizer)
+
+        ########################################
+        # START Staged training data collator
+        ########################################
+
+        stage2_data_collator = self.get_stage2_data_collator(tokenizer)
+
+        ########################################
+        # END Staged training data collator
+        ########################################
+
         compute_metrics = self.get_compute_metrics(tokenizer)
         tokenized_dataset = None
 
@@ -52,8 +68,8 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
                 # START Staged training dataset
                 ########################################
 
-                stage2_dataset = self.create_stage2_training_dataset(tokenized_dataset)
-                self.print_on_main_process_only(training_arguments, dataset_summary(stage2_dataset))
+                stage2_train_dataset = self.create_stage2_training_dataset(tokenized_dataset["train"])
+                self.print_on_main_process_only(training_arguments, dataset_summary(stage2_train_dataset))
 
                 ########################################
                 # END Staged training dataset
@@ -74,19 +90,20 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
             trainer.train()
 
             ########################################
-            # START Staged training arguments
+            # START Staged training arguments and stage 2 run
             ########################################
 
             training_arguments = self.update_training_arguments(training_arguments, batch_size)
             self.print_on_main_process_only(training_arguments, training_arguments)
 
             trainer.args = training_arguments
-            trainer.train_dataset = stage2_dataset
+            trainer.train_dataset = stage2_train_dataset
+            trainer.data_collator = stage2_data_collator
 
             trainer.train(resume_from_checkpoint=True)
 
             ########################################
-            # END Staged training arguments
+            # END Staged training arguments and stage 2 run
             ########################################
 
             predictions = self.get_predictions(trainer, tokenized_dataset)
