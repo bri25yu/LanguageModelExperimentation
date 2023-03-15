@@ -49,7 +49,8 @@ class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentB
 
     def update_data_collator(self, data_collator: Callable, stage: int) -> None:
         if stage == 2:
-            data_collator.max_length = 1024
+            data_collator.padding = True
+            data_collator.max_length = None
 
     def update_model(self, model: PreTrainedModel, stage: int) -> None:
         if stage == 2:
