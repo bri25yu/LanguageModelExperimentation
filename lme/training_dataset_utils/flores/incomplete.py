@@ -37,7 +37,7 @@ def main():
 
     dataset_dict["train"] = apply_incomplete(dataset_dict["train"], MAX_SEQ_LEN, total_examples)
 
-    dataset_dict.push_to_hub(DATASET_NAME, private=True)
+    dataset_dict.push_to_hub(DATASET_NAME)
 
 
 if __name__ == "__main__":

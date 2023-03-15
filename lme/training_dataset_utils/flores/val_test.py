@@ -40,7 +40,7 @@ def main():
         "test": dataset_dict["test"],
     })
 
-    dataset_dict.push_to_hub(DATASET_NAME, private=True)
+    dataset_dict.push_to_hub(DATASET_NAME)
 
 
 if __name__ == "__main__":

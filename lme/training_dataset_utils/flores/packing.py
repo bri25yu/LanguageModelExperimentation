@@ -72,7 +72,7 @@ def main():
         "val": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="val"),
         "test": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="test"),
     })
-    dataset_dict.push_to_hub(DATASET_NAME, private=True)
+    dataset_dict.push_to_hub(DATASET_NAME)
 
 
 if __name__ == "__main__":

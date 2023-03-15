@@ -30,7 +30,7 @@ def main():
         "train": select_n(raw_dataset, total_set_size, SEED),
     })
 
-    dataset_dict.push_to_hub(DATASET_NAME, private=True)
+    dataset_dict.push_to_hub(DATASET_NAME)
 
 
 if __name__ == "__main__":
