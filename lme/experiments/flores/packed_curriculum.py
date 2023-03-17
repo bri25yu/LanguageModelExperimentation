@@ -71,3 +71,13 @@ class TestFloresPackedCurriculumExperiment(FloresPackedCurriculumExperimentBase)
 
 class FloresPackedCurriculum300MExperiment(FloresPackedCurriculumExperimentBase):
     pass
+
+
+class FloresPackedCurriculum2300MExperiment(FloresPackedCurriculum300MExperiment):
+    def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
+        super().update_training_arguments(training_arguments, batch_size, stage)
+
+        if stage == 1:
+            max_steps = 4000
+
+        training_arguments.max_steps = max_steps
