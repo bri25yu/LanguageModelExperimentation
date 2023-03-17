@@ -7,7 +7,7 @@ from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.compute_metrics_utils.flores200 import get_flores_compute_metrics
 from lme.data_processors.flores200 import (
-    BaselineSmallDataProcessor, BaselineMediumDataProcessor
+    BaselineSmallDataProcessor, BaselineMediumDataProcessor, Baseline8DataProcessor
 )
 
 from lme.model_mixins import MT5300MModelMixin
@@ -64,8 +64,27 @@ class FloresBaselineMediumExperiment(FloresBaselineExperimentBase):
 
 
 # This is `FloresBaselineMediumExperiment` with the original number of steps i.e. 10k but with a larger batch size
-class FloresBaselineMedium2Experiment(FloresBaselineMediumExperiment):
+class FloresBaselineMedium2Experiment(FloresBaselineExperimentBase):
     DATA_PROCESSOR_CLS = BaselineMediumDataProcessor
+
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
+
+        args.max_steps = 10000
+
+        target_total_batch_size_per_update = 2 ** 11  # 2048
+        gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
+
+        args.gradient_accumulation_steps = gradient_accumulation_steps
+        args.per_device_train_batch_size = per_device_batch_size
+        args.per_device_eval_batch_size = 2 * per_device_batch_size
+
+        return args
+
+
+# This is `FloresBaselineMediumExperiment2` with the different data processor for the subset of 8 languages
+class FloresBaseline_8Experiment(FloresBaselineExperimentBase):
+    DATA_PROCESSOR_CLS = Baseline8DataProcessor
 
     def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
         args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
