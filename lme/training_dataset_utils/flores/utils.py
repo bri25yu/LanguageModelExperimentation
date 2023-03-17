@@ -13,6 +13,7 @@ from transformers.tokenization_utils import PreTrainedTokenizerBase
 from transformers import AutoTokenizer
 
 from lme.training_dataset_utils.incomplete_utils import add_prefix_truncated_output
+from lme.training_dataset_utils.span_corrupt_utils import create_span_corrupt_inputs
 
 
 def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000) -> Dataset:
@@ -78,6 +79,14 @@ def create_inputs_from_examples(
         f"{source_lang} {sep} {target_lang} {sep} {source_sentence}"
         for source_lang, target_lang, source_sentence in
         zip(source_langs, target_langs, source_sentences)
+    ]
+
+
+def create_pretrain_input_from_examples(langs: List[str], sentences: List[str], sep: str) -> List[str]:
+    return [
+        f"{lang} {sep} {sentence}"
+        for lang, sentence in
+        zip(langs, sentences)
     ]
 
 
@@ -199,3 +208,71 @@ def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int, seed: int=
     )
 
     return packed_dataset.shuffle(seed=seed)
+
+
+def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42) -> Dataset:
+    set_seed(seed)
+
+    is_lang_key = lambda s: s.startswith("sentence_")
+    lang_keys = array(list(filter(is_lang_key, flores_train_dataset.column_names)))
+
+    def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        n_examples = len(examples["id"])
+        batch_lang_keys = choice(lang_keys, size=(n_examples,))
+        batch_langs = [k[len("sentence_")] for k in batch_lang_keys]
+
+        sentences = [examples[k][i] for i, k in enumerate(batch_lang_keys)]
+
+        return {
+            "lang": batch_langs,
+            "sentences": sentences,
+        }
+
+    columns_to_remove = tuple(set(flores_train_dataset.column_names) - set(["id"]))
+
+    res = []
+    for _ in trange((n // len(flores_train_dataset)) + 1, desc="Mapping"):
+        dataset = dataset.map(map_fn, remove_columns=columns_to_remove, batched=True)
+        res.append(dataset)
+
+    return concatenate_datasets(res).select(range(n)).flatten_indices()
+
+
+def tokenize_pretrain(pretrain_dataset: Dataset, tokenizer: PreTrainedTokenizerBase, max_seq_len: int) -> Dataset:
+    sep = tokenizer.eos_token
+
+    def tokenize_fn(examples):
+        inputs = create_pretrain_input_from_examples(examples["langs"], examples["sentences"], sep)
+
+        return tokenizer(inputs, max_length=max_seq_len, truncation=True)
+
+    columns_to_remove = set(pretrain_dataset.column_names) - set(["id"])
+    tokenized_pretrain_dataset = pretrain_dataset.map(
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
+    )
+
+    return tokenized_pretrain_dataset
+
+
+def mask_and_create_labels_for_pretrain(tokenized_pretrain_dataset: Dataset, tokenizer: PreTrainedTokenizerBase, seed: int=42) -> Dataset:
+    set_seed(seed)
+
+    MASK_PROB = 0.15
+    AVERAGE_SPAN_LENGTH = 3
+
+    sentinel_start_id = len(tokenizer) - 1  # e.g. 250100 -> 250099
+
+    def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        examples["labels"] = []
+        for i in len(examples["input_ids"]):
+            input_ids = examples["input_ids"][i]
+            corrupted_input_ids, label_ids =\
+                create_span_corrupt_inputs(input_ids, MASK_PROB, AVERAGE_SPAN_LENGTH, sentinel_start_id)
+            examples["input_ids"][i] = corrupted_input_ids
+            examples["labels"].append(label_ids)
+
+        return examples
+
+    masked_dataset = tokenized_pretrain_dataset.map(map_fn, batched=True, desc="Creating pretrain objective")
+
+    return masked_dataset
