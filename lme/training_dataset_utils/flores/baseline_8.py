@@ -50,7 +50,8 @@ def main():
     total_set_size = BATCH_SIZE_PER_UPDATE * NUM_UPDATES
 
     raw_dataset = load_dataset("facebook/flores", "all")["dev"]
-    raw_dataset = raw_dataset.select_columns(OTHER_COLUMNS_TO_SELECT + LANGUAGES_TO_SELECT)
+    columns_to_remove = tuple(set(raw_dataset.column_names) - set(OTHER_COLUMNS_TO_SELECT + LANGUAGES_TO_SELECT))
+    raw_dataset = raw_dataset.remove_columns(columns_to_remove)
     dataset_dict = DatasetDict({
         "train": select_n(raw_dataset, total_set_size, SEED),
     })

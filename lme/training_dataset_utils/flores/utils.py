@@ -24,7 +24,7 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
     is_lang_key = lambda s: s.startswith("sentence_")
     lang_keys = array(list(filter(is_lang_key, raw_dataset.column_names)))
 
-    idxs = choice(len(lang_keys), size=(int(n * 1.1), 2))
+    idxs = choice(len(lang_keys), size=(int(n * 1.5), 2))
     idxs = idxs[idxs[:, 0] != idxs[:, 1]][:n]
     assert idxs.shape == (n, 2), idxs.shape
 
