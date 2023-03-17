@@ -1,21 +1,16 @@
 """
-A randomly selected set of training examples, of 8 languages:
-
-Latin based: 
-Pretrained on by MT5: English, Danish, 
-Not pretrained on by MT5: Dyula, Southwestern Dinka
-
-Character based: 
-Pretrained on by MT5: Simplified Chinese, Japanese
-Not pretrained on by MT5: Standard Tibetan, Yue Chinese
+A randomly selected set of 5000 val examples and 10000 test examples.
 
 DatasetDict({
-    train: Dataset({
+    val: Dataset({
         features: ['id', 'source_lang', 'target_lang', 'source', 'target'],
-        num_rows: <number of target rows>
+        num_rows: 5000
+    })
+    test: Dataset({
+        features: ['id', 'source_lang', 'target_lang', 'source', 'target'],
+        num_rows: 10000
     })
 })
-
 """
 
 from datasets import DatasetDict, load_dataset
@@ -23,11 +18,11 @@ from datasets import DatasetDict, load_dataset
 from lme.training_dataset_utils.flores.utils import select_n
 
 
-BATCH_SIZE_PER_UPDATE = 2048
-NUM_UPDATES = 10000
+VAL_SET_SIZE = 5000
+TEST_SET_SIZE = 10000
 
 SEED = 42
-DATASET_NAME = "flores200_8_baseline"
+DATASET_NAME = "flores200_8_val_test"
 
 LANGUAGES_TO_SELECT = ['sentence_eng_Latn', 
     'sentence_dan_Latn', 
@@ -45,16 +40,23 @@ OTHER_COLUMNS_TO_SELECT = ['id',
     'has_image',
     'has_hyperlink']
 
-
 def main():
-    total_set_size = BATCH_SIZE_PER_UPDATE * NUM_UPDATES
-
-    raw_dataset = load_dataset("facebook/flores", "all")["dev"]
+    total_set_size = VAL_SET_SIZE + TEST_SET_SIZE
+    
+    raw_dataset = load_dataset("facebook/flores", "all")["devtest"]
     columns_to_remove = tuple(set(raw_dataset.column_names) - set(OTHER_COLUMNS_TO_SELECT + LANGUAGES_TO_SELECT))
     raw_dataset = raw_dataset.remove_columns(columns_to_remove)
-    
+
+    total_dataset = select_n(raw_dataset, total_set_size, seed=SEED)
+
+    dataset_dict = total_dataset.train_test_split(
+        test_size=TEST_SET_SIZE,
+        shuffle=True,
+        seed=SEED,
+    )
     dataset_dict = DatasetDict({
-        "train": select_n(raw_dataset, total_set_size, SEED),
+        "val": dataset_dict["train"],
+        "test": dataset_dict["test"],
     })
 
     dataset_dict.push_to_hub(DATASET_NAME)
