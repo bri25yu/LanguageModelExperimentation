@@ -10,5 +10,6 @@
     "log_level": "error",
     "log_on_each_node": false,
     "logging_steps": 1,
-    "predict_with_generate": true
+    "predict_with_generate": true,
+    "torch_compile": true
 }
