@@ -12,5 +12,5 @@
     "logging_steps": 1,
     "predict_with_generate": true,
     "torch_compile": true,
-    "optim": "adamw_fused_torch"
+    "optim": "adamw_torch_fused"
 }
