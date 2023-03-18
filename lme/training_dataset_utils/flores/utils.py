@@ -232,7 +232,7 @@ def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42) -> Data
 
     res = []
     for _ in trange((n // len(flores_train_dataset)) + 1, desc="Mapping"):
-        dataset = dataset.map(map_fn, remove_columns=columns_to_remove, batched=True)
+        dataset = flores_train_dataset.map(map_fn, remove_columns=columns_to_remove, batched=True)
         res.append(dataset)
 
     return concatenate_datasets(res).select(range(n)).flatten_indices()
