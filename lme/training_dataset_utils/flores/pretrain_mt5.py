@@ -27,7 +27,7 @@ DATASET_NAME = "flores200_pretrain_mt5"
 def main():
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
 
-    pretrain_dataset = load_dataset("bri25yu/flores200_pretrain")["dev"]
+    pretrain_dataset = load_dataset("bri25yu/flores200_pretrain")["train"]
     print(f"Pretrain dataset\n{pretrain_dataset}\n{pretrain_dataset[0]}")
 
     tokenized_dataset = tokenize_pretrain(pretrain_dataset, tokenizer, MAX_SEQ_LEN)

@@ -1,7 +1,8 @@
 from typing import List, Tuple
+from numpy.typing import NDArray
 
 from numpy import (
-    arange, array, argwhere, cumsum, empty, equal, hstack, insert, ndarray, round, ones, zeros
+    arange, array, argwhere, bool_, cumsum, empty, equal, hstack, insert, int_, round, ones, zeros
 )
 from numpy.random import shuffle
 
@@ -21,7 +22,7 @@ def get_noise_statistics(mask_prob: float, average_span_length: int, length: int
     return num_spans, num_noise_tokens, num_nonnoise_tokens
 
 
-def get_span_lengths(length: int, num_spans: int) -> ndarray[int]:
+def get_span_lengths(length: int, num_spans: int) -> NDArray[int_]:
     stars = zeros((length - num_spans,), dtype=bool)
     bars = ones((num_spans - 1,), dtype=bool)
     stars_and_bars = hstack((stars, bars))
@@ -35,7 +36,7 @@ def get_span_lengths(length: int, num_spans: int) -> ndarray[int]:
     return lengths
 
 
-def create_noise_mask(length: int, noise_lengths: ndarray[int], nonnoise_lengths: ndarray[int]) -> ndarray[bool]:
+def create_noise_mask(length: int, noise_lengths: NDArray[int_], nonnoise_lengths: NDArray[int_]) -> NDArray[bool_]:
     """
     >>> from numpy import array
     >>> length = 10
@@ -60,11 +61,11 @@ def create_noise_mask(length: int, noise_lengths: ndarray[int], nonnoise_lengths
     return noise_mask
 
 
-def get_ids(input_ids: ndarray[int], mask: ndarray[bool]) -> ndarray[int]:
+def get_ids(input_ids: NDArray[int_], mask: NDArray[bool_]) -> NDArray[int_]:
     return input_ids[mask]
 
 
-def insert_sentinel_ids(input_ids: ndarray[int], lengths: List[int], sentinel_id_start: int) -> ndarray[int]:
+def insert_sentinel_ids(input_ids: NDArray[int_], lengths: List[int], sentinel_id_start: int) -> NDArray[int_]:
     """
     For the first example,
         insert_idxs is [3, 5, 9]
