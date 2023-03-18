@@ -33,7 +33,7 @@ def main():
     tokenized_dataset = tokenize_pretrain(pretrain_dataset, tokenizer, MAX_SEQ_LEN)
     print(f"Tokenized dataset\n{tokenized_dataset}\n{tokenized_dataset[0]}")
 
-    corrupted_dataset = mask_and_create_labels_for_pretrain(pretrain_dataset, tokenizer, seed=SEED)
+    corrupted_dataset = mask_and_create_labels_for_pretrain(tokenized_dataset, tokenizer, seed=SEED)
     print(f"Corrupted dataset\n{corrupted_dataset}\n{corrupted_dataset[0]}")
 
     val_test_dict = load_dataset("bri25yu/flores200_val_test")
