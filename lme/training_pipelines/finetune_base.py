@@ -72,7 +72,9 @@ class FinetuneExperimentBase(ExperimentBase):
             self.load_and_save_predictions_dict(trainer, learning_rate, predictions)
 
     def resume_from_checkpoint(self, training_args: TrainingArguments) -> bool:
-        user_flag = os.environ.get("RESUME_FROM_CHECKPOINT", False)
+        user_flag = os.environ.get("RESUME_FROM_CHECKPOINT", None)
+        user_flag = user_flag == "true"
+
         if not user_flag: return False
 
         output_dir = training_args.output_dir
