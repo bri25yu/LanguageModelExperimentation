@@ -56,7 +56,7 @@ def main():
     print(f"Text dataset of for pretraining\n{text_dataset}\n{text_dataset[0]}")
 
     tokenized_dataset = tokenize_pretrain(
-        text_dataset=text_dataset,
+        pretrain_dataset=text_dataset,
         tokenizer=tokenizer,
         max_seq_len=MAX_SEQ_LEN_PER_EXAMPLE,
     )
