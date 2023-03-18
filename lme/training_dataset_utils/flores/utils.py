@@ -248,7 +248,7 @@ def tokenize_pretrain(pretrain_dataset: Dataset, tokenizer: PreTrainedTokenizerB
     sep = tokenizer.eos_token
 
     def tokenize_fn(examples):
-        inputs = create_pretrain_input_from_examples(examples["langs"], examples["sentences"], sep)
+        inputs = create_pretrain_input_from_examples(examples["lang"], examples["sentences"], sep)
 
         return tokenizer(inputs, max_length=max_seq_len, truncation=True)
 
