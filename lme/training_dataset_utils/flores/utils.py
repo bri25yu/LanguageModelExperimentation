@@ -254,7 +254,7 @@ def tokenize_pretrain(pretrain_dataset: Dataset, tokenizer: PreTrainedTokenizerB
 
     columns_to_remove = set(pretrain_dataset.column_names) - set(["id"])
     tokenized_pretrain_dataset = pretrain_dataset.map(
-        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing", num_proc=16
     )
 
     return tokenized_pretrain_dataset
