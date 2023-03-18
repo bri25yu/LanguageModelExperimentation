@@ -219,9 +219,8 @@ def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42, max_sin
     is_lang_key = lambda s: s.startswith("sentence_")
     lang_keys = array(list(filter(is_lang_key, flores_train_dataset.column_names)))
 
-    def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
-        n_examples = len(examples["id"])
-        batch_lang_keys = choice(lang_keys, size=(n_examples,))
+    def map_fn(examples: Dict[str, List[str]], idxs: List[int], batch_lang_keys: Sequence[str]) -> Dict[str, List[str]]:
+        batch_lang_keys = batch_lang_keys[idxs]
         batch_langs = [k[len("sentence_"):] for k in batch_lang_keys]
 
         sentences = [examples[k][i] for i, k in enumerate(batch_lang_keys)]
@@ -235,7 +234,11 @@ def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42, max_sin
 
     res = []
     for _ in trange((n // len(flores_train_dataset)) + 1, desc="Mapping"):
-        dataset = flores_train_dataset.map(map_fn, remove_columns=columns_to_remove, batched=True, num_proc=4)
+        batch_lang_keys = choice(lang_keys, size=(len(flores_train_dataset),))
+        fn_kwargs = {"batch_lang_keys": batch_lang_keys}
+        dataset = flores_train_dataset.map(
+            map_fn, remove_columns=columns_to_remove, batched=True, num_proc=4, fn_kwargs=fn_kwargs, with_indices=True
+        )
         res.append(dataset)
 
     return concatenate_datasets(res).select(range(n)).flatten_indices()
