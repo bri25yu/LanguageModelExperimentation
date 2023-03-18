@@ -284,3 +284,18 @@ def mask_and_create_labels_for_pretrain(tokenized_pretrain_dataset: Dataset, tok
     )
 
     return masked_dataset
+
+
+def create_mix(
+    dataset1: Dataset, dataset2: Dataset, total_examples: int, ratio_dataset_1: float, seed: int=42
+) -> Dataset:
+    num_examples_1 = int(total_examples * dataset1)
+    num_examples_2 = total_examples - num_examples_1
+
+    dataset1 = dataset1.select(range(num_examples_1))
+    dataset2 = dataset2.select(range(num_examples_2))
+
+    mixed_dataset = concatenate_datasets((dataset1, dataset2))
+    mixed_dataset = mixed_dataset.shuffle(seed=seed).flatten_indices()
+
+    return mixed_dataset
