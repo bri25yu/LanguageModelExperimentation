@@ -78,6 +78,4 @@ class FloresPackedCurriculum2300MExperiment(FloresPackedCurriculum300MExperiment
         super().update_training_arguments(training_arguments, batch_size, stage)
 
         if stage == 1:
-            max_steps = 4000
-
-        training_arguments.max_steps = max_steps
+            training_arguments.max_steps = 4000
