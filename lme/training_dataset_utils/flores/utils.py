@@ -222,7 +222,7 @@ def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42, max_sin
     def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
         n_examples = len(examples["id"])
         batch_lang_keys = choice(lang_keys, size=(n_examples,))
-        batch_langs = [k[len("sentence_")] for k in batch_lang_keys]
+        batch_langs = [k[len("sentence_"):] for k in batch_lang_keys]
 
         sentences = [examples[k][i] for i, k in enumerate(batch_lang_keys)]
 
