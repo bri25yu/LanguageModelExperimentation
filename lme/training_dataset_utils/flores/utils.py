@@ -275,6 +275,7 @@ def mask_and_create_labels_for_pretrain(tokenized_pretrain_dataset: Dataset, tok
             corrupted_input_ids, label_ids =\
                 create_span_corrupt_inputs(input_ids, MASK_PROB, AVERAGE_SPAN_LENGTH, sentinel_start_id)
             examples["input_ids"][i] = corrupted_input_ids
+            examples["attention_mask"][i] = [1] * len(corrupted_input_ids)
             examples["labels"].append(label_ids)
 
         return examples
