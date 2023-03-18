@@ -114,6 +114,8 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
             # Original code:
             # trainer.train()
 
+            checkpoint_dir = self.resume_from_checkpoint(training_arguments)
+
             for stage, tokenized_dataset in enumerate(tokenized_datasets):
                 stage = stage + 1  # 1-indexed
 
@@ -131,7 +133,8 @@ class FinetuneStagedTrainingArgsExperimentBase(FinetuneExperimentBase):
                 self.print_on_main_process_only(training_arguments, model.generation_config)
                 self.print_on_main_process_only(training_arguments, data_collator)
 
-                trainer.train(resume_from_checkpoint=(stage != 1))
+                trainer.train(resume_from_checkpoint=checkpoint_dir)
+                checkpoint_dir = trainer.state.best_model_checkpoint
 
             # We implicitly keep the last tokenized dataset for final evaluation
 

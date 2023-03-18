@@ -1,13 +1,13 @@
 from abc import abstractmethod
 from typing import Callable, List, Union
 
+import os
+
 from datasets import DatasetDict
 
 from transformers.tokenization_utils import PreTrainedTokenizerBase
-
-from transformers import (
-    TrainingArguments,
-)
+from transformers.trainer_utils import get_last_checkpoint
+from transformers import TrainingArguments
 
 from lme.data_processors.utils import dataset_summary
 from lme.training_pipelines.experiment_base import ExperimentBase
@@ -64,8 +64,18 @@ class FinetuneExperimentBase(ExperimentBase):
             )
             self.setup_trainer_log_callbacks(trainer)
 
-            trainer.train()
+            resume_from_checkpoint = self.resume_from_checkpoint(training_arguments)
+            trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
             predictions = self.get_predictions(trainer, tokenized_dataset)
 
             self.load_and_save_predictions_dict(trainer, learning_rate, predictions)
+
+    def resume_from_checkpoint(self, training_args: TrainingArguments) -> bool:
+        user_flag = os.environ.get("RESUME_FROM_CHECKPOINT", False)
+        if not user_flag: return False
+
+        output_dir = training_args.output_dir
+        last_checkpoint = get_last_checkpoint(output_dir)
+
+        return last_checkpoint is not None
