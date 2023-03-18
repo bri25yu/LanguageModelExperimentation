@@ -270,7 +270,7 @@ def mask_and_create_labels_for_pretrain(tokenized_pretrain_dataset: Dataset, tok
 
     def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
         examples["labels"] = []
-        for i in len(examples["input_ids"]):
+        for i in range(len(examples["input_ids"])):
             input_ids = examples["input_ids"][i]
             corrupted_input_ids, label_ids =\
                 create_span_corrupt_inputs(input_ids, MASK_PROB, AVERAGE_SPAN_LENGTH, sentinel_start_id)
@@ -279,6 +279,8 @@ def mask_and_create_labels_for_pretrain(tokenized_pretrain_dataset: Dataset, tok
 
         return examples
 
-    masked_dataset = tokenized_pretrain_dataset.map(map_fn, batched=True, desc="Creating pretrain objective")
+    masked_dataset = tokenized_pretrain_dataset.map(
+        map_fn, batched=True, desc="Creating pretrain objective", num_proc=16
+    )
 
     return masked_dataset
