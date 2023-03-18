@@ -210,8 +210,11 @@ def apply_packing(tokenized_dataset: Dataset, examples_per_pack: int, seed: int=
     return packed_dataset.shuffle(seed=seed)
 
 
-def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42) -> Dataset:
+def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42, max_single_size: int=100000) -> Dataset:
     set_seed(seed)
+
+    max_n_copies = max_single_size // len(flores_train_dataset)
+    flores_train_dataset = concatenate_datasets([flores_train_dataset] * max_n_copies)
 
     is_lang_key = lambda s: s.startswith("sentence_")
     lang_keys = array(list(filter(is_lang_key, flores_train_dataset.column_names)))
@@ -232,7 +235,7 @@ def select_pretrain(flores_train_dataset: Dataset, n: int, seed: int=42) -> Data
 
     res = []
     for _ in trange((n // len(flores_train_dataset)) + 1, desc="Mapping"):
-        dataset = flores_train_dataset.map(map_fn, remove_columns=columns_to_remove, batched=True)
+        dataset = flores_train_dataset.map(map_fn, remove_columns=columns_to_remove, batched=True, num_proc=4)
         res.append(dataset)
 
     return concatenate_datasets(res).select(range(n)).flatten_indices()
