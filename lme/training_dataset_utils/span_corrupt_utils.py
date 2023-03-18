@@ -11,8 +11,8 @@ __all__ = ["create_span_corrupt_inputs"]
 
 
 def get_noise_statistics(mask_prob: float, average_span_length: int, length: int) -> Tuple[int, int, int]:
-    num_noise_tokens = int(round(length * mask_prob))
-    num_spans = int(round(num_noise_tokens / average_span_length))
+    num_noise_tokens = max(1, int(round(length * mask_prob)))
+    num_spans = max(1, int(round(num_noise_tokens / average_span_length)))
 
     num_noise_tokens = min(num_noise_tokens, length - num_spans)
     num_noise_tokens = max(num_noise_tokens, num_spans)
