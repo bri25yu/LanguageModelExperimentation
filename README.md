@@ -37,10 +37,13 @@ For tib to eng translation:
 
 For Flores200:
 
-|GPU size|Model      |Seq len|Batch size|
-|--------|-----------|-------|----------|
-|    24GB|   mT5 300M|    128|        32|
-|    24GB|   mT5 300M|   1024|         4|
+|GPU size|Precision|Model      |Seq len|Batch size|
+|--------|---------|-----------|-------|----------|
+|    24GB|     BF16|   mT5 300M|    128|        32|
+|    24GB|     BF16|   mT5 300M|   1024|         4|
+|    24GB|     FP32|   mT5 300M|    128|         8|
+|    48GB|     BF16|   mT5 300M|    128|        64|
+|    48GB|     BF16|   mT5 300M|   1024|         8|
 
 
 ### Ideas

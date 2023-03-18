@@ -300,3 +300,64 @@ def create_mix(
     mixed_dataset = mixed_dataset.shuffle(seed=seed).flatten_indices()
 
     return mixed_dataset
+
+
+def select_languages_for_packed_pretrain(
+    flores_train_dataset: Dataset,
+    total_datapoints: int,
+    examples_per_datapoint: int,
+    seed: int=42,
+) -> Dataset:
+    set_seed(seed)
+
+    is_lang_key = lambda s: s.startswith("sentence_")
+    all_lang_keys = array(sorted(filter(is_lang_key, flores_train_dataset.column_names)))
+    keys_to_langs = lambda keys: [k[len("sentence_"):] for k in keys]
+
+    repeats_per_datapoint = (total_datapoints // len(flores_train_dataset)) + 1
+
+    def select_language_pairs(inputs: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        batch_langs, batch_sentences = [], []
+        for _ in trange(repeats_per_datapoint):
+            lang_keys = choice(all_lang_keys, size=(examples_per_datapoint,), replace=False)
+            langs = keys_to_langs(lang_keys)
+
+            sentences = [inputs[lang_key][0] for lang_key in lang_keys]
+
+            batch_langs.extend(langs)
+            batch_sentences.extend(sentences)
+
+        return {
+            "id": [inputs["id"][0]] * len(batch_langs),
+            "lang": batch_langs,
+            "sentences": batch_sentences,
+        }
+
+    text_dataset = flores_train_dataset.map(
+        select_language_pairs,
+        remove_columns=flores_train_dataset.column_names,
+        num_proc=4,
+        batched=True,
+        batch_size=1,
+        desc="Selecting languages for packed pretrain",
+    )
+    assert len(text_dataset) == repeats_per_datapoint * len(flores_train_dataset) * examples_per_datapoint, len(text_dataset)
+
+    return text_dataset.select(range(total_datapoints * examples_per_datapoint))
+
+
+def insert_sep_for_pretrain_packing(tokenized_dataset: Dataset, tokenizer: PreTrainedTokenizerBase) -> Dataset:
+    sep_token_id = tokenizer.sep_token_id
+
+    def map_fn(examples: Dict[str, Sequence[int]]) -> Dict[str, Sequence[int]]:
+        n_examples = len(examples["input_ids"])
+        keys = ["input_ids", "attention_mask", "labels"]
+        for i in range(n_examples):
+            for key in keys:
+                examples[key][i] += [sep_token_id]
+
+        return examples
+
+    tokenized_dataset = tokenized_dataset.map(map_fn, batched=True, num_proc=4, desc="Adding sep token")
+
+    return tokenized_dataset
