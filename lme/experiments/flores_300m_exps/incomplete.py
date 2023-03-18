@@ -1,7 +1,7 @@
 from lme.data_processors.flores200 import IncompleteDataProcessor
 from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 
-from lme.experiments.flores.baseline import FloresBaselineMedium2Experiment
+from lme.experiments.flores_300m_exps.baseline import FloresBaselineMedium2Experiment
 
 
 class FloresIncompleteExperimentBase(FloresBaselineMedium2Experiment):

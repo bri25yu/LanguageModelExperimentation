@@ -5,7 +5,7 @@ from transformers.modeling_utils import PreTrainedModel
 
 from lme.data_processors.flores200 import BaselineMediumDataProcessor, PretrainMixDataProcessor
 
-from lme.experiments.flores.packed_curriculum import FloresPackedCurriculumExperimentBase
+from lme.experiments.flores_300m_exps.packed_curriculum import FloresPackedCurriculumExperimentBase
 
 
 class FloresPretrainMixExperimentBase(FloresPackedCurriculumExperimentBase):

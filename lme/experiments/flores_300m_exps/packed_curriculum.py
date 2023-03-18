@@ -11,7 +11,7 @@ from lme.training_argument_mixins.utils import calculate_batch_size_args
 
 from lme.training_pipelines import FinetuneStagedTrainingArgsExperimentBase
 
-from lme.experiments.flores.baseline import FloresBaselineMedium2Experiment
+from lme.experiments.flores_300m_exps.baseline import FloresBaselineMedium2Experiment
 
 
 class FloresPackedCurriculumExperimentBase(FinetuneStagedTrainingArgsExperimentBase, FloresBaselineMedium2Experiment):
