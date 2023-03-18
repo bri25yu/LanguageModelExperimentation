@@ -36,7 +36,7 @@ def main():
     corrupted_dataset = mask_and_create_labels_for_pretrain(tokenized_dataset, tokenizer, seed=SEED)
     print(f"Corrupted dataset\n{corrupted_dataset}\n{corrupted_dataset[0]}")
 
-    val_test_dict = load_dataset("bri25yu/flores200_val_test")
+    val_test_dict = load_dataset("bri25yu/flores200_baseline_medium_mt5")
     dataset_dict = DatasetDict({
         "train": corrupted_dataset,
         "val": val_test_dict["val"],
