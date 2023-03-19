@@ -62,3 +62,17 @@ class FloresPretrainMix2300MExperiment(FloresPretrainMixExperimentBase):
         training_arguments.max_steps = max_steps
 
         training_arguments.__post_init__()  # Recreate hf deepspeed config
+
+
+class FloresPretrainMix3300MExperiment(FloresPretrainMixExperimentBase):
+    def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
+        if stage == 1:
+            max_steps = 2000
+        elif stage == 2:
+            max_steps = 10000
+        else:
+            raise ValueError(f"Unknown stage {stage}")
+
+        training_arguments.max_steps = max_steps
+
+        training_arguments.__post_init__()  # Recreate hf deepspeed config
