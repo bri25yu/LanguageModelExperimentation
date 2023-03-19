@@ -60,7 +60,7 @@ def main():
         tokenizer=tokenizer,
         max_seq_len=MAX_SEQ_LEN_PER_EXAMPLE,
     )
-    print(f"Tokenized dataset for pretraining\n{tokenized_dataset}")
+    print(f"Tokenized dataset for pretraining\n{tokenized_dataset}\n{tokenized_dataset[0]}")
 
     corrupted_dataset = mask_and_create_labels_for_pretrain(
         tokenized_pretrain_dataset=tokenized_dataset,
@@ -70,7 +70,7 @@ def main():
         tokenized_dataset=corrupted_dataset,
         tokenizer=tokenizer,
     )
-    print(f"Tokenized dataset with pretraining objective applied\n{corrupted_dataset}")
+    print(f"Tokenized dataset with pretraining objective applied\n{corrupted_dataset}\n{corrupted_dataset[0]}")
 
     packed_dataset = apply_packing(
         tokenized_dataset=corrupted_dataset,

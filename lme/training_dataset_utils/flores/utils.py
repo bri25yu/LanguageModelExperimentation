@@ -347,7 +347,7 @@ def select_languages_for_packed_pretrain(
 
 
 def insert_sep_for_pretrain_packing(tokenized_dataset: Dataset, tokenizer: PreTrainedTokenizerBase) -> Dataset:
-    sep_token_id = tokenizer.sep_token_id
+    sep_token_id = tokenizer.eos_token_id
 
     def map_fn(examples: Dict[str, Sequence[int]]) -> Dict[str, Sequence[int]]:
         n_examples = len(examples["input_ids"])
