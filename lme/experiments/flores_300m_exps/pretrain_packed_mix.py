@@ -1,0 +1,38 @@
+from typing import Callable
+
+from transformers import TrainingArguments
+from transformers.modeling_utils import PreTrainedModel
+
+from lme.data_processors.flores200 import PackedDataProcessor, PretrainPackedMixDataProcessor
+
+from lme.experiments.flores_300m_exps.packed_curriculum import FloresPackedCurriculumExperimentBase
+
+
+class FloresPretrainPackedMixExperimentBase(FloresPackedCurriculumExperimentBase):
+    MAX_INPUT_LENGTH = 1024
+    DATA_PROCESSOR_CLASSES = [
+        PretrainPackedMixDataProcessor,
+        PackedDataProcessor,
+    ]
+
+    def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
+        if stage == 1:
+            max_steps = 2000
+        elif stage == 2:
+            max_steps = 10000
+        else:
+            raise ValueError(f"Unknown stage {stage}")
+
+        training_arguments.max_steps = max_steps
+
+        training_arguments.__post_init__()  # Recreate hf deepspeed config
+
+    def update_data_collator(self, data_collator: Callable, stage: int) -> None:
+        pass
+
+    def update_model(self, model: PreTrainedModel, stage: int) -> None:
+        pass
+
+
+class FloresPretrainPackedMix300MExperiment(FloresPretrainPackedMixExperimentBase):
+    pass
