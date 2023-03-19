@@ -9,6 +9,7 @@ from lme.experiments.flores_300m_exps.baseline import FloresBaselineMedium2Exper
 
 class FloresPackedExperimentBase(FloresBaselineMedium2Experiment):
     DATA_PROCESSOR_CLS = PackedDataProcessor
+    MAX_INPUT_LENGTH = 1024
 
     def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
         args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
