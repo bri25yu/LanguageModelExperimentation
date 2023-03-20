@@ -97,5 +97,46 @@ class FloresBaseline_8Experiment(FloresBaselineExperimentBase):
         args.gradient_accumulation_steps = gradient_accumulation_steps
         args.per_device_train_batch_size = per_device_batch_size
         args.per_device_eval_batch_size = 2 * per_device_batch_size
+        args.__post_init__()
+
+        return args
+
+
+# This is FloresBaseline_8Experiment with batch size total 64
+class FloresBaseline_82Experiment(FloresBaselineExperimentBase):
+    DATA_PROCESSOR_CLS = Baseline8DataProcessor
+
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
+
+        args.max_steps = 10000
+
+        target_total_batch_size_per_update = 2 ** 6  # 64
+        gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
+
+        args.gradient_accumulation_steps = gradient_accumulation_steps
+        args.per_device_train_batch_size = per_device_batch_size
+        args.per_device_eval_batch_size = 2 * per_device_batch_size
+        args.__post_init__()
+
+        return args
+
+
+# This is FloresBaseline_8Experiment with batch size total 256
+class FloresBaseline_83Experiment(FloresBaselineExperimentBase):
+    DATA_PROCESSOR_CLS = Baseline8DataProcessor
+
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        args = super().get_training_arguments(batch_size=batch_size, learning_rate=learning_rate)
+
+        args.max_steps = 10000
+
+        target_total_batch_size_per_update = 2 ** 8  # 256
+        gradient_accumulation_steps, per_device_batch_size = calculate_batch_size_args(target_total_batch_size_per_update, batch_size)
+
+        args.gradient_accumulation_steps = gradient_accumulation_steps
+        args.per_device_train_batch_size = per_device_batch_size
+        args.per_device_eval_batch_size = 2 * per_device_batch_size
+        args.__post_init__()
 
         return args
