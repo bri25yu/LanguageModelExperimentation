@@ -38,7 +38,7 @@ BATCH_SIZE_PER_UPDATE = 1024
 NUM_UPDATES = 10000
 
 SEED = 42
-DATASET_NAME = "flores200_eng_output_scaffolding"
+DATASET_NAME = "flores200_eng_scaffolding"
 
 
 def main():
