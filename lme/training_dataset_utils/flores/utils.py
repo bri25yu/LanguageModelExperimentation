@@ -16,16 +16,24 @@ from lme.training_dataset_utils.incomplete_utils import add_prefix_truncated_out
 from lme.training_dataset_utils.span_corrupt_utils import create_span_corrupt_inputs
 
 
-def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000) -> Dataset:
+def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000, eng_data: List[str]=[]) -> Dataset:
     set_seed(seed)
 
     max_n_copies = max_single_size // len(raw_dataset)
+    # Make sure we have enough data to select from indices
     raw_dataset = concatenate_datasets([raw_dataset] * max_n_copies)
 
+    # Do the same for eng dataset (if empty then it will do nothing)
+    eng_dataset = eng_data * max_n_copies
+
+    # Filter out language keys
     is_lang_key = lambda s: s.startswith("sentence_")
     lang_keys = array(list(filter(is_lang_key, raw_dataset.column_names)))
 
+    # Select n random pairs of languages. We multiply n by 1.5 to make sure we have enough
+    # data to select from after removing duplicates
     idxs = choice(len(lang_keys), size=(int(n * 1.5), 2))
+    # Make sure we are not translating same language to itself and select n
     idxs = idxs[idxs[:, 0] != idxs[:, 1]][:n]
     assert idxs.shape == (n, 2), idxs.shape
 
@@ -38,17 +46,34 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
         n_examples = len(examples["id"])
         source_keys = source_keys[idxs]
         target_keys = target_keys[idxs]
-        return {
-            "source_lang": [k[len("sentence_"):] for k in source_keys],
-            "target_lang": [k[len("sentence_"):] for k in target_keys],
-            "source": [examples[source_keys[i]][i] for i in range(n_examples)],
-            "target": [examples[target_keys[i]][i] for i in range(n_examples)],
-        }
+
+        # Without special eng data input, just do source and target language
+        # i indexes the randomized language list as well as the sentence list
+        # and since it it is indexing into copied versions of the dataset, the 
+        # sentences line up for the different languages.
+        if not eng_data:
+            return {
+                "source_lang": [k[len("sentence_"):] for k in source_keys],
+                "target_lang": [k[len("sentence_"):] for k in target_keys],
+                "source": [examples[source_keys[i]][i] for i in range(n_examples)],
+                "target": [examples[target_keys[i]][i] for i in range(n_examples)],
+            }
+        # If english data should also be processed with each example, then add 
+        # eng_source to the dictionary output. 
+        else:
+            return {
+                "source_lang": [k[len("sentence_"):] for k in source_keys],
+                "target_lang": [k[len("sentence_"):] for k in target_keys],
+                "source": [examples[source_keys[i]][i] for i in range(n_examples)],
+                "target": [examples[target_keys[i]][i] for i in range(n_examples)],
+                "eng_source": [eng_dataset[i] for i in range(n_examples)],
+            }
 
     columns_to_remove = tuple(set(raw_dataset.column_names) - set(["id"]))
 
     res = []
     for i in trange((n // len(raw_dataset)) + 1, desc="Mapping"):
+        # Go through dataset length once per iteration via random indexes
         start_i, end_i = i * len(raw_dataset), (i + 1) * len(raw_dataset)
         fn_kwargs = {
             "source_keys": lang_keys[idxs[start_i: end_i, 0]],
@@ -90,6 +115,34 @@ def create_pretrain_input_from_examples(langs: List[str], sentences: List[str], 
     ]
 
 
+def create_eng_scaffold_inputs_from_examples(
+    source_langs: List[str], target_langs: List[str], source_sentences: List[str], 
+    eng_sentences: List[str], is_scaffold_input: bool, sep: str
+) -> List[str]:
+    # Creates inputs for either english scaffolding in the input or output sentences.
+    eng_lang = "eng_Latn"
+    if is_scaffold_input:
+        return [
+            f"{source_lang} {sep} {eng_lang} {sep} {target_lang} {sep} {source_sentence} {sep} {eng_sentence}"
+            for source_lang, target_lang, source_sentence, eng_sentence in
+            zip(source_langs, target_langs, source_sentences, eng_sentences)
+        ]
+    else:
+        return [
+            f"{source_lang} {sep} {eng_lang} {sep} {target_lang} {sep} {source_sentence}"
+            for source_lang, target_lang, source_sentence in
+            zip(source_langs, target_langs, source_sentences)
+        ]
+
+
+def create_eng_scaffold_outputs(target_sentences: List[str], eng_sentences: List[str], sep: str) -> List[str]:
+    return [
+        f"{eng_sentence} {sep} {target_sentence}"
+        for target_sentence, eng_sentence in
+        zip(target_sentences, eng_sentences)
+    ]
+
+
 def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> DatasetDict:
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
     sep = tokenizer.eos_token
@@ -101,6 +154,33 @@ def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> Datase
         labels = tokenizer(text_target=examples["target"], max_length=max_seq_len, truncation=True)
 
         model_inputs["labels"] = labels["input_ids"]
+        return model_inputs
+
+    columns_to_remove = set(dataset_dict["train"].column_names) - set(["id"])
+    dataset_dict = dataset_dict.map(
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
+    )
+
+    return dataset_dict
+
+
+def tokenize_eng_scaffold_mt5(dataset_dict: DatasetDict, max_seq_len: int, is_scaffold_input: bool) -> DatasetDict:
+    tokenizer = AutoTokenizer.from_pretrained("google/mt5-base", use_fast=False)
+    sep = tokenizer.eos_token
+
+    def tokenize_fn(examples):
+        # Generate inputs, which either has the english sentence and the english language token (input) or just the english language token (output)
+        inputs = create_eng_scaffold_inputs_from_examples(examples["source_lang"], examples["target_lang"], examples["source"], examples["eng_source"], is_scaffold_input, sep)
+        model_inputs = tokenizer(inputs, max_length=max_seq_len, truncation=True)
+
+        # Generate target outputs, which either has the english sentence with the target language concatenated (output),
+        # or just the normal target output with the target language (input)
+        if is_scaffold_input:
+            labels = tokenizer(text_target=examples["target"], max_length=max_seq_len, truncation=True)
+        else:
+            labels = tokenizer(text_target=create_eng_scaffold_outputs(examples["target"], examples["eng_source"], sep), max_length=max_seq_len, truncation=True)
+        model_inputs["labels"] = labels["input_ids"]
+
         return model_inputs
 
     columns_to_remove = set(dataset_dict["train"].column_names) - set(["id"])
