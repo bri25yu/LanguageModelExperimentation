@@ -23,8 +23,10 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
     # Make sure we have enough data to select from indices
     raw_dataset = concatenate_datasets([raw_dataset] * max_n_copies)
 
-    # Do the same for eng dataset (if empty then it will do nothing)
-    eng_dataset = eng_data * max_n_copies
+    # Do the same for eng dataset if exists
+    if eng_data:
+        eng_dataset = eng_data * max_n_copies
+        raw_dataset = raw_dataset.add_column("eng", eng_dataset)
 
     # Filter out language keys
     is_lang_key = lambda s: s.startswith("sentence_")
@@ -66,7 +68,7 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
                 "target_lang": [k[len("sentence_"):] for k in target_keys],
                 "source": [examples[source_keys[i]][i] for i in range(n_examples)],
                 "target": [examples[target_keys[i]][i] for i in range(n_examples)],
-                "eng_source": [eng_dataset[i] for i in range(n_examples)],
+                "eng_source": [examples["eng"][i] for i in range(n_examples)],
             }
 
     columns_to_remove = tuple(set(raw_dataset.column_names) - set(["id"]))
