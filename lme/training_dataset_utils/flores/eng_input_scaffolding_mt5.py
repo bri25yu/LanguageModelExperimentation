@@ -4,7 +4,7 @@ A randomly selected set of training examples tokenized with the mT5 tokenizer.
 DatasetDict({
     train: Dataset({
         features: ['id', 'input_ids', 'attention_mask', 'labels'],
-        num_rows: 20480000
+        num_rows: 10240000
     })
     val: Dataset({
         features: ['id', 'input_ids', 'attention_mask', 'labels'],

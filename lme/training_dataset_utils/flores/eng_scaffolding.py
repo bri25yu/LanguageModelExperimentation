@@ -15,7 +15,7 @@ Training target output:
 DatasetDict({
     train: Dataset({
         features: ['id', 'input_ids', 'attention_mask', 'labels'],
-        num_rows: 2560000
+        num_rows: 10240000
     })
     val: Dataset({
         features: ['id', 'input_ids', 'attention_mask', 'labels'],
