@@ -10,7 +10,7 @@ from lme.compute_metrics_utils.flores200 import get_flores_compute_metrics
 
 from lme.data_processors.abstract import AbstractDataProcessor
 from lme.data_processors.flores200 import (
-    BaselineMediumDataProcessor, PackedDataProcessor
+    BaselineMediumDataProcessor, Packed2DataProcessor
 )
 
 from lme.model_mixins import MT5600MModelMixin
@@ -19,7 +19,7 @@ from lme.training_argument_mixins import FloresMT5FinetuneArgsMixin
 
 
 class FloresStagedExperimentBase(FloresMT5FinetuneArgsMixin, FinetuneStagedTrainingArgsExperimentBase):
-    MAX_INPUT_LENGTH = 1024
+    MAX_INPUT_LENGTH = 256
     TRAINER_CLS = Seq2SeqTrainer
     DATA_PROCESSOR_CLASSES: Union[None, List[AbstractDataProcessor]] = None
 
@@ -52,10 +52,10 @@ class FloresBaseline600MExperiment(MT5600MModelMixin, FloresStagedExperimentBase
 
 
 class FloresPacked600MExperiment(MT5600MModelMixin, FloresStagedExperimentBase):
-    # (2048 / 8) = 256 // (2 ** 11 / 2 ** 3) = 2 ** 8
-    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 8
+    # (2048 / 2) = 1024 // (2 ** 11 / 2 ** 1) = 2 ** 10
+    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 10
 
-    DATA_PROCESSOR_CLASSES = [PackedDataProcessor]
+    DATA_PROCESSOR_CLASSES = [Packed2DataProcessor]
 
     def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
         pass
