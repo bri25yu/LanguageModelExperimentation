@@ -28,5 +28,5 @@ class FloresPacked2ExperimentBase(FloresBaselineMedium2Experiment):
         return args
 
 
-class FloresPacked2300MExperiment(FloresPackedExperimentBase):
+class FloresPacked2300MExperiment(FloresPacked2ExperimentBase):
     pass
