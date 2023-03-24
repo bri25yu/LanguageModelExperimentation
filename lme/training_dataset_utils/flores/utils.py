@@ -187,7 +187,7 @@ def tokenize_eng_scaffold_mt5(dataset_dict: DatasetDict, max_seq_len: int, is_sc
 
     columns_to_remove = set(dataset_dict["train"].column_names) - set(["id"])
     dataset_dict = dataset_dict.map(
-        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing"
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing", num_proc=16
     )
 
     return dataset_dict
