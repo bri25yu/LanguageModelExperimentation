@@ -1,6 +1,6 @@
 from transformers import TrainingArguments
 
-from lme.data_processors.flores200 import PackedDataProcessor
+from lme.data_processors.flores200 import Packed2DataProcessor
 
 from lme.training_argument_mixins.utils import calculate_batch_size_args
 
@@ -8,7 +8,7 @@ from lme.experiments.flores_300m_exps.baseline import FloresBaselineMedium2Exper
 
 
 class FloresPacked2ExperimentBase(FloresBaselineMedium2Experiment):
-    DATA_PROCESSOR_CLS = PackedDataProcessor
+    DATA_PROCESSOR_CLS = Packed2DataProcessor
     MAX_INPUT_LENGTH = 256
 
     def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
