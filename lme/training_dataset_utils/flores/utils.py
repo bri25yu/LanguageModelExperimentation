@@ -266,7 +266,7 @@ def tokenize_language_pairs_to_pack(text_dataset: Dataset, tokenizer: PreTrained
 
     columns_to_remove = set(text_dataset.column_names) - set(["id"])
     return text_dataset.map(
-        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing", num_proc=4
+        tokenize_fn, batched=True, remove_columns=columns_to_remove, desc="Tokenizing", num_proc=16
     )
 
 
