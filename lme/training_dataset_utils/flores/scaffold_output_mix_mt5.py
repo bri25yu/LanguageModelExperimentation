@@ -19,7 +19,7 @@ from lme.training_dataset_utils.flores.utils import create_mix
 RATIO_TRANSLATION = 0.5  # 50% scaffold, 50% translation
 TOTAL_EXAMPLES = 10240000
 SEED = 42
-DATASET_NAME = "flores200_scaffold_output_mix_mt5"
+DATASET_NAME = "flores200_eng_output_scaffolding_mix_mt5"
 
 
 def main():
