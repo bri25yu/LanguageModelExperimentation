@@ -40,6 +40,7 @@ For Flores200:
 |GPU size|Precision|Model      |Seq len|Batch size|
 |--------|---------|-----------|-------|----------|
 |    24GB|     BF16|   mT5 300M|    128|        32|
+|    24GB|     BF16|   mT5 300M|    256|        16|
 |    24GB|     BF16|   mT5 300M|   1024|         4|
 |    24GB|     FP32|   mT5 300M|    128|         8|
 |    24GB|     BF16|   mT5 600M|   1024|     2? 4?|
