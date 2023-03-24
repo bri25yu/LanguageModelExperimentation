@@ -29,13 +29,17 @@ DATASET_NAME = "flores200_eng_output_scaffolding_mt5"
 
 def main():
     train_dataset = load_dataset("hlillemark/flores200_eng_scaffolding")["train"]
-    dataset_dict = DatasetDict({
-        "train": train_dataset,
-        "val": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="val"),
-        "test": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="test")
+    train_dataset_dict = DatasetDict({
+        "train": train_dataset
     })
 
-    dataset_dict = tokenize_eng_scaffold_mt5(dataset_dict, MAX_SEQ_LEN, is_scaffold_input=False)
+    train_dataset_dict = tokenize_eng_scaffold_mt5(train_dataset_dict, MAX_SEQ_LEN, is_scaffold_input=False)
+
+    dataset_dict = DatasetDict({
+        "train": train_dataset_dict["train"],
+        "val": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="val"),
+        "test": load_dataset("bri25yu/flores200_baseline_medium_mt5", split="test")
+        })
 
     dataset_dict.push_to_hub(DATASET_NAME)
 
