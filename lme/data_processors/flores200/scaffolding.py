@@ -96,7 +96,7 @@ class ScaffoldingOutputMixDataProcessor(AbstractDataProcessor):
         return load_dataset("hlillemark/flores200_eng_output_scaffolding_mix_mt5", use_auth_token=True)
 
 
-class ScaffoldingInput2MixDataProcessor(AbstractDataProcessor):
+class ScaffoldingInputMix2DataProcessor(AbstractDataProcessor):
     """
     DatasetDict({
         train: Dataset({
