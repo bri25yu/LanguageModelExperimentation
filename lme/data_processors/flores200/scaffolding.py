@@ -115,7 +115,7 @@ class ScaffoldingInputMix2DataProcessor(AbstractDataProcessor):
     """
 
     def load(self) -> DatasetDict:
-        return load_dataset("hlillemark/flores200_eng_input2_scaffolding_mix_mt5", use_auth_token=True)
+        return load_dataset("hlillemark/flores200_eng_input_scaffolding_mix2_mt5", use_auth_token=True)
 
 
 class ScaffoldingInputMix3DataProcessor(AbstractDataProcessor):
@@ -137,4 +137,4 @@ class ScaffoldingInputMix3DataProcessor(AbstractDataProcessor):
     """
 
     def load(self) -> DatasetDict:
-        return load_dataset("hlillemark/flores200_eng_input3_scaffolding_mix_mt5", use_auth_token=True)
+        return load_dataset("hlillemark/flores200_eng_input_scaffolding_mix3_mt5", use_auth_token=True)
