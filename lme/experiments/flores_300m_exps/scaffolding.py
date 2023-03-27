@@ -2,6 +2,7 @@ from transformers import TrainingArguments
 
 from lme.data_processors.flores200 import ScaffoldingOutputDataProcessor, ScaffoldingInputDataProcessor
 from lme.data_processors.flores200 import ScaffoldingOutputMixDataProcessor, ScaffoldingInputMixDataProcessor
+from lme.data_processors.flores200 import ScaffoldingInputMix2DataProcessor, ScaffoldingInputMix3DataProcessor
 
 from lme.training_argument_mixins.utils import calculate_batch_size_args
 
@@ -46,4 +47,14 @@ class FloresScaffoldInputMix300MExperiment(FloresScaffoldExperimentBase):
 
 class FloresScaffoldOutputMix300MExperiment(FloresScaffoldExperimentBase):
     DATA_PROCESSOR_CLS = ScaffoldingOutputMixDataProcessor
+    pass
+
+
+class FloresScaffoldInputMix2300MExperiment(FloresScaffoldExperimentBase):
+    DATA_PROCESSOR_CLS = ScaffoldingInputMix2DataProcessor
+    pass
+
+
+class FloresScaffoldInputMix3300MExperiment(FloresScaffoldExperimentBase):
+    DATA_PROCESSOR_CLS = ScaffoldingInputMix3DataProcessor
     pass
