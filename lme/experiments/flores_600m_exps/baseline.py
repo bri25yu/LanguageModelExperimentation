@@ -10,7 +10,8 @@ from lme.compute_metrics_utils.flores200 import get_flores_compute_metrics
 
 from lme.data_processors.abstract import AbstractDataProcessor
 from lme.data_processors.flores200 import (
-    BaselineMediumDataProcessor, Packed2DataProcessor, ScaffoldingInputMixDataProcessor
+    BaselineMediumDataProcessor, Packed2DataProcessor, 
+    ScaffoldingInputMixDataProcessor, ScaffoldingInputMix3DataProcessor
 )
 
 from lme.model_mixins import MT5600MModelMixin
@@ -72,3 +73,10 @@ class FloresScaffoldInputMix600MExperiment(FloresBaseline600MExperiment):
     TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 10
 
     DATA_PROCESSOR_CLASSES = [ScaffoldingInputMixDataProcessor]
+
+
+class FloresScaffoldInputMix3600MExperiment(FloresBaseline600MExperiment):
+    # (2048 / 2) = 1024 // (2 ** 11 / 2 ** 1) = 2 ** 10
+    TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 10
+
+    DATA_PROCESSOR_CLASSES = [ScaffoldingInputMix3DataProcessor]
