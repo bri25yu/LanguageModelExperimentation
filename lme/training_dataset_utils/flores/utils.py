@@ -118,11 +118,11 @@ def select_all(raw_dataset: Dataset, seed: int=42) -> Dataset:
             res["source"].append(examples[source_key][0])
             res["target"].append(examples[target_key][0])
 
+        res["id"] = [examples["id"][0]] * len(res["source"])
         return res
 
-    columns_to_remove = tuple(set(raw_dataset.column_names) - set(["id"]))
     dataset = raw_dataset.map(
-        map_fn, remove_columns=columns_to_remove, batched=True, batch_size=1
+        map_fn, remove_columns=raw_dataset.column_names, batched=True, batch_size=1
     )
 
     return dataset.shuffle(seed=seed).flatten_indices()
