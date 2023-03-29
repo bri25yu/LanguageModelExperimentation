@@ -16,7 +16,7 @@ from datasets import DatasetDict, load_dataset
 from lme.training_dataset_utils.flores.utils import create_mix
 
 
-RATIO_TRANSLATION = 0.5  # 50% scaffold, 50% translation
+RATIO_DATASET1 = 0.5  # 50% scaffold, 50% translation
 TOTAL_EXAMPLES = 10240000
 SEED = 42
 DATASET_NAME = "flores200_eng_input_scaffolding_mix_mt5"
@@ -26,7 +26,7 @@ def main():
     scaffold_dataset = load_dataset("bri25yu/flores200_eng_input_scaffolding_mt5")["train"]
     baseline_dataset = load_dataset("bri25yu/flores200_baseline_medium_mt5")["train"]
 
-    mixed_dataset = create_mix(scaffold_dataset, baseline_dataset, TOTAL_EXAMPLES, RATIO_TRANSLATION, seed=SEED)
+    mixed_dataset = create_mix(scaffold_dataset, baseline_dataset, TOTAL_EXAMPLES, RATIO_DATASET1, seed=SEED)
     print(f"Mixed dataset\n{mixed_dataset}\n{mixed_dataset[0]}")
 
     dataset_dict = DatasetDict({
