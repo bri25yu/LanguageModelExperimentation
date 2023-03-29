@@ -1,6 +1,6 @@
 from typing import Dict, List, Sequence
 
-from itertools import chain
+from itertools import chain, product
 
 from tqdm.auto import trange
 
@@ -97,6 +97,35 @@ def select_n(raw_dataset: Dataset, n: int, seed: int, max_single_size: int=10000
         res.append(dataset)
 
     return concatenate_datasets(res).select(range(n)).flatten_indices()
+
+
+def select_all(raw_dataset: Dataset, seed: int=42) -> Dataset:
+    is_lang_key = lambda s: s.startswith("sentence_")
+    lang_keys = list(filter(is_lang_key, raw_dataset.column_names))
+
+    def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        res = {
+            "source_lang": [],
+            "target_lang": [],
+            "source": [],
+            "target": [],
+        }
+        for source_key, target_key in product(lang_keys, lang_keys):
+            if source_key == target_key: continue
+
+            res["source_lang"].append(source_key[len("sentence_"):])
+            res["target_lang"].append(target_key[len("sentence_"):])
+            res["source"].append(examples[source_key][0])
+            res["target"].append(examples[target_key][0])
+
+        return res
+
+    columns_to_remove = tuple(set(raw_dataset.column_names) - set(["id"]))
+    dataset = raw_dataset.map(
+        map_fn, remove_columns=columns_to_remove, batched=True, batch_size=1
+    )
+
+    return dataset.shuffle(seed=seed).flatten_indices()
 
 
 def create_inputs_from_examples(
