@@ -1,0 +1,4 @@
+#!/bin/bash
+
+find results/*/predictions -size -99M -type f -print | xargs git add
+git add results/*/*/events.out.*
