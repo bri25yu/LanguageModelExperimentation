@@ -18,7 +18,8 @@ from lme.training_argument_mixins import FloresMT5FinetuneArgsMixin
 class FloresBaseline1B20milExperiment(MT51BModelMixin, FloresMT5FinetuneArgsMixin, FinetuneExperimentBase):
     MAX_INPUT_LENGTH = 256
     TRAINER_CLS = Seq2SeqTrainer
-    DATA_PROCESSOR_CLASSES: Union[None, List[AbstractDataProcessor]] = [BaselineMediumDataProcessor]
+    DATA_PROCESSOR_CLASSES: Union[None, List[AbstractDataProcessor]] = None
+    DATA_PROCESSOR_CLASSES = [BaselineMediumDataProcessor]
 
     def get_data_collator(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         max_input_length = self.MAX_INPUT_LENGTH
