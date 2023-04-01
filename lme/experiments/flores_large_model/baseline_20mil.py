@@ -28,6 +28,9 @@ class FloresBaseline1B20milExperiment(MT51BModelMixin, FloresMT5FinetuneArgsMixi
     def get_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         return get_flores_compute_metrics(tokenizer)
 
+    def get_tokenized_dataset(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
+        pass
+
     def get_tokenized_datasets(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> DatasetDict:
         return list(map(lambda c: c()(training_arguments), self.DATA_PROCESSOR_CLASSES))
 
