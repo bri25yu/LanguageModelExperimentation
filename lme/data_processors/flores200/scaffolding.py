@@ -138,3 +138,25 @@ class ScaffoldingInputMix3DataProcessor(AbstractDataProcessor):
 
     def load(self) -> DatasetDict:
         return load_dataset("hlillemark/flores200_eng_input_scaffolding_mix3_mt5", use_auth_token=True)
+
+
+class ScaffoldingInputMix3LargeDataProcessor(AbstractDataProcessor):
+    """
+    DatasetDict({
+        train: Dataset({
+            features: ['id', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 20480000
+        })
+        val: Dataset({
+            features: ['id', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 5000
+        })
+        test: Dataset({
+            features: ['id', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 10000
+        })
+    })
+    """
+
+    def load(self) -> DatasetDict:
+        return load_dataset("hlillemark/flores200_eng_input_scaffolding_mix3_large_mt5", use_auth_token=True)
