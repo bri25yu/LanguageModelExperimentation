@@ -23,7 +23,7 @@ DATASET_NAME = "flores200_eng_input_scaffolding_mix3_large_mt5"
 
 
 def main():
-    scaffold_dataset = load_dataset("hlillemark/flores200_eng_input_scaffolding_large_mt5")
+    scaffold_dataset = load_dataset("hlillemark/flores200_eng_input_scaffolding_large_mt5")["train"]
     baseline_dataset = load_dataset("bri25yu/flores200_baseline_medium_mt5")["train"]
 
     mixed_dataset = create_mix(scaffold_dataset, baseline_dataset, TOTAL_EXAMPLES, RATIO_DATASET1, seed=SEED)
