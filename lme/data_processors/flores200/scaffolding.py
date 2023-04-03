@@ -5,7 +5,8 @@ from lme.data_processors.abstract import AbstractDataProcessor
 
 __all__ = ["ScaffoldingOutputDataProcessor", "ScaffoldingInputDataProcessor",
         "ScaffoldingOutputMixDataProcessor", "ScaffoldingInputMixDataProcessor",
-        "ScaffoldingInputMix2DataProcessor", "ScaffoldingInputMix3DataProcessor"]
+        "ScaffoldingInputMix2DataProcessor", "ScaffoldingInputMix3DataProcessor",
+        "ScaffoldingInputMix3LargeDataProcessor"]
 
 
 class ScaffoldingInputDataProcessor(AbstractDataProcessor):
