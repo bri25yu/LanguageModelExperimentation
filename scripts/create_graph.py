@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from os import listdir
-from os.path import isdir, join
+from os.path import exists, isdir, join
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
@@ -112,6 +112,13 @@ def plot_comparative_experiment(
     save_name: str
 
     """
+
+    if not save_name.endswith(".png"): save_name += ".png"
+    save_path = join(DATASET_CACHE_DIR, save_name)
+    if exists(save_path):
+        print(f"Already have a graph at {save_path}")
+        return
+
     rows, cols = 1, 1
     fig, ax = plt.subplots(rows, cols, figsize=(10 * cols, 8 * rows))
 
@@ -134,23 +141,8 @@ def plot_comparative_experiment(
 
     ax.legend()
     fig.tight_layout()
-    fig.savefig(join(DATASET_CACHE_DIR, save_name))
+    fig.savefig(save_path)
 
 
 if __name__ == "__main__":
     pass
-    # plot_experiment(
-    #     "",
-    #     "",
-    #     "",
-    #     "",
-    # )
-
-    # plot_comparative_experiment(
-    #     ["", ""],
-    #     ["", ""],
-    #     "",
-    #     "",
-    #     "",
-    #     "",
-    # )
