@@ -49,7 +49,10 @@ def create_and_upload_dataset(num_examples: int, dataset_name: Union[None, str])
     tokenized_dataset = tokenize_eng_scaffold_output_cotr_mt5(
         eng_scaffold_dataset, tokenizer, MAX_SEQ_LEN
     )
-    print("Tokenized English scaffold dataset", tokenized_dataset, pformat(tokenized_dataset[0]), sep="\n")
+    print("Tokenized English scaffold dataset", tokenized_dataset, tokenized_dataset[0], sep="\n")
+
+    print("Example input", tokenizer.decode(tokenized_dataset[0]["input_ids"]), sep="\n")
+    print("Example target", tokenizer.decode(tokenized_dataset[0]["labels"]), sep="\n")
 
     dataset_dict = DatasetDict({
         "train": tokenized_dataset,
