@@ -544,5 +544,5 @@ def tokenize_eng_scaffold_output_cotr_mt5(
         }
 
     return eng_scaffold_dataset.map(
-        map_fn, remove_columns=eng_scaffold_dataset, batched=True, num_proc=16
+        map_fn, remove_columns=eng_scaffold_dataset.column_names, batched=True, num_proc=16
     )
