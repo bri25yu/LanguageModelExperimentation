@@ -44,15 +44,23 @@ def create_and_upload_dataset(num_examples: int, dataset_name: Union[None, str])
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base", use_fast=False)
 
     eng_scaffold_dataset = select_n_for_eng_scaffold(flores200_dataset, num_examples, SEED)
-    print("English scaffold dataset", eng_scaffold_dataset, pformat(eng_scaffold_dataset[0]), sep="\n")
+    print("English scaffold dataset", eng_scaffold_dataset, pformat(eng_scaffold_dataset[0]), "\n", sep="\n")
 
     tokenized_dataset = tokenize_eng_scaffold_output_cotr_mt5(
         eng_scaffold_dataset, tokenizer, MAX_SEQ_LEN
     )
-    print("Tokenized English scaffold dataset", tokenized_dataset, tokenized_dataset[0], sep="\n")
+    print("Tokenized English scaffold dataset", tokenized_dataset, tokenized_dataset[0], "\n", sep="\n")
 
-    print("Example input", tokenizer.decode(tokenized_dataset[0]["input_ids"]), sep="\n")
-    print("Example target", tokenizer.decode(tokenized_dataset[0]["labels"]), sep="\n")
+    example = tokenized_dataset[0]
+    print("Example input", tokenizer.decode(example["input_ids"]), sep="\n")
+    print("Example target", tokenizer.decode(example["labels"]), sep="\n")
+
+    target_sep_token_id = tokenizer.encode("<extra_id_0>")[0]
+    label_start_idx = example["labels"].index(target_sep_token_id)
+    eval_target = example["labels"][label_start_idx+1:]
+    print("Example eval target", eval_target, tokenizer.decode(eval_target), sep="\n")
+
+    print()
 
     dataset_dict = DatasetDict({
         "train": tokenized_dataset,
