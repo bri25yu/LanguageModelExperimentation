@@ -1,5 +1,7 @@
 from typing import Dict, List, Sequence
 
+from math import ceil
+
 from itertools import chain, product
 
 from tqdm.auto import trange
@@ -483,7 +485,7 @@ def insert_sep_for_pretrain_packing(tokenized_dataset: Dataset, tokenizer: PreTr
 def select_n_for_eng_scaffold(flores200_dataset: Dataset, n_examples: int, seed: int) -> Dataset:
     set_seed(seed)
 
-    examples_per_sentence = round(n_examples / len(flores200_dataset))
+    examples_per_sentence = ceil(n_examples / len(flores200_dataset))
 
     english_key = "sentence_eng_Latn"
     language_keys = [c for c in flores200_dataset.column_names if c.startswith("sentence_")]
