@@ -478,3 +478,69 @@ def insert_sep_for_pretrain_packing(tokenized_dataset: Dataset, tokenizer: PreTr
     tokenized_dataset = tokenized_dataset.map(map_fn, batched=True, num_proc=4, desc="Adding sep token")
 
     return tokenized_dataset
+
+
+def select_n_for_eng_scaffold(flores200_dataset: Dataset, n_examples: int, seed: int) -> Dataset:
+    set_seed(seed)
+
+    examples_per_sentence = round(n_examples / len(flores200_dataset))
+
+    english_key = "sentence_eng_Latn"
+    language_keys = [c for c in flores200_dataset.column_names if c.startswith("sentence_")]
+    language_keys.remove(english_key)
+
+    def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
+        res = {
+            "source": [],
+            "target": [],
+            "english": [],
+            "source_lang": [],
+            "target_lang": [],
+        }
+        source_keys, target_keys = choice(language_keys, size=(2, examples_per_sentence))
+        for source_key, target_key in zip(source_keys, target_keys):
+            res["source"].append(examples[source_key][0])
+            res["target"].append(examples[target_key][0])
+            res["english"].append(examples[english_key][0])
+            res["source_lang"].append(source_key[len("sentence_"):])
+            res["target_lang"].append(target_key[len("sentence_"):])
+        res["id"] = [examples["id"][0]] * examples_per_sentence
+        return res
+
+    return flores200_dataset \
+        .map(map_fn, remove_columns=flores200_dataset.column_names, batched=True, batch_size=1, num_proc=16) \
+        .shuffle(seed=seed) \
+        .select(range(n_examples)) \
+        .flatten_indices()
+
+
+def tokenize_eng_scaffold_output_cotr_mt5(
+    eng_scaffold_dataset: Dataset, tokenizer: PreTrainedTokenizerBase, max_seq_len: int
+) -> Dataset:
+    sep_token = tokenizer.eos_token
+    target_sep_token = "<extra_id_0>"
+
+    def map_fn(examples: Dict[str, List[str]]) -> Dict[str, List[int]]:
+        examples: List[Dict[str, str]] = [
+            {k: examples[k][i] for k in examples} for i in range(len(examples["source"]))
+        ]
+        inputs, targets = [], []
+        for d in examples:
+            # In line with `create_inputs_from_examples`
+            input_i = f"{d['source_lang']} {sep_token} {d['target_lang']} {sep_token} {d['source']}"
+            target_i = f"{d['english']} {target_sep_token} {d['target']}"
+
+            inputs.append(input_i)
+            targets.append(target_i)
+
+        model_inputs = tokenizer(inputs, max_length=max_seq_len, truncation=True)
+        target_outputs = tokenizer(text_target=targets, max_length=max_seq_len, truncation=True)
+
+        return {
+            **model_inputs,
+            "labels": target_outputs["input_ids"],
+        }
+
+    return eng_scaffold_dataset.map(
+        map_fn, remove_columns=eng_scaffold_dataset, batched=True, num_proc=16
+    )
