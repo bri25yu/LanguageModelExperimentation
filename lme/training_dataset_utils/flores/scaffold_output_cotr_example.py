@@ -24,6 +24,8 @@ from argparse import ArgumentParser
 
 from pprint import pformat
 
+import lme  # Redirect cache
+
 from datasets import DatasetDict, load_dataset
 
 from transformers import AutoTokenizer
