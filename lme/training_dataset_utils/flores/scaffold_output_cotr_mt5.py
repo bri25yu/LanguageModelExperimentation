@@ -30,20 +30,24 @@ from datasets import DatasetDict, load_dataset
 
 from transformers import AutoTokenizer
 
-from lme.training_dataset_utils.flores.utils import select_n_for_eng_scaffold, tokenize_eng_scaffold_output_cotr_mt5
+from lme.training_dataset_utils.flores.utils import select_n, tokenize_eng_scaffold_output_cotr_mt5
 
 
 TOTAL_EXAMPLES = 10240000
 MAX_SEQ_LEN = 256
 SEED = 42
-DATASET_NAME = "flores200_scaffold_eng_output_mt5"
+DATASET_NAME = "flores200_eng_output_scaffolding_cotr_mt5"
 
 
 def create_and_upload_dataset(num_examples: int, dataset_name: Union[None, str]) -> None:
     flores200_dataset = load_dataset("facebook/flores", "all")["dev"]
     tokenizer = AutoTokenizer.from_pretrained("google/mt5-base", use_fast=False)
 
-    eng_scaffold_dataset = select_n_for_eng_scaffold(flores200_dataset, num_examples, SEED)
+    eng_data = flores200_dataset["sentence_eng_Latn"]
+
+    # Same procedure as the regular eng scaffolding stuff but without removing the eng column since 
+    # we are not mixing it with the other tasks, and english to or from translation is still a task.
+    eng_scaffold_dataset = select_n(flores200_dataset, num_examples, SEED, eng_data=eng_data)
     print("English scaffold dataset", eng_scaffold_dataset, pformat(eng_scaffold_dataset[0]), "\n", sep="\n")
 
     tokenized_dataset = tokenize_eng_scaffold_output_cotr_mt5(

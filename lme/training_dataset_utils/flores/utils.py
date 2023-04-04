@@ -530,7 +530,7 @@ def tokenize_eng_scaffold_output_cotr_mt5(
         for d in examples:
             # In line with `create_inputs_from_examples`
             input_i = f"{d['source_lang']} {sep_token} {d['target_lang']} {sep_token} {d['source']}"
-            target_i = f"{d['english']} {target_sep_token} {d['target']}"
+            target_i = f"{d['eng_source']} {target_sep_token} {d['target']}"
 
             inputs.append(input_i)
             targets.append(target_i)

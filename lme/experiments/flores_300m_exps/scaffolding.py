@@ -1,8 +1,15 @@
-from transformers import TrainingArguments
+from typing import Callable
 
-from lme.data_processors.flores200 import ScaffoldingOutputDataProcessor, ScaffoldingInputDataProcessor
-from lme.data_processors.flores200 import ScaffoldingOutputMixDataProcessor, ScaffoldingInputMixDataProcessor
-from lme.data_processors.flores200 import ScaffoldingInputMix2DataProcessor, ScaffoldingInputMix3DataProcessor
+from transformers import TrainingArguments
+from transformers.tokenization_utils import PreTrainedTokenizerBase
+
+from lme.compute_metrics_utils.flores200 import get_flores_compute_metrics_cotr
+
+from lme.data_processors.flores200 import (ScaffoldingOutputDataProcessor, ScaffoldingInputDataProcessor,
+                                        ScaffoldingOutputMixDataProcessor, ScaffoldingInputMixDataProcessor,
+                                        ScaffoldingInputMix2DataProcessor, ScaffoldingInputMix3DataProcessor,
+                                        ScaffoldingOutputCOTRDataProcessor)
+
 
 from lme.training_argument_mixins.utils import calculate_batch_size_args
 
@@ -57,4 +64,13 @@ class FloresScaffoldInputMix2300MExperiment(FloresScaffoldExperimentBase):
 
 class FloresScaffoldInputMix3300MExperiment(FloresScaffoldExperimentBase):
     DATA_PROCESSOR_CLS = ScaffoldingInputMix3DataProcessor
+    pass
+
+
+class FloresScaffoldOutputCOTR300MExperiment(FloresScaffoldExperimentBase):
+    DATA_PROCESSOR_CLS = ScaffoldingOutputCOTRDataProcessor
+    
+    def get_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
+        return get_flores_compute_metrics_cotr(tokenizer)
+
     pass
