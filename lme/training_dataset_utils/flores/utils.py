@@ -543,6 +543,8 @@ def tokenize_eng_scaffold_output_cotr_mt5(
             "labels": target_outputs["input_ids"],
         }
 
+    columns_to_remove = set(eng_scaffold_dataset.column_names) - set(["id"])
+
     return eng_scaffold_dataset.map(
-        map_fn, remove_columns=eng_scaffold_dataset.column_names, batched=True, num_proc=16
+        map_fn, remove_columns=columns_to_remove, batched=True, num_proc=16
     )
