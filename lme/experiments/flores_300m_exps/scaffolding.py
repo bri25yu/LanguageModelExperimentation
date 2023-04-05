@@ -64,7 +64,6 @@ class FloresScaffoldInputMix2300MExperiment(FloresScaffoldExperimentBase):
 
 class FloresScaffoldInputMix3300MExperiment(FloresScaffoldExperimentBase):
     DATA_PROCESSOR_CLS = ScaffoldingInputMix3DataProcessor
-    pass
 
 
 class FloresScaffoldOutputCOTR300MExperiment(FloresScaffoldExperimentBase):
@@ -73,4 +72,11 @@ class FloresScaffoldOutputCOTR300MExperiment(FloresScaffoldExperimentBase):
     def get_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         return get_flores_compute_metrics_cotr(tokenizer)
 
-    pass
+
+class TestFloresScaffoldOutputCOTR300MExperiment(FloresScaffoldOutputCOTR300MExperiment):
+    def get_training_arguments(self, batch_size: int, learning_rate: float) -> TrainingArguments:
+        args = super().get_training_arguments(batch_size, learning_rate)
+        args.eval_steps = 1
+        args.max_steps = 2
+
+        return args
