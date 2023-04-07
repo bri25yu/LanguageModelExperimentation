@@ -46,7 +46,8 @@ For Flores200:
 |    24GB|     BF16|     mT5 1B|    256|         4|
 |    48GB|     BF16|   mT5 300M|    128|        64|
 |    48GB|     BF16|   mT5 300M|    128|        64|
-|    48GB|     BF16|     mT5 1B|    256|        32|
+|    48GB|     BF16|     mT5 1B|    128|        32|
+|    48GB|     BF16|     mT5 1B|    256|        16|
 
 
 ### Ideas
