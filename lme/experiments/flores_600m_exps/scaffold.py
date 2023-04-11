@@ -29,7 +29,7 @@ class FLoresScaffoldInputMix3Large600MExperiment(FloresMT5FinetuneLargeArgsMixin
 
 
 class FloresScaffoldOutputCOTR600MExperiment(FloresScaffoldInputMix600MExperiment):
-    DATA_PROCESSOR_CLS = [ScaffoldingOutputCOTRDataProcessor]
+    DATA_PROCESSOR_CLASSES = [ScaffoldingOutputCOTRDataProcessor]
     
     def get_compute_metrics(self, tokenizer: PreTrainedTokenizerBase) -> Callable:
         return get_flores_compute_metrics_cotr(tokenizer)
