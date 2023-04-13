@@ -4,7 +4,7 @@ from transformers import TrainingArguments
 from transformers.modeling_utils import PreTrainedModel
 
 from lme.data_processors.flores200 import BaselineMediumDataProcessor
-from lme.model_mixins import MT51BModelMixin
+from lme.model_mixins import MT51BModelMixin, MT53BModelMixin
 
 from lme.experiments.flores_600m_exps.baseline import FloresStagedExperimentBase
 
@@ -20,3 +20,7 @@ class FloresBaseline1BExperiment(MT51BModelMixin, FloresStagedExperimentBase):
 
     def update_model(self, model: PreTrainedModel, stage: int) -> None:
         pass
+
+
+class FloresBaseline3BExperiment(MT53BModelMixin, FloresBaseline1BExperiment):
+    pass
