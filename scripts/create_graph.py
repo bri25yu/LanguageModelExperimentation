@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from os import listdir
-from os.path import exists, isdir, join
+from os.path import abspath, dirname, exists, isdir, join
 
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 
@@ -9,7 +9,10 @@ from numpy import array
 
 import matplotlib.pyplot as plt
 
-from lme import RESULTS_DIR, DATASET_CACHE_DIR
+
+ROOT_DIR = dirname(abspath(__file__))
+RESULTS_DIR = join(ROOT_DIR, "..", "results")
+GRAPHS_DIR = join(ROOT_DIR, "..", "graphs")
 
 
 __all__ = ["plot_experiment", "plot_comparative_experiment"]
@@ -83,7 +86,7 @@ def plot_experiment(experiment_name: str, title: str, property_name: str, y_labe
 
     ax.legend()
     fig.tight_layout()
-    fig.savefig(join(DATASET_CACHE_DIR, experiment_name))
+    fig.savefig(join(GRAPHS_DIR, experiment_name))
 
 
 def plot_comparative_experiment(
@@ -93,28 +96,11 @@ def plot_comparative_experiment(
     property_name: str,
     y_label: str,
     save_name: str,
+    y_min: float=None,
 ) -> None:
-    """
-    Plots the experiments by learning rate over time
-
-    Parameters
-    ----------
-    experiment_names: List[str]
-        Name of an experiment like [TranslationMT5600MExperiment, TranslationMT51BExperiment].
-    legend_labels: List[str]
-        Labels for experiments to display on the legend.
-    title: str
-        Title of the plot.
-    property_name: str
-        Property to plot over time.
-    y_label: str
-        The label for the y-axis.
-    save_name: str
-
-    """
-
     if not save_name.endswith(".png"): save_name += ".png"
-    save_path = join(DATASET_CACHE_DIR, save_name)
+    save_path = join(GRAPHS_DIR, save_name)
+    print(save_path)
     if exists(save_path):
         print(f"Already have a graph at {save_path}")
         return
@@ -134,6 +120,11 @@ def plot_comparative_experiment(
 
         ax.plot(steps, means, label=legend_label)
         ax.fill_between(steps, means-stds, means+stds, alpha=.1)
+
+    if y_min is not None:
+        y_min = min(y_min, ax.get_ylim()[0])
+        y_max = ax.get_ylim()[1]
+        ax.set_ylim(y_min, y_max)
 
     ax.set_xlabel("Steps")
     ax.set_ylabel(y_label)

@@ -26,4 +26,5 @@ plot_comparative_experiment(
     "eval/chrf++",
     "Validation set chrF++ score",
     "flores200_3b",
+    y_min=5.0,
 )
