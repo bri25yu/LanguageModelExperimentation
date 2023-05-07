@@ -100,7 +100,6 @@ def plot_comparative_experiment(
 ) -> None:
     if not save_name.endswith(".png"): save_name += ".png"
     save_path = join(GRAPHS_DIR, save_name)
-    print(save_path)
     if exists(save_path):
         print(f"Already have a graph at {save_path}")
         return

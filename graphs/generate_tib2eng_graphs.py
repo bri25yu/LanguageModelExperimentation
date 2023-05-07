@@ -31,3 +31,30 @@ plot_comparative_experiment(
     "Validation set BLEU score",
     "tib2eng_3b",
 )
+
+plot_comparative_experiment(
+    ["TranslationMT5600MExperiment", "TranslationIncomplete4Experiment"],
+    ["mT5 600M baseline", "mT5 600M completing an input"],
+    "",
+    "eval/bleu_score",
+    "Validation set BLEU score",
+    "tib2eng_mt5_600m",
+)
+
+plot_comparative_experiment(
+    ["TranslationMT51BExperiment", "TranslationIncompleteMT51BExperiment"],
+    ["mT5 1B baseline", "mT5 1B completing an input"],
+    "",
+    "eval/bleu_score",
+    "Validation set BLEU score",
+    "tib2eng_mt5_1b",
+)
+
+plot_comparative_experiment(
+    ["TranslationMT53BExperiment", "TranslationIncompleteMT53BExperiment"],
+    ["mT5 3B baseline", "mT5 3B completing an input"],
+    "",
+    "eval/bleu_score",
+    "Validation set BLEU score",
+    "tib2eng_mt5_3b",
+)
