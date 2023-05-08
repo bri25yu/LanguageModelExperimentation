@@ -100,7 +100,7 @@ def plot_comparative_experiment(
     save_name: str,
     y_min: float=None,
 ) -> None:
-    if not save_name.endswith(".png"): save_name += ".png"
+    if not save_name.endswith(".pdf"): save_name += ".pdf"
     save_path = join(GRAPHS_DIR, save_name)
     if exists(save_path):
         print(f"Already have a graph at {save_path}")
@@ -133,7 +133,7 @@ def plot_comparative_experiment(
 
     ax.legend()
     fig.tight_layout()
-    fig.savefig(save_path)
+    fig.savefig(save_path, format="pdf")
 
 
 if __name__ == "__main__":
