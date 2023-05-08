@@ -35,7 +35,7 @@ plot_comparative_experiment(
 plot_comparative_experiment(
     ["TranslationMT5600MExperiment", "TranslationIncomplete4Experiment"],
     ["mT5 600M baseline", "mT5 600M completing an input"],
-    "",
+    "Classical Tibetan to English performance",
     "eval/bleu_score",
     "Validation set BLEU score",
     "tib2eng_mt5_600m",

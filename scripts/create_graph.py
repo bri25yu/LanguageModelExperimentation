@@ -7,6 +7,8 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 
 from numpy import array
 
+from matplotlib import rcParams
+rcParams.update({"font.size": 24})
 import matplotlib.pyplot as plt
 
 
