@@ -127,7 +127,10 @@ def select_all(raw_dataset: Dataset, seed: int=42) -> Dataset:
         map_fn, remove_columns=raw_dataset.column_names, batched=True, batch_size=1
     )
 
-    return dataset.shuffle(seed=seed).flatten_indices()
+    if seed is not None:
+        dataset = dataset.shuffle(seed=seed).flatten_indices()
+
+    return dataset
 
 
 def create_inputs_from_examples(
