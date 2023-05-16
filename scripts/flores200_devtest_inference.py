@@ -42,6 +42,11 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
         eval_accumulation_steps=1,
         bf16=True,
         predict_with_generate=True,
+        deepspeed={
+            "zero_optimization": {
+                "stage": 0,
+            },
+        }
     )
     trainer = Seq2SeqTrainer(model, args, data_collator)
     tokenized_predictions = trainer.predict(tokenized_dataset).predictions
@@ -56,7 +61,7 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
 
 if __name__ == "__main__":
     model_path_prefix = "hlillemark"
-    bs_600m = None
+    bs_600m = 128
     bs_1b = None
     bs_3b = None
 
