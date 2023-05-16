@@ -55,8 +55,6 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     predictions = tokenizer.batch_decode(tokenized_predictions, skip_special_tokens=True)
 
     text_dataset = text_dataset.add_column(f"prediction", predictions)
-    # 1012 is the number of sentences in the flores200 devtest set
-    text_dataset = text_dataset.map(get_chrf_unreduced_str, batched=True, batch_size=1012, num_proc=16, remove_columns=text_dataset.column_names)
 
     text_dataset.push_to_hub(f"flores200_devtest_{model_name}")
 
