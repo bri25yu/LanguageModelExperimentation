@@ -29,11 +29,7 @@ tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
 data_collator = DataCollatorForSeq2Seq(tokenizer)
 
 def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_examples: int=None):
-    if n_examples is not None:
-        split = f"devtest[:{n_examples}]"
-    else:
-        split = "devtest"
-
+    split = "devtest" if n_examples is None else f"devtest[:{n_examples}]"
     text_dataset = load_dataset("bri25yu/flores200_devtest_translation_pairs", split=split)
     tokenized_dataset = load_dataset("bri25yu/flores200_devtest_translation_pairs_mt5", split=split)
 
@@ -54,6 +50,22 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     text_dataset = text_dataset.map(get_chrf_unreduced_str, batched=True, batch_size=1012, num_proc=16, remove_columns=text_dataset.column_names)
 
     text_dataset.push_to_hub(f"flores200_devtest_{model_name}")
+
+
+def run_flores_inference():
+    bs_600m = None
+    bs_1b = None
+    bs_3b = None
+
+    run_eval("mt5-600M-flores200-baseline", model_path_prefix, bs_600m)
+    run_eval("mt5-600M-flores200-packed", model_path_prefix, bs_600m)
+    run_eval("mt5-600M-flores200-scaffold", model_path_prefix, bs_600m)
+    run_eval("mt5-1B-flores200-baseline", model_path_prefix, bs_1b)
+    run_eval("mt5-1B-flores200-packed", model_path_prefix, bs_1b)
+    run_eval("mt5-1B-flores200-scaffold", model_path_prefix, bs_1b)
+    run_eval("mt5-3B-flores200-baseline", model_path_prefix, bs_3b)
+    run_eval("mt5-3B-flores200-packed", model_path_prefix, bs_3b)
+    run_eval("mt5-3B-flores200-scaffold", model_path_prefix, bs_3b)
 
 
 if __name__ == "__main__":
