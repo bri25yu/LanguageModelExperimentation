@@ -5,6 +5,8 @@ import json
 from sacrebleu import CHRF
 from sacrebleu.utils import sum_of_lists
 
+import lme  # redirect cache
+
 from datasets import load_dataset
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainer, Seq2SeqTrainingArguments
@@ -52,7 +54,8 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     text_dataset.push_to_hub(f"flores200_devtest_{model_name}")
 
 
-def run_flores_inference():
+if __name__ == "__main__":
+    model_path_prefix = "hlillemark"
     bs_600m = None
     bs_1b = None
     bs_3b = None
@@ -66,9 +69,3 @@ def run_flores_inference():
     run_eval("mt5-3B-flores200-baseline", model_path_prefix, bs_3b)
     run_eval("mt5-3B-flores200-packed", model_path_prefix, bs_3b)
     run_eval("mt5-3B-flores200-scaffold", model_path_prefix, bs_3b)
-
-
-if __name__ == "__main__":
-    model_path_prefix = "hlillemark"
-    bs_600m = 1
-    run_eval("mt5-600M-flores200-baseline", model_path_prefix, bs_600m, n_examples=10)
