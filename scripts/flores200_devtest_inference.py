@@ -6,7 +6,6 @@ from numpy.random import choice
 from numpy.random import seed as set_numpy_seed
 
 from sacrebleu import CHRF
-from sacrebleu.utils import sum_of_lists
 
 import lme  # redirect cache
 
@@ -17,16 +16,17 @@ from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSe
 
 chrf = CHRF(6, 2, 2)  # character n-gram order 6, word n-gram order 2, beta 2
 
-def chrf_unreduced_to_str(hypotheses: List[str], references: List[str]):
-    stats = chrf._extract_corpus_statistics(hypotheses, [references])
-    return json.dumps(sum_of_lists(stats))
+def chrf_unreduced_to_str(hypothesis: str, reference: str):
+    stats = chrf._extract_corpus_statistics([hypothesis], [[reference]])
+    return json.dumps(stats[0])
 
 
 def get_chrf_unreduced_str(examples: Dict[str, List[str]]) -> Dict[str, List[str]]:
     return {
-        "source_lang":  [examples["source_lang"][0]],
-        "target_lang":  [examples["target_lang"][0]],
-        "chrf_unreduced": [chrf_unreduced_to_str(examples["prediction"], examples["target"])],
+        "chrf_unreduced": [
+            chrf_unreduced_to_str(pred, target)
+            for pred, target in zip(examples["prediction"], examples["target"])
+        ],
     }
 
 
@@ -55,7 +55,7 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     predictions = tokenizer.batch_decode(tokenized_predictions, skip_special_tokens=True)
 
     text_dataset = text_dataset.add_column(f"prediction", predictions)
-
+    text_dataset = text_dataset.map(get_chrf_unreduced_str, batched=True, num_proc=16)
     text_dataset.push_to_hub(f"flores200_devtest_{model_name}")
 
 
