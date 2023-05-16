@@ -46,7 +46,7 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     args = Seq2SeqTrainingArguments(
         output_dir=model_name,
         per_device_eval_batch_size=batch_size,
-        eval_accumulation_steps=100,
+        eval_accumulation_steps=1,
         bf16_full_eval=True,
         predict_with_generate=True,
     )
@@ -85,7 +85,7 @@ def run_eval_subsample(model_name: str, model_path_prefix: str, batch_size: int,
 if __name__ == "__main__":
     model_path_prefix = "hlillemark"
     n_examples = 1_000_000
-    bs_600m = 32
+    bs_600m = 64
 
     run_eval_subsample("mt5-600m-flores200-scaffold", model_path_prefix, bs_600m, n_examples)
     # run_eval_subsample("mt5-600m-flores200-baseline", model_path_prefix, bs_600m, n_examples)
