@@ -180,7 +180,7 @@ def create_eng_scaffold_outputs(target_sentences: List[str], eng_sentences: List
 
 
 def tokenize_baseline_mt5(dataset_dict: DatasetDict, max_seq_len: int) -> DatasetDict:
-    tokenizer = AutoTokenizer.from_pretrained("google/mt5-base")
+    tokenizer = AutoTokenizer.from_pretrained("google/mt5-base", use_fast=False)
     sep = tokenizer.eos_token
 
     def tokenize_fn(examples):
