@@ -39,8 +39,8 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     args = Seq2SeqTrainingArguments(
         output_dir=model_name,
         per_device_eval_batch_size=batch_size,
-        eval_accumulation_steps=1,
-        bf16=True,
+        eval_accumulation_steps=100,
+        bf16_full_eval=True,
         predict_with_generate=True,
     )
     trainer = Seq2SeqTrainer(model, args, data_collator)
@@ -56,7 +56,7 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
 
 if __name__ == "__main__":
     model_path_prefix = "hlillemark"
-    bs_600m = 128
+    bs_600m = 32
     bs_1b = None
     bs_3b = None
 
