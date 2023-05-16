@@ -9,7 +9,7 @@ from sacrebleu import CHRF
 
 import lme  # redirect cache
 
-from datasets import load_dataset
+from datasets import DatasetDict, load_dataset
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainer, Seq2SeqTrainingArguments
 
@@ -56,7 +56,11 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
 
     text_dataset = text_dataset.add_column(f"prediction", predictions)
     text_dataset = text_dataset.map(get_chrf_unreduced_str, batched=True, num_proc=16)
-    text_dataset.push_to_hub(f"flores200_devtest_{model_name}")
+
+    text_dataset_dict = DatasetDict({
+        "devtest": text_dataset,
+    })
+    text_dataset_dict.push_to_hub(f"flores200_devtest_{model_name}")
 
 
 def get_indices(total_n: int, seed: int=42) -> List[int]:
