@@ -50,7 +50,6 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
         dataloader_num_workers=4,
         bf16_full_eval=True,
         predict_with_generate=True,
-        torch_compile=True,
     )
     trainer = Seq2SeqTrainer(model, args, data_collator)
     tokenized_predictions = trainer.predict(tokenized_dataset).predictions
