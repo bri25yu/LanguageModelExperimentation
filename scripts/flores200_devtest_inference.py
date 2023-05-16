@@ -36,7 +36,7 @@ data_collator = DataCollatorForSeq2Seq(tokenizer)
 def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_examples: int=None, select_indices=None):
     split = "devtest" if n_examples is None else f"devtest[:{n_examples}]"
     text_dataset = load_dataset("bri25yu/flores200_devtest_translation_pairs", split=split)
-    tokenized_dataset = load_dataset("bri25yu/flores200_devtest_translation_pairs_mt5", split=split)
+    tokenized_dataset = load_dataset("hlillemark/flores200_devtest_translation_pairs_mt5", split=split)
 
     if select_indices is not None:
         text_dataset = text_dataset.select(select_indices)
