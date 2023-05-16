@@ -80,9 +80,9 @@ def run_eval_subsample(model_name: str, model_path_prefix: str, batch_size: int,
 
 if __name__ == "__main__":
     model_path_prefix = "hlillemark"
-    n_examples = 10_000
+    n_examples = 500_000
     bs_600m = 32
 
     run_eval_subsample("mt5-1B-flores200-scaffold", model_path_prefix, bs_600m, n_examples)
-    # run_eval_subsample("mt5-600M-flores200-baseline", model_path_prefix, bs_600m, n_examples)
-    # run_eval_subsample("mt5-600M-flores200-packed", model_path_prefix, bs_600m, n_examples)
+    run_eval_subsample("mt5-1B-flores200-baseline", model_path_prefix, bs_600m, n_examples)
+    run_eval_subsample("mt5-1B-flores200-packed", model_path_prefix, bs_600m, n_examples)
