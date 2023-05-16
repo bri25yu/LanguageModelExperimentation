@@ -54,6 +54,8 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     tokenized_predictions = trainer.predict(tokenized_dataset).predictions
     predictions = tokenizer.batch_decode(tokenized_predictions, skip_special_tokens=True)
 
+    if not trainer.is_world_process_zero(): return
+
     text_dataset = text_dataset.add_column(f"prediction", predictions)
     text_dataset = text_dataset.map(get_chrf_unreduced_str, batched=True, num_proc=16)
 
