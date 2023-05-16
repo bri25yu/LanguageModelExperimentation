@@ -42,11 +42,6 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
         eval_accumulation_steps=1,
         bf16=True,
         predict_with_generate=True,
-        deepspeed={
-            "zero_optimization": {
-                "stage": 0,
-            },
-        }
     )
     trainer = Seq2SeqTrainer(model, args, data_collator)
     tokenized_predictions = trainer.predict(tokenized_dataset).predictions
