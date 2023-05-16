@@ -54,7 +54,7 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     tokenized_predictions = trainer.predict(tokenized_dataset).predictions
     predictions = tokenizer.batch_decode(tokenized_predictions, skip_special_tokens=True)
 
-    if not trainer.is_world_process_zero(): return
+    if not trainer.is_world_process_zero(): return  # Only push from main process
 
     text_dataset = text_dataset.add_column(f"prediction", predictions)
     text_dataset = text_dataset.map(get_chrf_unreduced_str, batched=True, num_proc=16)
@@ -88,5 +88,5 @@ if __name__ == "__main__":
     bs_600m = 64
 
     run_eval_subsample("mt5-600m-flores200-scaffold", model_path_prefix, bs_600m, n_examples)
-    run_eval_subsample("mt5-600m-flores200-baseline", model_path_prefix, bs_600m, n_examples)
-    run_eval_subsample("mt5-600m-flores200-packed", model_path_prefix, bs_600m, n_examples)
+    # run_eval_subsample("mt5-600m-flores200-baseline", model_path_prefix, bs_600m, n_examples)
+    # run_eval_subsample("mt5-600m-flores200-packed", model_path_prefix, bs_600m, n_examples)
