@@ -87,7 +87,8 @@ if __name__ == "__main__":
     model_path_prefix = "hlillemark"
     n_examples = 1_000_000
     bs_600m = 32
+    bs_1b = 16
 
-    # run_eval_subsample("mt5-600m-flores200-scaffold", model_path_prefix, bs_600m, n_examples)
-    run_eval_subsample("mt5-600m-flores200-baseline", model_path_prefix, bs_600m, n_examples)
-    run_eval_subsample("mt5-600m-flores200-packed", model_path_prefix, bs_600m, n_examples)
+    run_eval_subsample("mt5-1b-flores200-scaffold", model_path_prefix, bs_1b, n_examples)
+    run_eval_subsample("mt5-1b-flores200-baseline", model_path_prefix, bs_1b, n_examples)
+    run_eval_subsample("mt5-1b-flores200-packed", model_path_prefix, bs_1b, n_examples)

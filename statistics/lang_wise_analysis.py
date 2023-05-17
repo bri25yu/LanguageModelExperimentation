@@ -23,7 +23,7 @@ def chrf_unreduced_str_to_aggregate(strs: List[str]) -> float:
 # This script will gather analysis for the language wise pairs.
 
 HF_PATH = 'hlillemark/'
-INPUT_DATASET = 'flores200_devtest_mt5-600m-flores200-scaffold'
+INPUT_DATASET = 'flores200_devtest_mt5-600m-flores200-baseline'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MC4_PATH = os.path.join(BASE_DIR, 'mc4_sizes_fixed.csv')
 OUTPUT_PATH = os.path.join(BASE_DIR, INPUT_DATASET)
@@ -36,8 +36,8 @@ if not os.path.exists(OUTPUT_PATH):
 # Lang to lang analysis:
 # ----------------------------
 # Read in data
-input_dataset = load_dataset(HF_PATH + INPUT_DATASET)
-df = pd.DataFrame(input_dataset['devtest'])
+input_dataset = load_dataset(HF_PATH + INPUT_DATASET, split='devtest')
+df = pd.DataFrame(input_dataset)
 df = df[['source_lang', 'target_lang', 'chrf_unreduced']]
 
 # Group by source lang 
@@ -60,10 +60,12 @@ df_target.to_csv(os.path.join(OUTPUT_PATH, 'xx_to_lang.csv'), index=False)
 
 # Rename raw language to language data and include
 df_pair_labeled = df.copy()
-df_pair_labeled['label'] = df_pair_labeled['source_lang'] + '-' + df_pair_labeled['target_lang']
-df_pair_labeled['chrF++'] = df_pair_labeled['chrf_unreduced'].apply(func=lambda x: chrf_unreduced_str_to_aggregate([x]))
+# group by pair and compute chrf
+df_pair_labeled = df_pair_labeled.groupby(['source_lang', 'target_lang'])['chrf_unreduced'].apply(lambda x: chrf_unreduced_str_to_aggregate(x)).reset_index()
+df_pair_labeled.rename(columns={'chrf_unreduced': 'chrF++'}, inplace=True)
 # save xx-yy for later
 xx_yy_chrf = df_pair_labeled.where(df_pair_labeled['source_lang'] != 'eng_Latn').where(df_pair_labeled['target_lang'] != 'eng_Latn')['chrF++'].mean()
+df_pair_labeled['label'] = df_pair_labeled['source_lang'] + '-' + df_pair_labeled['target_lang']
 df_pair_labeled = df_pair_labeled[['label', 'chrF++']]
 
 # save to csv
