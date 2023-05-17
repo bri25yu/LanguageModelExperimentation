@@ -23,7 +23,9 @@ def chrf_unreduced_str_to_aggregate(strs: List[str]) -> float:
 # This script will gather analysis for the language wise pairs.
 
 HF_PATH = 'hlillemark/'
-INPUT_DATASET = 'flores200_devtest_mt5-600m-flores200-baseline'
+PARAM_COUNT = '600m'
+EXPERIMENT = 'scaffold'
+INPUT_DATASET = 'flores200_devtest_mt5-{}-flores200-{}'.format(PARAM_COUNT, EXPERIMENT)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MC4_PATH = os.path.join(BASE_DIR, 'mc4_sizes_fixed.csv')
 OUTPUT_PATH = os.path.join(BASE_DIR, INPUT_DATASET)
