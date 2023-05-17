@@ -85,7 +85,7 @@ def run_eval_subsample(model_name: str, model_path_prefix: str, batch_size: int,
 
 if __name__ == "__main__":
     model_path_prefix = "hlillemark"
-    n_examples = 1_000_000
+    n_examples = 500_000
     bs_600m = 32
     bs_1b = 16
 
