@@ -4,6 +4,8 @@ from os.path import join
 
 import json
 
+from requests.exceptions import ConnectionError
+
 from numpy.random import choice
 from numpy.random import seed as set_numpy_seed
 
@@ -94,6 +96,16 @@ if __name__ == "__main__":
     bs_600m = 32
     bs_1b = 16
 
-    run_eval_subsample("mt5-1b-flores200-scaffold", model_path_prefix, bs_1b, n_examples)
-    run_eval_subsample("mt5-1b-flores200-baseline", model_path_prefix, bs_1b, n_examples)
-    run_eval_subsample("mt5-1b-flores200-packed", model_path_prefix, bs_1b, n_examples)
+    model_names = [
+        "mt5-1b-flores200-scaffold",
+        "mt5-1b-flores200-baseline",
+        "mt5-1b-flores200-packed",
+    ]
+    batch_size = bs_1b
+    for model_name in model_names:
+        try:
+            run_eval_subsample(model_name, model_path_prefix, batch_size, n_examples)
+        except ConnectionError:
+            # TODO Debug ConnectionError caused on upload to HF.
+            # Currently, we save to disk first then attempt upload to not lose and progress
+            pass
