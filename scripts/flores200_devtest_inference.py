@@ -1,5 +1,7 @@
 from typing import Dict, List
 
+from os.path import join
+
 import json
 
 from numpy.random import choice
@@ -12,6 +14,8 @@ import lme  # redirect cache
 from datasets import DatasetDict, load_dataset
 
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, DataCollatorForSeq2Seq, Seq2SeqTrainer, Seq2SeqTrainingArguments
+
+from lme import DATASET_CACHE_DIR
 
 
 chrf = CHRF(6, 2, 2)  # character n-gram order 6, word n-gram order 2, beta 2
@@ -63,6 +67,7 @@ def run_eval(model_name: str, model_path_prefix: str, batch_size: int, n_example
     text_dataset_dict = DatasetDict({
         "devtest": text_dataset,
     })
+    text_dataset_dict.save_to_disk(join(DATASET_CACHE_DIR, f"flores200_devtest_{model_name}"))
     text_dataset_dict.push_to_hub(f"flores200_devtest_{model_name}")
 
 
