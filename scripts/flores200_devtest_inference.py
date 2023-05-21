@@ -92,16 +92,17 @@ def run_eval_subsample(model_name: str, model_path_prefix: str, batch_size: int,
 
 if __name__ == "__main__":
     model_path_prefix = "hlillemark"
-    n_examples = 500_000
+    n_examples = 100_000
     bs_600m = 32
     bs_1b = 16
+    bs_3b = 8
 
     model_names = [
-        "mt5-1b-flores200-scaffold",
-        "mt5-1b-flores200-baseline",
-        "mt5-1b-flores200-packed",
+        "mt5-3b-flores200-scaffold",
+        "mt5-3b-flores200-baseline",
+        "mt5-3b-flores200-packed",
     ]
-    batch_size = bs_1b
+    batch_size = bs_3b
     for model_name in model_names:
         try:
             run_eval_subsample(model_name, model_path_prefix, batch_size, n_examples)
