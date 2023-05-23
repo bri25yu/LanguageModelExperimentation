@@ -174,11 +174,10 @@ def script_analysis(OUTPUT_PATH, df):
 
 if __name__ == "__main__":
     # CONFIG:
-    PARAM_COUNTS = ['600m']#, '1b', '3b']
+    PARAM_COUNTS = ['1b', '3b']#['600m']#, '1b', '3b']
     EXPERIMENTS = ['scaffold', 'baseline', 'packed']
     for PARAM_COUNT in PARAM_COUNTS:
         for EXPERIMENT in EXPERIMENTS:
-            
             INPUT_DATASET = 'flores200_devtest_mt5-{}-flores200-{}'.format(PARAM_COUNT, EXPERIMENT)
             OUTPUT_PATH = os.path.join(BASE_DIR, PARAM_COUNT, EXPERIMENT)
 
@@ -195,7 +194,6 @@ if __name__ == "__main__":
             avg_stats(OUTPUT_PATH, df)
             pretraining_mt5_analysis(OUTPUT_PATH)
             script_analysis(OUTPUT_PATH, df)
-
 
 
 # TODO nllb analysis later

@@ -133,3 +133,6 @@ run_*.py
 
 # Ignore hostfiles
 hostfile*.txt
+
+# Ignore .DS_Store
+.DS_Store
