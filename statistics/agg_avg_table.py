@@ -12,11 +12,12 @@ for name in names:
     p = pd.read_csv(os.path.join(BASE_DIR, PARAM_COUNT, name, 'avg_stats.csv'))
     p = p[p['label'] != 'xx-yy']
     # Load lang_to_xx and xx_to_lang
-    lang_to_xx = pd.read_csv(os.path.join(BASE_DIR, PARAM_COUNT, name, 'pretraining', 'lang_to_xx_mt5_pretrain.csv'))
-    xx_to_lang = pd.read_csv(os.path.join(BASE_DIR, PARAM_COUNT, name, 'pretraining', 'xx_to_lang_mt5_pretrain.csv'))
+    lang_to_xx = pd.read_csv(os.path.join(BASE_DIR, PARAM_COUNT, name, 'lang_to_lang', 'lang_to_xx.csv'))
+    xx_to_lang = pd.read_csv(os.path.join(BASE_DIR, PARAM_COUNT, name, 'lang_to_lang', 'xx_to_lang.csv'))
     # Add row for eng-xx and xx-eng
     p = pd.concat([pd.DataFrame({'label': 'eng-xx', 'chrF++': lang_to_xx[lang_to_xx['label'] == 'eng_Latn-xx']['chrF++']}), p])
     p = pd.concat([pd.DataFrame({'label': 'xx-eng', 'chrF++': xx_to_lang[xx_to_lang['label'] == 'xx-eng_Latn']['chrF++']}), p])
+
     p['chrF++'] = p['chrF++'].round(1)
     p.rename(columns={'chrF++': 'chrF++_{}'.format(name)}, inplace=True)
     loaded.append(p)
