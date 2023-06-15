@@ -1,2 +1,0 @@
-a19 slots=2
-a20 slots=2

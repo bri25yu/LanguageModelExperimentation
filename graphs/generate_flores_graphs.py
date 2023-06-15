@@ -1,4 +1,4 @@
-from scripts.create_graph import *
+from graphs.create_graph import *
 
 
 plot_comparative_series(
