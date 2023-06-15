@@ -5,10 +5,10 @@ import evaluate
 from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 
-__all__ = ["get_translation_compute_metrics"]
+__all__ = ["get_tib2eng_compute_metrics"]
 
 
-def get_translation_compute_metrics(tokenizer: PreTrainedTokenizerBase) -> Callable:
+def get_tib2eng_compute_metrics(tokenizer: PreTrainedTokenizerBase) -> Callable:
     chrf = evaluate.load("chrf")
     bleu = evaluate.load("bleu")
 

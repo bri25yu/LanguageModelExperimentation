@@ -10,7 +10,7 @@ from datasets import Dataset
 
 from lme import RESULTS_DIR
 from lme.experiments import available_experiments
-from lme.data_processors import TranslationDataProcessor
+from lme.data_processors import Tib2EngDataProcessor
 
 
 EXPERIMENTS_TO_OUTPUT: List[str] = [
@@ -45,7 +45,7 @@ def decode_tokens(experiment, results):
 
 def output_single(experiment_name: str) -> None:
     experiment = available_experiments[experiment_name]()
-    test_dataset = TranslationDataProcessor().load()["test"]
+    test_dataset = Tib2EngDataProcessor().load()["test"]
 
     results = load_results(experiment)
     predictions = decode_tokens(experiment, results)

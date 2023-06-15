@@ -72,15 +72,13 @@ from transformers.tokenization_utils import PreTrainedTokenizerBase
 
 from lme.training_pipelines import FinetuneExperimentBase
 
-from lme.training_argument_mixins import MT5FinetuneArgsMixin
+from lme.training_argument_mixins import Tib2EngMT5FinetuneArgsMixin
 from lme.training_argument_mixins.utils import calculate_total_examples
 
 from lme.training_dataset_utils.utils import repeat_examples
 from lme.training_dataset_utils.incomplete_utils import (
     add_prefix_truncated_output,
     add_prefix_and_suffix_truncated_output,
-    add_middle_truncated_output,
-    add_suffix_truncated_output,
     add_masked_output,
     mask_input,
     mask_input_subsequence,
@@ -88,7 +86,7 @@ from lme.training_dataset_utils.incomplete_utils import (
 
 from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 
-from lme.experiments.translation.mixin import TranslationMixin
+from lme.experiments.tib2eng.mixin import TranslationMixin
 
 
 class TranslationIncomplete1Mixin(TranslationMixin):
@@ -414,7 +412,7 @@ class TranslationIncomplete13Mixin(TranslationMixin):
         return dataset_dict
 
 
-class TranslationIncompleteExperimentBase(MT5600MModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase):
+class TranslationIncompleteExperimentBase(MT5600MModelMixin, Tib2EngMT5FinetuneArgsMixin, FinetuneExperimentBase):
     pass
 
 
@@ -468,12 +466,12 @@ class TranslationIncomplete13Experiment(TranslationIncomplete13Mixin, Translatio
     pass
 
 class TranslationIncompleteMT51BExperiment(
-    TranslationIncomplete4Mixin, MT51BModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase
+    TranslationIncomplete4Mixin, MT51BModelMixin, Tib2EngMT5FinetuneArgsMixin, FinetuneExperimentBase
 ):
     pass
 
 
 class TranslationIncompleteMT53BExperiment(
-    TranslationIncomplete4Mixin, MT53BModelMixin, MT5FinetuneArgsMixin, FinetuneExperimentBase
+    TranslationIncomplete4Mixin, MT53BModelMixin, Tib2EngMT5FinetuneArgsMixin, FinetuneExperimentBase
 ):
     pass

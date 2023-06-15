@@ -3,10 +3,10 @@ from datasets import load_dataset, DatasetDict
 from lme.data_processors.abstract import AbstractDataProcessor
 
 
-__all__ = ["TranslationDataProcessor"]
+__all__ = ["Tib2EngDataProcessor"]
 
 
-class TranslationDataProcessor(AbstractDataProcessor):
+class Tib2EngDataProcessor(AbstractDataProcessor):
     """
     The original loaded dataset dict is
     DatasetDict({

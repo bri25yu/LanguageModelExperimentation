@@ -1,10 +1,10 @@
 from lme.training_pipelines import FinetuneExperimentBase
 from lme.model_mixins import NLLB600MModelMixin, NLLB1BModelMixin, NLLB3BModelMixin
-from lme.training_argument_mixins import NLLBFinetuneArgsMixin
-from lme.experiments.translation.mixin import TranslationMixin
+from lme.training_argument_mixins import Tib2EngNLLBFinetuneArgsMixin
+from lme.experiments.tib2eng.mixin import TranslationMixin
 
 
-class TranslationNLLBExperimentBase(NLLBFinetuneArgsMixin, TranslationMixin, FinetuneExperimentBase):
+class TranslationNLLBExperimentBase(Tib2EngNLLBFinetuneArgsMixin, TranslationMixin, FinetuneExperimentBase):
     pass
 
 

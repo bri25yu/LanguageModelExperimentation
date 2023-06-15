@@ -11,7 +11,7 @@ from lme.compute_metrics_utils.flores200 import get_flores_compute_metrics
 from lme.data_processors.abstract import AbstractDataProcessor
 from lme.data_processors.flores200 import BaselineMediumDataProcessor
 
-from lme.model_mixins import MT5600MModelMixin
+from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 from lme.training_pipelines import FinetuneStagedTrainingArgsExperimentBase
 from lme.training_argument_mixins import FloresMT5FinetuneArgsMixin
 
@@ -35,10 +35,6 @@ class FloresStagedExperimentBase(FloresMT5FinetuneArgsMixin, FinetuneStagedTrain
     def get_tokenized_datasets(self, tokenizer: PreTrainedTokenizerBase, training_arguments: TrainingArguments) -> List[DatasetDict]:
         return list(map(lambda c: c()(training_arguments), self.DATA_PROCESSOR_CLASSES))
 
-
-class FloresBaseline600MExperiment(MT5600MModelMixin, FloresStagedExperimentBase):
-    DATA_PROCESSOR_CLASSES = [BaselineMediumDataProcessor]
-
     def update_training_arguments(self, training_arguments: TrainingArguments, batch_size: int, stage: int) -> None:
         pass
 
@@ -47,3 +43,19 @@ class FloresBaseline600MExperiment(MT5600MModelMixin, FloresStagedExperimentBase
 
     def update_model(self, model: PreTrainedModel, stage: int) -> None:
         pass
+
+
+class FloresBaselineExperimentBase(FloresStagedExperimentBase):
+    DATA_PROCESSOR_CLASSES = [BaselineMediumDataProcessor]
+
+
+class FloresBaseline600MExperiment(MT5600MModelMixin, FloresBaselineExperimentBase):
+    pass    
+
+
+class FloresBaseline1BExperiment(MT51BModelMixin, FloresBaselineExperimentBase):
+    pass
+
+
+class FloresBaseline3BExperiment(MT53BModelMixin, FloresBaselineExperimentBase):
+    pass
