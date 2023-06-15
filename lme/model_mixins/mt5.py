@@ -7,11 +7,9 @@ from transformers import AutoTokenizer, MT5ForConditionalGeneration
 
 
 __all__ = [
-    "MT5300MModelMixin",
     "MT5600MModelMixin",
     "MT51BModelMixin",
     "MT53BModelMixin",
-    "MT513BModelMixin",
 ]
 
 
@@ -20,10 +18,7 @@ class MT5ModelMixinBase:
 
     def get_tokenizer(self) -> PreTrainedTokenizerBase:
         model_name = self.MODEL_NAME
-
-        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
-
-        return tokenizer
+        return AutoTokenizer.from_pretrained(model_name, use_fast=False)
 
     def get_model(self, tokenizer: PreTrainedTokenizerBase) -> PreTrainedModel:
         model_name = self.MODEL_NAME
@@ -33,10 +28,6 @@ class MT5ModelMixinBase:
         model.config.max_length = max_input_length
 
         return model
-
-
-class MT5300MModelMixin(MT5ModelMixinBase):
-    MODEL_NAME = "google/mt5-small"
 
 
 class MT5600MModelMixin(MT5ModelMixinBase):
@@ -49,7 +40,3 @@ class MT51BModelMixin(MT5ModelMixinBase):
 
 class MT53BModelMixin(MT5ModelMixinBase):
     MODEL_NAME = "google/mt5-xl"
-
-
-class MT513BModelMixin(MT5ModelMixinBase):
-    MODEL_NAME = "google/mt5-xxl"
