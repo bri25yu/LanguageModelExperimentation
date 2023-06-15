@@ -7,12 +7,14 @@ from lme.training_argument_mixins.utils import (
 )
 
 
-__all__ = ["FloresMT5FinetuneArgsMixin"]
+__all__ = [
+    "FloresMT5FinetuneLargeArgsMixin",
+]
 
 
-class FloresMT5FinetuneArgsMixin:
+class FloresMT5FinetuneLargeArgsMixin:
     """
-    This results in 10k * 2048 = 20mil examples.
+    This results in 20k * 2048 = 40mil examples.
     """
     TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 11  # 2048
 
@@ -30,7 +32,7 @@ class FloresMT5FinetuneArgsMixin:
         return Seq2SeqTrainingArguments(
             output_dir=output_dir,
             learning_rate=learning_rate,
-            max_steps=10000,
+            max_steps=20000,
             eval_steps=200,
             save_steps=200,
             warmup_steps=0,

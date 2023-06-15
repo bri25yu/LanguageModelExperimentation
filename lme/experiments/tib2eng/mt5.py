@@ -3,13 +3,12 @@ from lme.model_mixins import (
     MT5600MModelMixin,
     MT51BModelMixin,
     MT53BModelMixin,
-    MT513BModelMixin,
 )
-from lme.training_argument_mixins import MT5FinetuneArgsMixin, MT513BFinetuneArgsMixin
-from lme.experiments.translation.mixin import TranslationMixin
+from lme.training_argument_mixins import Tib2EngMT5FinetuneArgsMixin
+from lme.experiments.tib2eng.mixin import TranslationMixin
 
 
-class TranslationMT5ExperimentBase(MT5FinetuneArgsMixin, TranslationMixin, FinetuneExperimentBase):
+class TranslationMT5ExperimentBase(Tib2EngMT5FinetuneArgsMixin, TranslationMixin, FinetuneExperimentBase):
     pass
 
 
@@ -22,8 +21,4 @@ class TranslationMT51BExperiment(MT51BModelMixin, TranslationMT5ExperimentBase):
 
 
 class TranslationMT53BExperiment(MT53BModelMixin, TranslationMT5ExperimentBase):
-    pass
-
-
-class TranslationMT513BExperiment(MT513BModelMixin, MT513BFinetuneArgsMixin, TranslationMixin, FinetuneExperimentBase):
     pass
