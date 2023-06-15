@@ -13,3 +13,6 @@ HUGGINGFACE_CACHE_DIR = os.path.join(ROOT_DIR, "..", "..", "huggingface_cache")
 
 os.environ["TRANSFORMERS_CACHE"] = HUGGINGFACE_CACHE_DIR
 os.environ["HF_DATASETS_CACHE"] = HUGGINGFACE_CACHE_DIR
+
+# Transformers logging level will be controlled by the training arguments
+os.environ["DATASETS_VERBOSITY"] = "error"

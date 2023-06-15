@@ -1,14 +1,29 @@
-from lme.data_processors.flores200 import ScaffoldingInputMix3DataProcessor
 from lme.model_mixins import MT5600MModelMixin, MT51BModelMixin, MT53BModelMixin
 
 from lme.experiments.flores.baseline import FloresStagedExperimentBase
 
 
 class FloresScaffoldExperimentBase(FloresStagedExperimentBase):
+    """
+    DatasetDict({
+        train: Dataset({
+            features: ['id', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 10240000
+        })
+        val: Dataset({
+            features: ['id', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 5000
+        })
+        test: Dataset({
+            features: ['id', 'input_ids', 'attention_mask', 'labels'],
+            num_rows: 10000
+        })
+    })
+    """
     # (2048 / 2) = 1024 // (2 ** 11 / 2 ** 1) = 2 ** 10
     TARGET_TOTAL_BATCH_SIZE_PER_UPDATE = 2 ** 10
 
-    DATA_PROCESSOR_CLASSES = [ScaffoldingInputMix3DataProcessor]
+    DATASET_HF_PATHS = ["hlillemark/flores200_eng_input_scaffolding_mix3_mt5"]
 
 
 class FloresScaffold600MExperiment(MT5600MModelMixin, FloresScaffoldExperimentBase):

@@ -1,4 +1,4 @@
-from typing import Dict, Type
+from typing import Dict, List, Tuple, Type
 
 import sys
 from types import ModuleType
@@ -7,7 +7,7 @@ from importlib import import_module
 import pkgutil
 
 
-__all__ = ["available_experiments"]
+__all__ = ["run"]
 
 
 def get_experiments_from_module(module: ModuleType) -> Dict[str, Type]:
@@ -66,3 +66,13 @@ current_module = sys.modules[__name__]
 available_experiments = recursively_discover_experiments(
     current_module
 )
+
+
+def run(experiment_name: str, batch_size: int, learning_rates: List[float]) -> None:
+    experiment_cls = available_experiments.get(experiment_name, None)
+
+    if experiment_cls is None:
+        print(f"Experiment {experiment_name} is not recognized")
+        return
+
+    [experiment_cls().run(batch_size, [lr]) for lr in learning_rates]
